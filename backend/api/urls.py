@@ -1,6 +1,7 @@
+# backend/api/urls.py
 from django.urls import path
-from .views import test_connection
+from . import views
 
 urlpatterns = [
-    path('test/', test_connection),
+    path('', views.health_check),  # Simple test endpoint
 ]
