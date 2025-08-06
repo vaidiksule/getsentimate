@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from 'react'
 
+type ApiResponse = {
+  message: string
+}
+
 export default function Home() {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<ApiResponse | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/test/')
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/test/`)
       .then(res => res.json())
       .then(json => setData(json))
       .catch(err => console.error('Error:', err))
