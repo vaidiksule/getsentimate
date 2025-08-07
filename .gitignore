@@ -1,28 +1,28 @@
 # Python
-__pycache__/
 *.py[cod]
-*.sqlite3
 *.log
-*.env
+*.sqlite3
+__pycache__/
+*.pyc
+
+# Virtual Environments
+venv/
+.env
+.env/
 
 # Django
 db.sqlite3
 /static/
 media/
 
-# Node
+# Node.js
 node_modules/
 .next/
 .env.local
-.env
 
-# VSCode
+# IDEs & Editors
 .vscode/
 
-# OS
+# OS generated
 .DS_Store
 Thumbs.db
-
-# Environments
-venv/
-.env/
