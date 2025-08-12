@@ -4,10 +4,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from .models import Comment, Video, AnalysisSession
-from .serializers import CommentSerializer, VideoSerializer, AnalysisSessionSerializer
-from .services.youtube_service import YouTubeService
-from .services.ai_service import AIService
+from ..models import Comment, Video, AnalysisSession
+from ..serializers import CommentSerializer, VideoSerializer, AnalysisSessionSerializer
+from ..services.youtube_service import YouTubeService
+from ..services.ai_service import AIService
 
 
 @api_view(['GET'])
@@ -47,7 +47,6 @@ def ai_service_status(request):
     except Exception as e:
         return Response({
             "ai_services": {
-                "openai_available": False,
                 "gemini_available": False,
                 "primary_service": "none"
             },
@@ -159,21 +158,12 @@ def video_analytics(request, video_id):
         'non-toxic': comments.filter(toxicity_label='non-toxic').count(),
     }
     
-    # Transcript analytics
-    transcript_info = {
-        'available': video.transcript_available,
-        'analyzed': video.transcript_analyzed,
-        'length': len(video.transcript) if video.transcript else 0,
-        'word_count': len(video.transcript.split()) if video.transcript else 0
-    }
-    
     return Response({
         "video_id": video_id,
         "total_comments": total_comments,
         "analyzed_comments": analyzed_comments,
         "sentiment_distribution": sentiment_distribution,
         "toxicity_distribution": toxicity_distribution,
-        "transcript_info": transcript_info,
         "analysis_progress": (analyzed_comments / total_comments * 100) if total_comments > 0 else 0
     })
 
@@ -184,7 +174,6 @@ def video_analytics(request, video_id):
 def fetch_youtube_comments(request):
     """Fetch comments from YouTube video URL"""
     url = request.data.get('url')
-    fetch_transcript = request.data.get('fetch_transcript', True)  # Default to True
     
     if not url:
         return Response(
@@ -194,7 +183,7 @@ def fetch_youtube_comments(request):
     
     try:
         youtube_service = YouTubeService()
-        result = youtube_service.process_video_url(url, fetch_transcript=fetch_transcript)
+        result = youtube_service.process_video_url(url, fetch_transcript=False)
         
         return Response({
             "message": "Comments fetched successfully",
@@ -202,8 +191,6 @@ def fetch_youtube_comments(request):
             "total_comments": result['total_comments'],
             "video": VideoSerializer(result['video']).data,
             "comments_count": len(result['comments']),
-            "transcript_available": result['transcript_available'],
-            "transcript_length": result['transcript_length']
         })
         
     except ValueError as e:
@@ -374,8 +361,6 @@ def debug_video_comments(request, video_id):
             "video_id": video_id,
             "video_title": video.title,
             "total_comments": comments.count(),
-            "transcript_available": video.transcript_available,
-            "transcript_length": len(video.transcript) if video.transcript else 0,
             "comments": [
                 {
                     "id": c.id,
@@ -392,47 +377,5 @@ def debug_video_comments(request, video_id):
     except Exception as e:
         return Response(
             {"error": f"Failed to get debug info: {str(e)}"}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
-
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def analyze_transcript(request, video_id):
-    """Analyze video transcript for insights and context"""
-    try:
-        video = get_object_or_404(Video, video_id=video_id)
-        
-        if not video.transcript or not video.transcript_available:
-            return Response({
-                "error": "No transcript available for this video",
-                "video_id": video_id,
-                "transcript_available": video.transcript_available
-            }, status=status.HTTP_404_NOT_FOUND)
-        
-        # Get AI service for transcript analysis
-        ai_service = AIService()
-        
-        # Analyze transcript content
-        transcript_analysis = ai_service.analyze_transcript_context(
-            video.transcript, 
-            [c.text for c in Comment.objects.filter(video_id=video_id)]
-        )
-        
-        # Mark transcript as analyzed
-        video.transcript_analyzed = True
-        video.save()
-        
-        return Response({
-            "message": "Transcript analyzed successfully",
-            "video_id": video_id,
-            "transcript_length": len(video.transcript),
-            "word_count": len(video.transcript.split()),
-            "analysis": transcript_analysis
-        })
-        
-    except Exception as e:
-        return Response(
-            {"error": f"Failed to analyze transcript: {str(e)}"}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

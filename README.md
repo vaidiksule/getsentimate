@@ -1,8 +1,4 @@
-Great — here’s a **clear, detailed handoff document** you can paste directly into **Cursor** to continue working confidently there.
-
----
-
-## 🧠 Project: GetSentimate — Smart YouTube Comment Analyzer
+# 🧠 Project: GetSentimate - Smart YouTube Comment Analyzer
 
 ### 🎯 Problem
 
@@ -12,134 +8,116 @@ YouTubers and creators deal with thousands of comments daily. Important feedback
 
 **GetSentimate** is an AI-powered YouTube comment analyzer. It provides:
 
-* **Smart sentiment & toxicity filters**
-* **Summarized comment insights**
-* **Custom rule-based filtering**
-* **Searchable semantic clustering**
-* **Visual dashboards for creators**
+*   Smart sentiment & toxicity analysis using Gemini Pro
+*   Summarized comment insights
+*   Filters for finding specific feedback
+*   Visual dashboards for creators
 
 ---
 
 ## ✅ Current Status
 
-We are starting fresh and have completed the **Django backend setup** using Python 3.10 and Django 4.x. Frontend will be built in Next.js and deployed via Vercel.
+The core functionality is now implemented:
+
+*   Django backend setup with Gemini Pro integration
+*   Frontend setup with Next.js
+*   YouTube comment fetching and analysis pipeline
+
+### ⚠️ Important
+
+*   OpenAI integration has been removed.
+*   User authentication is currently disabled for simplified access.
 
 ---
 
-## 🧱 Tech Stack (MVP)
+## 🧱 Tech Stack
 
-| Layer        | Tech                                |
-| ------------ | ----------------------------------- |
-| Frontend     | Next.js 14 + Tailwind CSS              |
-| Backend      | Django 4.2 (Python 3.10)            |
-| DB (Primary) | MongoDB (via Djongo)                |
-| Vector DB    | Qdrant (comment embeddings)         |
-| Auth         | Google OAuth                        |
-| AI/NLP       | OpenAI GPT-4o                       |
-| Async Tasks  | Celery + Redis                      |
-| Deployment   | Render (Backend), Vercel (Frontend) |
+| Layer        | Tech                      |
+| ------------ | ------------------------- |
+| Frontend     | Next.js + Tailwind CSS    |
+| Backend      | Django (Python)           |
+| AI/NLP       | Google Gemini Pro         |
+| Deployment   | (Future - Vercel/Render) |
 
 ---
 
-## 📁 Current Project Structure
+## ⚙️ Setup Instructions
 
-```bash
-getsentimate/
-├── backend/              # Django backend folder
-│   ├── core/             # Django project
-│   │   ├── settings.py   # Configuration
-│   │   ├── urls.py       # URL routing
-│   │   └── wsgi.py       # WSGI entry point
-│   ├── manage.py         # Django CLI
-│   └── requirements.txt  # Python dependencies
-├── frontend/             # Next.js app (planned)
-├── venv/                 # Virtual environment (local)
-└── README.md
-```
+1.  **Clone the repository:**
 
----
+    ```bash
+    git clone [repository URL]
+    cd getsentimate
+    ```
+2.  **Backend Setup:**
 
-## 🔧 What’s Set Up Already
+    *   Navigate to the `backend` directory.
 
-* ✅ Fresh virtual environment using Python 3.10
-* ✅ Django 4.2 project created inside `backend/core`
-* ✅ Dependencies installed (see below)
-* ✅ Local run tested successfully
-* ✅ Clean `requirements.txt` generated
+        ```bash
+        cd backend
+        ```
+    *   Create a virtual environment (recommended):
 
-### 🔗 requirements.txt snapshot:
+        ```bash
+        python -m venv venv
+        .\venv\Scripts\activate  # On Windows
+        source venv/bin/activate   # On macOS and Linux
+        ```
+    *   Install dependencies:
 
-```txt
-Django>=4.2,<5.0
-djongo
-pymongo
-djangorestframework
-django-cors-headers
-gunicorn
-whitenoise
-python-decouple
-python-dotenv
-sqlparse
-tzdata
-requests
-```
+        ```bash
+        pip install -r requirements.txt
+        ```
+    *   Create a `.env` file in the `backend` directory with the following variables:
 
----
-
-## 📌 What Comes Next
-
-You can continue inside Cursor with:
-
-1. ✅ Creating the main `api/` Django app
-2. ✅ Setting up MongoDB connection in `settings.py`
-3. ✅ Adding CORS middleware for frontend requests
-4. ✅ Implementing Comment model + parsing endpoint
-5. ✅ Setting up frontend to call backend
-6. ✅ Deploy backend on Render
-
----
-
-## 🧪 Development Notes
-
-* We're using **Djongo** to connect Django ORM to MongoDB
-* Frontend and backend will be deployed separately
-* `.env` will store all secrets like DB URI, API keys, etc.
-* We'll integrate OpenAI and Qdrant later once basic comment ingestion works
-
----
-
-## 🔐 Environment Variables Plan
-
-Create a `.env` in `backend/`:
-
-```
-SECRET_KEY=your-django-secret
+        ```
+YOUTUBE_API_KEY=YOUR_YOUTUBE_API_KEY
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+SECRET_KEY=your-django-secret-key
 DEBUG=True
-MONGO_URI=mongodb+srv://...
-OPENAI_API_KEY=sk-...
-```
+        ```
+    *   Run migrations:
 
-Use with `python-decouple` and `dotenv`.
+        ```bash
+        python manage.py makemigrations api
+        python manage.py migrate
+        ```
+    *   Start the development server:
+
+        ```bash
+        python manage.py runserver
+        ```
+3.  **Frontend Setup:**
+
+    *   Navigate to the `frontend` directory.
+
+        ```bash
+        cd ../frontend
+        ```
+    *   Install dependencies:
+
+        ```bash
+        npm install
+        ```
+    *   Create a `.env.local` file with the following variable:
+
+        ```
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 # Or your backend URL
+        ```
+    *   Run the development server:
+
+        ```bash
+        npm run dev
+        ```
 
 ---
 
-## 🧠 Reminder for Cursor Agent
+## 🤝 Contribution Guidelines
 
-Continue building the MVP:
+Contributions are welcome! Please follow these guidelines:
 
-* Step-by-step API endpoints
-* Mongo models
-* Frontend connection
-* NLP-based comment tagging
-* Dashboard views
-
-Ask for:
-
-* "Write DRF serializer"
-* "Add Mongo model"
-* "Create sentiment analysis endpoint"
-* "Help with Qdrant connection"
+*   Fork the repository.
+*   Create a new branch for your feature or bug fix.
+*   Submit a pull request with a clear description of your changes.
 
 ---
-
-Let me know when you’re ready for Render deploy setup or frontend Next.js bootstrapping — I’ll walk you through that too.

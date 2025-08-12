@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 
 
 class Comment(models.Model):
@@ -55,7 +54,7 @@ class Video(models.Model):
     view_count = models.IntegerField(default=0)
     like_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
-    
+
     # Analysis metadata
     comments_analyzed = models.IntegerField(default=0)
     last_analyzed = models.DateTimeField(null=True, blank=True)

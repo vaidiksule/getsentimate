@@ -78,6 +78,28 @@ class YouTubeService:
             'thumbnails': snippet.get('thumbnails', {}),
         }
     
+    def fetch_video_transcript(self, video_id: str) -> Optional[str]:
+        """Fetch transcript for a YouTube video.
+        
+        Args:
+            video_id: YouTube video ID
+            
+        Returns:
+            None as transcript fetching is currently disabled
+        """
+        return None
+
+    def get_transcript(self, video_id: str) -> str:
+        try:
+            from youtube_transcript_api import YouTubeTranscriptApi
+            transcript = YouTubeTranscriptApi.get_transcript(video_id)
+            # Format the transcript into a single string
+            transcript_text = '\n'.join([entry['text'] for entry in transcript])
+            return transcript_text
+        except Exception as e:
+            print(f"Error fetching transcript: {e}")
+            return None
+
     def fetch_video_comments(self, video_id: str, max_results: int = 100) -> List[Dict]:
         """
         Fetch comments for a video from YouTube API
@@ -98,8 +120,7 @@ class YouTubeService:
                 'part': 'snippet,replies',
                 'videoId': video_id,
                 'maxResults': min(100, max_results - len(comments)),
-                'key': self.api_key,
-                'order': 'relevance'  # relevance, time
+                'key': self.api_key
             }
             
             if next_page_token:
@@ -111,25 +132,20 @@ class YouTubeService:
             data = response.json()
             
             for item in data.get('items', []):
-                comment_data = item['snippet']['topLevelComment']['snippet']
+                snippet = item['snippet']['topLevelComment']['snippet']
                 
-                comment = {
+                comment_data = {
                     'comment_id': item['id'],
                     'video_id': video_id,
-                    'channel_id': comment_data['authorChannelId']['value'],
-                    'author_name': comment_data['authorDisplayName'],
-                    'author_channel_url': comment_data['authorChannelUrl'],
-                    'text': comment_data['textDisplay'],
-                    'like_count': comment_data['likeCount'],
-                    'published_at': datetime.fromisoformat(
-                        comment_data['publishedAt'].replace('Z', '+00:00')
-                    ),
-                    'updated_at': datetime.fromisoformat(
-                        comment_data['updatedAt'].replace('Z', '+00:00')
-                    ),
+                    'channel_id': snippet['authorChannelId']['value'],
+                    'author_name': snippet['authorDisplayName'],
+                    'author_channel_url': snippet['authorChannelUrl'],
+                    'text': snippet['textDisplay'],
+                    'like_count': snippet['likeCount'],
+                    'published_at': datetime.fromisoformat(snippet['publishedAt'].replace('Z', '+00:00')),
                 }
                 
-                comments.append(comment)
+                comments.append(comment_data)
                 
                 if len(comments) >= max_results:
                     break
@@ -143,10 +159,13 @@ class YouTubeService:
     
     def store_video_metadata(self, video_data: Dict) -> Video:
         """
-        Store video metadata in database
+        Store or update video metadata in database
+        
+        Args:
+            video_data: Video metadata dictionary
         
         Returns:
-            Video instance
+            Video model instance
         """
         video, created = Video.objects.get_or_create(
             video_id=video_data['video_id'],
@@ -162,7 +181,7 @@ class YouTubeService:
         )
         
         if not created:
-            # Update existing video with latest data
+            # Update existing video with new data
             video.title = video_data['title']
             video.channel_title = video_data['channel_title']
             video.view_count = video_data['view_count']
@@ -176,8 +195,12 @@ class YouTubeService:
         """
         Store comments in database
         
+        Args:
+            comments_data: List of comment dictionaries
+            video: Video model instance
+        
         Returns:
-            List of Comment instances
+            List of stored Comment model instances
         """
         stored_comments = []
         
@@ -205,12 +228,15 @@ class YouTubeService:
         
         return stored_comments
     
-    def process_video_url(self, url: str) -> Dict:
-        """
-        Process a YouTube URL and fetch all related data
+    def process_video_url(self, url: str, fetch_transcript: bool = False) -> Dict:
+        """Process a YouTube video URL: fetch metadata, comments, and optionally transcript
+        
+        Args:
+            url: YouTube video URL
+            fetch_transcript: Whether to fetch transcript (default: True)
         
         Returns:
-            Dict containing video metadata and comments
+            Dict containing video, comments, and transcript info
         """
         # Extract video ID
         video_id = self.extract_video_id_from_url(url)
@@ -223,13 +249,20 @@ class YouTubeService:
         
         # Fetch comments
         comments_data = self.fetch_video_comments(video_id)
-        
-        # Store comments
         comments = self.store_comments(comments_data, video)
         
+        # Fetch transcript if requested
+        # transcript = None
+        # if fetch_transcript:
+        #     transcript = self.fetch_video_transcript(video_id)
+        #     if transcript:
+        #         video.transcript = transcript
+        #         video.transcript_available = True
+        #         video.save()
+        
         return {
-            'video': video,
-            'comments': comments,
-            'total_comments': len(comments),
             'video_id': video_id,
+            'video': video,
+            'total_comments': len(comments),
+            'comments': comments,
         }
