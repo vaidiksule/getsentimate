@@ -5,6 +5,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 from django.conf import settings
 from ..models import Comment, Video
+from dotenv import load_dotenv
 
 
 class YouTubeService:

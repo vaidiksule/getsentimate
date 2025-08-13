@@ -44,6 +44,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
         setVideoData(null)
 
         try {
+            console.log('here')
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/youtube/fetch-comments/`, {
                 method: 'POST',
                 headers: {
@@ -51,7 +52,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
                 },
                 body: JSON.stringify({ url, fetch_transcript: false }),
             })
-
+            console.log(response)
         const data = await response.json()
 
         if (!response.ok) {
@@ -119,7 +120,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
                         value={url}
                         onChange={(e) => setUrl(e.target.value)}
                         placeholder="https://www.youtube.com/watch?v=..."
-                        className="flex-1 block w-full min-w-0 rounded-xl border-gray-300 focus:border-primary focus:ring-primary sm:text-sm"
+                        className="flex-1 block w-full min-w-0 rounded-xl border-gray-300 focus:border-primary focus:ring-primary sm:text-sm text-blue-900"
                         disabled={loading}
                     />
                     <button
@@ -147,7 +148,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
             {videoData && (
                 <div className="bg-neutral rounded-md p-4">
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Video Information</h3>
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-gray-900">
                         <p><span className="font-medium">Title:</span> {videoData.title}</p>
                         <p><span className="font-medium">Channel:</span> {videoData.channel_title}</p>
                         <p><span className="font-medium">Comments:</span> {videoData.total_comments}</p>
