@@ -1,7 +1,6 @@
 # 🧠 Project: GetSentimate - Smart YouTube Comment Analyzer
 
 
- hi im vaidik
 ### 🎯 Problem
 
 YouTubers and creators deal with thousands of comments daily. Important feedback, potential opportunities, or harmful content often get buried.
