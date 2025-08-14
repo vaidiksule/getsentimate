@@ -36,31 +36,31 @@ def health_check(request):
     })
 
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def ai_service_status(request):
-    """
-    Checks availability of AI services (e.g., OpenAI, Gemini)
-    and returns their operational status
-    """
-    try:
-        ai_service = AIService()
-        status_info = ai_service.get_service_status()
+# @api_view(['GET'])
+# @permission_classes([AllowAny])
+# def ai_service_status(request):
+#     """
+#     Checks availability of AI services (e.g., OpenAI, Gemini)
+#     and returns their operational status
+#     """
+#     try:
+#         ai_service = AIService()
+#         status_info = ai_service.get_service_status()
         
-        return Response({
-            "ai_services": status_info,
-            "message": "AI service status retrieved successfully"
-        })
-    except Exception as e:
-        # If check fails, mark all services as unavailable
-        return Response({
-            "ai_services": {
-                "openai_available": False,
-                "gemini_available": False,
-                "primary_service": "none"
-            },
-            "error": str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         return Response({
+#             "ai_services": status_info,
+#             "message": "AI service status retrieved successfully"
+#         })
+#     except Exception as e:
+#         # If check fails, mark all services as unavailable
+#         return Response({
+#             "ai_services": {
+#                 "openai_available": False,
+#                 "gemini_available": False,
+#                 "primary_service": "none"
+#             },
+#             "error": str(e)
+#         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 # ------------------------------
