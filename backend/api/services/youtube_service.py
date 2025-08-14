@@ -9,43 +9,51 @@ from dotenv import load_dotenv
 
 
 class YouTubeService:
-    """Service for interacting with YouTube API"""
-    
+    """Service for interacting with the YouTube Data API"""
+
     def __init__(self):
+        # Load YouTube API key from environment variables
         self.api_key = os.getenv('YOUTUBE_API_KEY')
         self.base_url = 'https://www.googleapis.com/youtube/v3'
-        
+
+        # Fail early if no API key is found
         if not self.api_key:
             raise ValueError("YouTube API key not found in environment variables")
-    
+
     def extract_video_id_from_url(self, url: str) -> str:
         """
-        Extract video ID from various YouTube URL formats
-        
-        Supported formats:
+        Extracts the video ID from a given YouTube URL.
+
+        Supports:
         - https://www.youtube.com/watch?v=VIDEO_ID
         - https://youtu.be/VIDEO_ID
         - https://www.youtube.com/embed/VIDEO_ID
         - https://www.youtube.com/v/VIDEO_ID
         """
         patterns = [
+            # Covers watch?v=, youtu.be/, embed/, and v/ formats
             r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/v\/)([a-zA-Z0-9_-]{11})',
+            # Covers complex watch URLs with multiple query params
             r'youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})',
         ]
-        
+
         for pattern in patterns:
             match = re.search(pattern, url)
             if match:
                 return match.group(1)
-        
+
+        # Raise error if no valid ID found
         raise ValueError(f"Could not extract video ID from URL: {url}")
-    
+
     def get_video_metadata(self, video_id: str) -> Dict:
         """
-        Fetch video metadata from YouTube API
-        
+        Retrieves video metadata from YouTube API.
+
         Returns:
-            Dict containing video title, channel info, stats, etc.
+            Dict containing:
+            - title, channel info, publish date
+            - view count, like count, comment count
+            - description, thumbnails
         """
         url = f"{self.base_url}/videos"
         params = {
@@ -53,19 +61,19 @@ class YouTubeService:
             'id': video_id,
             'key': self.api_key
         }
-        
+
         response = requests.get(url, params=params)
         response.raise_for_status()
-        
+
         data = response.json()
-        
+
         if not data.get('items'):
             raise ValueError(f"Video not found or not accessible: {video_id}")
-        
+
         video_data = data['items'][0]
         snippet = video_data['snippet']
         statistics = video_data.get('statistics', {})
-        
+
         return {
             'video_id': video_id,
             'title': snippet['title'],
@@ -78,23 +86,24 @@ class YouTubeService:
             'description': snippet.get('description', ''),
             'thumbnails': snippet.get('thumbnails', {}),
         }
-    
+
     def fetch_video_transcript(self, video_id: str) -> Optional[str]:
-        """Fetch transcript for a YouTube video.
-        
-        Args:
-            video_id: YouTube video ID
-            
-        Returns:
-            None as transcript fetching is currently disabled
+        """
+        (Currently unused) Placeholder method for fetching transcripts.
+        Always returns None for now.
         """
         return None
 
     def get_transcript(self, video_id: str) -> str:
+        """
+        Fetches transcript using youtube_transcript_api (if available).
+
+        Returns:
+            Full transcript text as a string, or None if unavailable.
+        """
         try:
             from youtube_transcript_api import YouTubeTranscriptApi
             transcript = YouTubeTranscriptApi.get_transcript(video_id)
-            # Format the transcript into a single string
             transcript_text = '\n'.join([entry['text'] for entry in transcript])
             return transcript_text
         except Exception as e:
@@ -103,18 +112,19 @@ class YouTubeService:
 
     def fetch_video_comments(self, video_id: str, max_results: int = 100) -> List[Dict]:
         """
-        Fetch comments for a video from YouTube API
-        
+        Fetches comments for a given video.
+
         Args:
             video_id: YouTube video ID
-            max_results: Maximum number of comments to fetch (default: 100)
-        
+            max_results: Maximum number of comments to retrieve (default 100)
+
         Returns:
-            List of comment dictionaries
+            List of comment dictionaries with:
+            - comment_id, author, text, like count, publish date
         """
         comments = []
         next_page_token = None
-        
+
         while len(comments) < max_results:
             url = f"{self.base_url}/commentThreads"
             params = {
@@ -123,18 +133,18 @@ class YouTubeService:
                 'maxResults': min(100, max_results - len(comments)),
                 'key': self.api_key
             }
-            
+
             if next_page_token:
                 params['pageToken'] = next_page_token
-            
+
             response = requests.get(url, params=params)
             response.raise_for_status()
-            
+
             data = response.json()
-            
+
             for item in data.get('items', []):
                 snippet = item['snippet']['topLevelComment']['snippet']
-                
+
                 comment_data = {
                     'comment_id': item['id'],
                     'video_id': video_id,
@@ -145,28 +155,23 @@ class YouTubeService:
                     'like_count': snippet['likeCount'],
                     'published_at': datetime.fromisoformat(snippet['publishedAt'].replace('Z', '+00:00')),
                 }
-                
+
                 comments.append(comment_data)
-                
+
                 if len(comments) >= max_results:
                     break
-            
-            # Check if there are more pages
+
+            # Move to next page if available
             next_page_token = data.get('nextPageToken')
             if not next_page_token:
                 break
-        
+
         return comments
-    
+
     def store_video_metadata(self, video_data: Dict) -> Video:
         """
-        Store or update video metadata in database
-        
-        Args:
-            video_data: Video metadata dictionary
-        
-        Returns:
-            Video model instance
+        Saves or updates video metadata in the database.
+        Uses Django ORM's get_or_create to avoid duplicates.
         """
         video, created = Video.objects.get_or_create(
             video_id=video_data['video_id'],
@@ -180,31 +185,25 @@ class YouTubeService:
                 'comment_count': video_data['comment_count'],
             }
         )
-        
+
         if not created:
-            # Update existing video with new data
+            # Update fields if video already exists
             video.title = video_data['title']
             video.channel_title = video_data['channel_title']
             video.view_count = video_data['view_count']
             video.like_count = video_data['like_count']
             video.comment_count = video_data['comment_count']
             video.save()
-        
+
         return video
-    
+
     def store_comments(self, comments_data: List[Dict], video: Video) -> List[Comment]:
         """
-        Store comments in database
-        
-        Args:
-            comments_data: List of comment dictionaries
-            video: Video model instance
-        
-        Returns:
-            List of stored Comment model instances
+        Saves comments in the database.
+        Updates existing ones if text or like count changes.
         """
         stored_comments = []
-        
+
         for comment_data in comments_data:
             comment, created = Comment.objects.get_or_create(
                 comment_id=comment_data['comment_id'],
@@ -218,49 +217,52 @@ class YouTubeService:
                     'published_at': comment_data['published_at'],
                 }
             )
-            
+
             if not created:
-                # Update existing comment
+                # Update fields for existing comment
                 comment.text = comment_data['text']
                 comment.like_count = comment_data['like_count']
                 comment.save()
-            
+
             stored_comments.append(comment)
-        
+
         return stored_comments
-    
+
     def process_video_url(self, url: str, fetch_transcript: bool = False) -> Dict:
-        """Process a YouTube video URL: fetch metadata, comments, and optionally transcript
-        
-        Args:
-            url: YouTube video URL
-            fetch_transcript: Whether to fetch transcript (default: True)
-        
-        Returns:
-            Dict containing video, comments, and transcript info
         """
-        # Extract video ID
+        High-level method to process a YouTube video URL:
+        1. Extracts video ID
+        2. Fetches metadata
+        3. Stores metadata
+        4. Fetches comments
+        5. Optionally fetches transcript
+
+        Returns:
+            Dict containing:
+            - video_id
+            - video object
+            - total_comments
+            - comments list
+        """
+        # Extract ID from given URL
         video_id = self.extract_video_id_from_url(url)
-        
-        # Fetch video metadata
+
+        # Fetch and store metadata
         video_data = self.get_video_metadata(video_id)
-        
-        # Store video metadata
         video = self.store_video_metadata(video_data)
-        
-        # Fetch comments
+
+        # Fetch and store comments
         comments_data = self.fetch_video_comments(video_id)
         comments = self.store_comments(comments_data, video)
-        
-        # Fetch transcript if requested
-        # transcript = None
+
+        # Optional transcript fetching (currently disabled)
         # if fetch_transcript:
         #     transcript = self.fetch_video_transcript(video_id)
         #     if transcript:
         #         video.transcript = transcript
         #         video.transcript_available = True
         #         video.save()
-        
+
         return {
             'video_id': video_id,
             'video': video,

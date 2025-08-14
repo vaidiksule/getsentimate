@@ -11,35 +11,49 @@ interface ToxicityChartProps {
 
 export default function ToxicityChart({ data }: ToxicityChartProps) {
   const total = data.toxic + data['non-toxic']
-  
+
   const getPercentage = (value: number) => {
     return total > 0 ? Math.round((value / total) * 100) : 0
   }
+
+  const toxicPercentage = getPercentage(data.toxic)
 
   return (
     <div className="space-y-4">
       {/* Donut Chart */}
       <div className="relative w-32 h-32 mx-auto">
-        <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+        <svg
+          className="w-32 h-32 transform -rotate-90 text-gray-200"
+          viewBox="0 0 36 36"
+        >
+          {/* Background Circle */}
           <path
-            className="text-gray-200"
             stroke="currentColor"
             strokeWidth="3"
             fill="transparent"
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            d="M18 2.0845
+               a 15.9155 15.9155 0 0 1 0 31.831
+               a 15.9155 15.9155 0 0 1 0 -31.831"
           />
+          {/* Toxic Segment */}
           <path
             className="text-red-500"
             stroke="currentColor"
             strokeWidth="3"
             fill="transparent"
-            strokeDasharray={`${getPercentage(data.toxic)}, 100`}
-            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+            strokeDasharray={`${toxicPercentage}, 100`}
+            d="M18 2.0845
+               a 15.9155 15.9155 0 0 1 0 31.831
+               a 15.9155 15.9155 0 0 1 0 -31.831"
           />
         </svg>
+
+        {/* Percentage Text */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{getPercentage(data.toxic)}%</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {toxicPercentage}%
+            </div>
             <div className="text-xs text-gray-500">Toxic</div>
           </div>
         </div>
@@ -59,7 +73,9 @@ export default function ToxicityChart({ data }: ToxicityChartProps) {
             <div className="w-3 h-3 bg-green-500 rounded-full"></div>
             <span className="text-sm text-gray-700">Non-toxic</span>
           </div>
-          <span className="text-sm font-medium text-gray-900">{data['non-toxic']}</span>
+          <span className="text-sm font-medium text-gray-900">
+            {data['non-toxic']}
+          </span>
         </div>
       </div>
 
@@ -70,7 +86,9 @@ export default function ToxicityChart({ data }: ToxicityChartProps) {
           <div className="text-xs text-gray-500">Toxic Comments</div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-green-600">{data['non-toxic']}</div>
+          <div className="text-2xl font-bold text-green-600">
+            {data['non-toxic']}
+          </div>
           <div className="text-xs text-gray-500">Safe Comments</div>
         </div>
       </div>

@@ -10,10 +10,14 @@ from .services.youtube_service import YouTubeService
 from .services.ai_service import AIService
 
 
+# ------------------------------
+# BASIC TEST & STATUS ENDPOINTS
+# ------------------------------
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def test_connection(request):
-    """Test endpoint for frontend connection"""
+    """Simple endpoint to confirm the API is reachable"""
     return Response({
         "message": "Django API is working!",
         "status": "success",
@@ -24,7 +28,7 @@ def test_connection(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
-    """Health check endpoint"""
+    """Returns a quick health status of the API and database connection"""
     return Response({
         "status": "healthy",
         "service": "GetSentimate API",
@@ -35,7 +39,10 @@ def health_check(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def ai_service_status(request):
-    """Check AI service availability and status"""
+    """
+    Checks availability of AI services (e.g., OpenAI, Gemini)
+    and returns their operational status
+    """
     try:
         ai_service = AIService()
         status_info = ai_service.get_service_status()
@@ -45,6 +52,7 @@ def ai_service_status(request):
             "message": "AI service status retrieved successfully"
         })
     except Exception as e:
+        # If check fails, mark all services as unavailable
         return Response({
             "ai_services": {
                 "openai_available": False,
@@ -55,10 +63,19 @@ def ai_service_status(request):
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+# ------------------------------
+# COMMENT RETRIEVAL ENDPOINTS
+# ------------------------------
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def comments_list(request):
-    """Get list of comments with optional filtering"""
+    """
+    Returns a list of comments with optional filters:
+    - video_id
+    - sentiment
+    - toxicity
+    """
     comments = Comment.objects.all()
     
     # Filter by video_id if provided
@@ -83,16 +100,24 @@ def comments_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def comment_detail(request, comment_id):
-    """Get detailed information about a specific comment"""
+    """Returns a single comment by its ID"""
     comment = get_object_or_404(Comment, comment_id=comment_id)
     serializer = CommentSerializer(comment)
     return Response(serializer.data)
 
 
+# ------------------------------
+# VIDEO ANALYSIS SESSION HANDLING
+# ------------------------------
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def analyze_video(request):
-    """Start analysis for a YouTube video"""
+    """
+    Starts an analysis session for a given video ID.
+    Creates the video if it doesn't exist and
+    registers an AnalysisSession with status 'pending'.
+    """
     video_id = request.data.get('video_id')
     if not video_id:
         return Response(
@@ -100,7 +125,7 @@ def analyze_video(request):
             status=status.HTTP_400_BAD_REQUEST
         )
     
-    # Check if video already exists
+    # Create video record if it doesn't exist
     video, created = Video.objects.get_or_create(
         video_id=video_id,
         defaults={
@@ -117,7 +142,7 @@ def analyze_video(request):
         total_comments=request.data.get('comment_count', 0)
     )
     
-    # TODO: Trigger async analysis task
+    # Placeholder for async analysis trigger
     # analyze_video_comments.delay(video_id, session.id)
     
     return Response({
@@ -131,35 +156,44 @@ def analyze_video(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def analysis_status(request, session_id):
-    """Get analysis session status"""
+    """Returns the current status of an analysis session"""
     session = get_object_or_404(AnalysisSession, id=session_id)
     serializer = AnalysisSessionSerializer(session)
     return Response(serializer.data)
 
 
+# ------------------------------
+# VIDEO ANALYTICS & SUMMARY
+# ------------------------------
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def video_analytics(request, video_id):
-    """Get analytics summary for a video"""
+    """
+    Returns sentiment/toxicity distribution for a video's comments,
+    transcript metadata, and analysis progress.
+    """
     video = get_object_or_404(Video, video_id=video_id)
     comments = Comment.objects.filter(video_id=video_id)
     
-    # Calculate analytics
+    # Basic counts
     total_comments = comments.count()
     analyzed_comments = comments.filter(analyzed=True).count()
     
+    # Sentiment breakdown
     sentiment_distribution = {
         'positive': comments.filter(sentiment_label='positive').count(),
         'negative': comments.filter(sentiment_label='negative').count(),
         'neutral': comments.filter(sentiment_label='neutral').count(),
     }
     
+    # Toxicity breakdown
     toxicity_distribution = {
         'toxic': comments.filter(toxicity_label='toxic').count(),
         'non-toxic': comments.filter(toxicity_label='non-toxic').count(),
     }
     
-    # Transcript analytics
+    # Transcript info
     transcript_info = {
         'available': video.transcript_available,
         'analyzed': video.transcript_analyzed,
@@ -178,13 +212,21 @@ def video_analytics(request, video_id):
     })
 
 
-# New YouTube integration endpoints
+# ------------------------------
+# YOUTUBE FETCH & AI ANALYSIS
+# ------------------------------
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def fetch_youtube_comments(request):
-    """Fetch comments from YouTube video URL"""
+    """
+    Given a YouTube URL, fetches:
+    - video metadata
+    - comments
+    - transcript (optional, default True)
+    """
     url = request.data.get('url')
-    fetch_transcript = request.data.get('fetch_transcript', True)  # Default to True
+    fetch_transcript = request.data.get('fetch_transcript', True)
     
     if not url:
         return Response(
@@ -221,8 +263,14 @@ def fetch_youtube_comments(request):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def analyze_comments(request):
-    """Analyze comments for sentiment and toxicity"""
-    # Handle both GET and POST requests
+    """
+    Analyzes all unanalyzed comments for:
+    - Sentiment (positive/negative/neutral)
+    - Toxicity (toxic/non-toxic)
+    
+    If all comments are already analyzed, returns summary and key topics.
+    """
+    # GET or POST video_id parameter
     if request.method == 'GET':
         video_id = request.query_params.get('video_id')
     else:
@@ -235,7 +283,7 @@ def analyze_comments(request):
         )
     
     try:
-        # Check if video exists
+        # Validate video exists
         try:
             video = Video.objects.get(video_id=video_id)
         except Video.DoesNotExist:
@@ -244,7 +292,6 @@ def analyze_comments(request):
                 "video_id": video_id
             }, status=status.HTTP_404_NOT_FOUND)
         
-        # Get all comments for this video
         all_comments = Comment.objects.filter(video_id=video_id)
         total_comments = all_comments.count()
         
@@ -255,16 +302,12 @@ def analyze_comments(request):
                 "total_comments": 0
             }, status=status.HTTP_404_NOT_FOUND)
         
-        # Get unanalyzed comments
+        # Filter for unanalyzed comments
         unanalyzed_comments = all_comments.filter(analyzed=False)
         unanalyzed_count = unanalyzed_comments.count()
         
         if unanalyzed_count == 0:
-            # All comments are already analyzed
-            analyzed_comments = all_comments.filter(analyzed=True)
-            analyzed_count = analyzed_comments.count()
-            
-            # Generate summary for all comments
+            # Already analyzed — just return summary and topics
             comment_texts = [c.text for c in all_comments]
             ai_service = AIService()
             summary_result = ai_service.summarize_comments(comment_texts)
@@ -274,7 +317,7 @@ def analyze_comments(request):
                 "message": "All comments already analyzed",
                 "video_id": video_id,
                 "total_comments": total_comments,
-                "analyzed_count": analyzed_count,
+                "analyzed_count": total_comments,
                 "unanalyzed_count": 0,
                 "summary": summary_result.get('summary', ''),
                 "key_topics": key_topics,
@@ -282,18 +325,18 @@ def analyze_comments(request):
                 "pain_points": summary_result.get('pain_points', [])
             })
         
-        # Analyze unanalyzed comments
+        # Process each unanalyzed comment
         ai_service = AIService()
         analyzed_count = 0
         
         for comment in unanalyzed_comments:
             try:
-                # Analyze sentiment
+                # Sentiment analysis
                 sentiment_result = ai_service.analyze_sentiment(comment.text)
                 comment.sentiment_score = sentiment_result.get('sentiment_score', 0.0)
                 comment.sentiment_label = sentiment_result.get('sentiment_label', 'neutral')
                 
-                # Analyze toxicity
+                # Toxicity detection
                 toxicity_result = ai_service.detect_toxicity(comment.text)
                 comment.toxicity_score = toxicity_result.get('toxicity_score', 0.0)
                 comment.toxicity_label = toxicity_result.get('toxicity_label', 'non-toxic')
@@ -303,16 +346,16 @@ def analyze_comments(request):
                 analyzed_count += 1
                 
             except Exception as e:
-                # Continue with next comment if one fails
+                # Skip failed comment analysis but continue processing
                 print(f"Error analyzing comment {comment.id}: {str(e)}")
                 continue
         
-        # Generate summary for all comments
+        # Summarize all comments after processing
         comment_texts = [c.text for c in all_comments]
         summary_result = ai_service.summarize_comments(comment_texts)
         key_topics = ai_service.extract_key_topics(comment_texts)
         
-        # Update video with analysis metadata
+        # Update analyzed count on video
         video.comments_analyzed = all_comments.filter(analyzed=True).count()
         video.save()
         
@@ -335,15 +378,23 @@ def analyze_comments(request):
         )
 
 
+# ------------------------------
+# VIDEO METADATA & DEBUGGING
+# ------------------------------
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def video_info(request, video_id):
-    """Get video information and metadata"""
+    """
+    Returns video metadata + comment stats:
+    - Total comments
+    - Analyzed comments
+    - Analysis progress %
+    """
     try:
         video = get_object_or_404(Video, video_id=video_id)
         serializer = VideoSerializer(video)
         
-        # Get comment statistics
         comments = Comment.objects.filter(video_id=video_id)
         total_comments = comments.count()
         analyzed_comments = comments.filter(analyzed=True).count()
@@ -365,7 +416,10 @@ def video_info(request, video_id):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def debug_video_comments(request, video_id):
-    """Debug endpoint to view raw video comments"""
+    """
+    Debugging endpoint — returns first 10 comments of a video
+    with sentiment/toxicity labels for inspection.
+    """
     try:
         video = get_object_or_404(Video, video_id=video_id)
         comments = Comment.objects.filter(video_id=video_id)
@@ -385,7 +439,7 @@ def debug_video_comments(request, video_id):
                     "toxicity": c.toxicity_label,
                     "analyzed": c.analyzed
                 }
-                for c in comments[:10]  # Limit to first 10 for debugging
+                for c in comments[:10]  # Limit to 10 for preview
             ]
         })
         
@@ -396,10 +450,19 @@ def debug_video_comments(request, video_id):
         )
 
 
+# ------------------------------
+# TRANSCRIPT ANALYSIS
+# ------------------------------
+
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def analyze_transcript(request, video_id):
-    """Analyze video transcript for insights and context"""
+    """
+    Analyzes the video's transcript (if available) to extract:
+    - Context
+    - Insights based on comments
+    - Other AI-driven analysis
+    """
     try:
         video = get_object_or_404(Video, video_id=video_id)
         
@@ -410,10 +473,9 @@ def analyze_transcript(request, video_id):
                 "transcript_available": video.transcript_available
             }, status=status.HTTP_404_NOT_FOUND)
         
-        # Get AI service for transcript analysis
         ai_service = AIService()
         
-        # Analyze transcript content
+        # AI analysis combining transcript and comments
         transcript_analysis = ai_service.analyze_transcript_context(
             video.transcript, 
             [c.text for c in Comment.objects.filter(video_id=video_id)]

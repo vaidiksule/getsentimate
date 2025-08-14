@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 
 interface AIServiceStatusProps {
     status: any;
@@ -7,8 +7,8 @@ interface AIServiceStatusProps {
 export default function AIServiceStatus({ status }: AIServiceStatusProps) {
     if (!status) {
         return (
-            <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+            <div className="flex items-center space-x-2 px-3 py-2 rounded-full bg-white/70 backdrop-blur-md border border-gray-200 shadow-sm">
+                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
                 <span className="text-sm text-gray-500">AI Status: Unknown</span>
             </div>
         );
@@ -17,17 +17,20 @@ export default function AIServiceStatus({ status }: AIServiceStatusProps) {
     const { ai_services } = status;
     const { openai_available, gemini_available, primary_service } = ai_services;
 
+    const statusDot = (isAvailable: boolean) =>
+        `w-2.5 h-2.5 rounded-full shadow-sm ${isAvailable ? 'bg-green-500' : 'bg-red-500'}`;
+
     return (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4 px-4 py-2 rounded-full bg-white/70 backdrop-blur-md border border-gray-200 shadow-sm">
             <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${openai_available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">OpenAI</span>
+                <div className={statusDot(openai_available)}></div>
+                <span className="text-sm text-gray-700">OpenAI</span>
             </div>
             <div className="flex items-center space-x-2">
-                <div className={`w-3 h-3 rounded-full ${gemini_available ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                <span className="text-sm font-medium">Gemini</span>
+                <div className={statusDot(gemini_available)}></div>
+                <span className="text-sm text-gray-700">Gemini</span>
             </div>
-            <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+            <div className="text-xs font-medium text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200">
                 Primary: {primary_service}
             </div>
         </div>

@@ -44,21 +44,26 @@ export default function SentimentChart({ data }: SentimentChartProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 p-4 bg-white shadow-lg rounded-xl border border-gray-100">
       {/* Bar Chart */}
-      <div className="space-y-2">
+      <div className="space-y-3">
         {Object.entries(data).map(([sentiment, count]) => (
-          <div key={sentiment} className="flex items-center space-x-3">
-            <div className="w-20 text-sm font-medium text-gray-700">
+          <div key={sentiment} className="flex items-center space-x-4">
+            {/* Label */}
+            <div className="w-20 text-sm font-semibold text-gray-800">
               {getLabel(sentiment)}
             </div>
-            <div className="flex-1 bg-gray-200 rounded-full h-4">
+            
+            {/* Progress Bar */}
+            <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
               <div
-                className={`h-4 rounded-full ${getColor(sentiment)} transition-all duration-300`}
+                className={`h-4 ${getColor(sentiment)} transition-all duration-500 ease-out shadow-inner`}
                 style={{ width: `${getPercentage(count)}%` }}
               ></div>
             </div>
-            <div className="w-16 text-sm text-gray-600 text-right">
+            
+            {/* Count & % */}
+            <div className="w-16 text-xs font-medium text-gray-600 text-right">
               {count} ({getPercentage(count)}%)
             </div>
           </div>
@@ -66,18 +71,18 @@ export default function SentimentChart({ data }: SentimentChartProps) {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t">
-        <div className="text-center">
+      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
+        <div className="text-center p-2 rounded-lg bg-green-50">
           <div className="text-2xl font-bold text-green-600">{data.positive}</div>
-          <div className="text-xs text-gray-500">Positive</div>
+          <div className="text-xs font-medium text-green-700">Positive</div>
         </div>
-        <div className="text-center">
+        <div className="text-center p-2 rounded-lg bg-red-50">
           <div className="text-2xl font-bold text-red-600">{data.negative}</div>
-          <div className="text-xs text-gray-500">Negative</div>
+          <div className="text-xs font-medium text-red-700">Negative</div>
         </div>
-        <div className="text-center">
+        <div className="text-center p-2 rounded-lg bg-gray-50">
           <div className="text-2xl font-bold text-gray-600">{data.neutral}</div>
-          <div className="text-xs text-gray-500">Neutral</div>
+          <div className="text-xs font-medium text-gray-700">Neutral</div>
         </div>
       </div>
     </div>
