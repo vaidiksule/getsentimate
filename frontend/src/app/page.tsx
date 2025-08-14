@@ -3,19 +3,28 @@
 import { GoogleLoginButton } from './components/GoogleLoginButton';
 import { useAuth } from './components/AuthProvider';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { FaRegSmile, FaShieldAlt, FaLightbulb } from 'react-icons/fa';
 
 export default function Home() {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken, logout } = useAuth();
+  const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
 
+  // Redirect to dashboard if user is logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+  // Optional: fetch user info (can be removed if not needed)
   useEffect(() => {
     const fetchMe = async () => {
       if (accessToken) {
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/me/`, {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me/`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
           });
           if (res.ok) {
             const data = await res.json();
@@ -23,35 +32,91 @@ export default function Home() {
           } else {
             setMessage('Failed to fetch /api/me/');
           }
-        } catch (error) {
+        } catch {
           setMessage('Error fetching /api/me/');
         }
       } else {
         setMessage('Not authenticated.');
       }
     };
-
     fetchMe();
   }, [accessToken]);
 
   return (
-    <main>
-      <div>
-        
-        <div>
-          {user ? (
-            <>
-              <p>Logged in as {user.name} ({user.email})</p>
-              <p>{message}</p>
-            </>
-          ) : (
+    <main className="min-h-screen font-sans text-gray-900 bg-white antialiased">
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 py-32 text-center">
+          <h1 className="text-5xl md:text-6xl font-semibold mb-6 leading-tight tracking-tight">
+            Unlock the Power of <span className="text-gray-700">YouTube Comment Analysis</span>
+          </h1>
+          <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto mb-12">
+            GetSentimate helps you understand audience sentiment, detect toxicity, and extract insights from comments — elegantly and effortlessly.
+          </p>
+
+          {!user && (
             <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
           )}
         </div>
+      </section>
 
-      </div>
+      {/* Features Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-semibold mb-16">Features You’ll Love</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="bg-white p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default text-center">
+              <FaRegSmile className="text-4xl text-gray-700 mx-auto mb-4" />
+              <h3 className="text-2xl font-medium mb-3">Sentiment Analysis</h3>
+              <p className="text-gray-500">Understand the emotions behind your comments with clarity.</p>
+            </div>
+            <div className="bg-white p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default text-center">
+              <FaShieldAlt className="text-4xl text-gray-700 mx-auto mb-4" />
+              <h3 className="text-2xl font-medium mb-3">Toxicity Detection</h3>
+              <p className="text-gray-500">Filter out spammy or harmful comments to maintain a clean community.</p>
+            </div>
+            <div className="bg-white p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default text-center">
+              <FaLightbulb className="text-4xl text-gray-700 mx-auto mb-4" />
+              <h3 className="text-2xl font-medium mb-3">Insight Extraction</h3>
+              <p className="text-gray-500">Discover recurring topics and trends effortlessly.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      
+      {/* How It Works Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6 text-center">
+          <h2 className="text-4xl font-semibold mb-16">How It Works</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="bg-gray-50 p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default">
+              <h3 className="text-xl font-medium mb-3">1. Connect Your Channel</h3>
+              <p className="text-gray-500">Sign in with Google to connect your YouTube channel securely.</p>
+            </div>
+            <div className="bg-gray-50 p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default">
+              <h3 className="text-xl font-medium mb-3">2. AI Analyzes Comments</h3>
+              <p className="text-gray-500">Comments are analyzed for sentiment, toxicity, and insights instantly.</p>
+            </div>
+            <div className="bg-gray-50 p-10 rounded-2xl shadow-sm hover:shadow-md transition cursor-default">
+              <h3 className="text-xl font-medium mb-3">3. Get Actionable Insights</h3>
+              <p className="text-gray-500">See trends and audience feedback to make smarter content decisions.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA Section */}
+      <section className="py-24 bg-white text-center">
+        <h2 className="text-4xl md:text-5xl font-semibold mb-6">Start Understanding Your Audience</h2>
+        <p className="text-gray-500 mb-8 max-w-2xl mx-auto">
+          Sign in with Google and start analyzing YouTube comments effortlessly.
+        </p>
+        {!user && (
+          <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
+        )}
+      </section>
+
     </main>
   );
 }

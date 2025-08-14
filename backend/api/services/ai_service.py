@@ -316,6 +316,7 @@ class AIService:
             Dict showing if Gemini is available and the primary service in use.
         """
         return {
+            "openai_available": False,
             "gemini_available": self.gemini_model is not None,
             "primary_service": "gemini" if self.gemini_model else "none"
         }
