@@ -1,6 +1,18 @@
 from django.contrib import admin
-from .models import Comment, Video, AnalysisSession
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
+from .models import Comment, Video, AnalysisSession, UserProfile
 
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    can_delete = False
+    verbose_name_plural = 'Profile'
+
+class CustomUserAdmin(UserAdmin):
+    inlines = (UserProfileInline,)
+
+admin.site.unregister(get_user_model())
+admin.site.register(get_user_model(), CustomUserAdmin)
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
@@ -8,7 +20,7 @@ class CommentAdmin(admin.ModelAdmin):
     list_filter = ['sentiment_label', 'toxicity_label', 'analyzed', 'published_at']
     search_fields = ['author_name', 'text', 'video_id']
     readonly_fields = ['created_at', 'updated_at']
-    
+
     fieldsets = (
         ('YouTube Data', {
             'fields': ('comment_id', 'video_id', 'channel_id', 'author_name', 'author_channel_url', 'text', 'like_count', 'published_at')
