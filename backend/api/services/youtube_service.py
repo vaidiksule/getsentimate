@@ -6,7 +6,7 @@ from datetime import datetime
 from django.conf import settings
 from ..models import Comment, Video
 from dotenv import load_dotenv
-
+load_dotenv()
 
 class YouTubeService:
     """Service for interacting with the YouTube Data API"""
