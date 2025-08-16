@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { FaRegSmile, FaShieldAlt, FaLightbulb } from 'react-icons/fa';
 
 export default function Home() {
-  const { user, accessToken, logout } = useAuth();
+  const { user, login, logout } = useAuth();
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
 
@@ -21,10 +21,11 @@ export default function Home() {
   // Optional: fetch user info (can be removed if not needed)
   useEffect(() => {
     const fetchMe = async () => {
-      if (accessToken) {
+      if (user) { // Check if user is authenticated
         try {
+          const token = user?.token || ''; // Get the token from the user object
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me/`, {
-            headers: { Authorization: `Bearer ${accessToken}` },
+            headers: { Authorization: `Bearer ${token}` },
           });
           if (res.ok) {
             const data = await res.json();
@@ -40,7 +41,7 @@ export default function Home() {
       }
     };
     fetchMe();
-  }, [accessToken]);
+  }, [user]);
 
   return (
     <main className="min-h-screen font-sans text-gray-900 bg-white antialiased">
