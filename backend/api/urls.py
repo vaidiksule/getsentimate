@@ -25,6 +25,11 @@ urlpatterns = [
     # Authentication endpoints
     path('auth/google/', auth.google_auth, name='google-auth'),
     path('me/', auth.get_me, name='get-me'),
+    
+    # User profile and credit management
+    path('user/profile/', general.user_profile, name='user_profile'),
+    path('user/videos/', general.user_videos, name='user_videos'),
+    path('user/credits/', general.user_credits, name='user_credits'),
 
     # Admin endpoints
     path('admin/metrics/summary/', admin_views.admin_metrics_summary, name='admin_metrics_summary'),

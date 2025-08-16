@@ -45,12 +45,18 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
     setVideoData(null)
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/youtube/fetch-comments/`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({ url, fetch_transcript: false }),
         }
@@ -59,17 +65,25 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
       const data = await response.json()
 
       if (!response.ok) {
+        if (response.status === 402) {
+          throw new Error('Insufficient credits to fetch comments. Please purchase more credits.')
+        }
         throw new Error(data.error || 'Failed to fetch video data')
       }
 
       setVideoData({
         video_id: data.video_id,
-        title: data.video.title,
-        channel_title: data.video.channel_title,
+        title: data.video_data.title,
+        channel_title: data.video_data.channel_title,
         total_comments: data.total_comments,
       })
 
-      setAnalysisStatus('Comments fetched successfully! Ready for analysis.')
+      // Show credit information
+      const creditMessage = data.credits_remaining !== undefined 
+        ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
+        : ''
+      
+      setAnalysisStatus(`Comments fetched successfully! Ready for analysis.${creditMessage}`)
     } catch (err: any) {
       setError(err.message || 'Failed to fetch video data')
     } finally {
@@ -84,12 +98,18 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
     setAnalysisStatus('Analyzing comments...')
 
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/youtube/analyze-comments/`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({ video_id: videoData.video_id }),
         }
@@ -98,11 +118,19 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
       const data = await response.json()
 
       if (!response.ok) {
+        if (response.status === 402) {
+          throw new Error('Insufficient credits to analyze comments. Please purchase more credits.')
+        }
         throw new Error(data.error || 'Failed to analyze comments')
       }
 
+      // Show credit information
+      const creditMessage = data.credits_remaining !== undefined 
+        ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
+        : ''
+      
       setAnalysisStatus(
-        `Analysis complete! ${data.analyzed_count} comments analyzed.`
+        `Analysis complete! ${data.analyzed_count} comments analyzed.${creditMessage}`
       )
 
       onVideoAnalyzed(videoData.video_id)

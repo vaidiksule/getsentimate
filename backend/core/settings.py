@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
 
-    # Local apps
-    "api",
+    # Local apps - API handled via MongoDB service
+    # "api",  # Removed - using pure MongoDB instead
 ]
 
 # Site ID for django.contrib.sites
@@ -88,14 +88,14 @@ ROOT_URLCONF = "core.urls"
 WSGI_APPLICATION = "core.wsgi.application"
 
 # --------------------
-# DATABASE (SQLite for now)
+# DATABASE (MongoDB Only)
 # --------------------
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
+# We're using PyMongo directly - no Django ORM database needed
+DATABASES = {}
+
+# MongoDB Configuration
+MONGODB_DATABASE_NAME = "getsentimatedb"
+MONGODB_URI = os.getenv('DATABASE_URL')
 
 # --------------------
 # AUTHENTICATION
@@ -120,11 +120,10 @@ LOGOUT_REDIRECT_URL = "/"
 # --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
+        "api.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
+        "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
@@ -178,6 +177,13 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # --------------------
 # CORS SETTINGS
 # --------------------
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with your frontend's origin
+    "https://getsentimate.vercel.app",
+    "https://www.getsentimate.vercel.app",
+    "https://getsentimate.com",
+    "https://www.getsentimate.com",
+]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 

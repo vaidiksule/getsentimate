@@ -4,8 +4,9 @@ import requests
 from typing import List, Dict, Optional
 from datetime import datetime
 from django.conf import settings
-from ..models import Comment, Video
 from dotenv import load_dotenv
+from .mongodb_service import MongoDBService
+
 load_dotenv()
 
 class YouTubeService:
@@ -168,104 +169,74 @@ class YouTubeService:
 
         return comments
 
-    def store_video_metadata(self, video_data: Dict) -> Video:
+    def store_video_metadata(self, video_data: Dict, user_google_id: str) -> str:
         """
-        Saves or updates video metadata in the database.
-        Uses Django ORM's get_or_create to avoid duplicates.
+        Saves or updates video metadata in MongoDB.
+        Returns the video ID.
         """
-        video, created = Video.objects.get_or_create(
-            video_id=video_data['video_id'],
-            defaults={
-                'title': video_data['title'],
-                'channel_id': video_data['channel_id'],
-                'channel_title': video_data['channel_title'],
-                'published_at': video_data['published_at'],
-                'view_count': video_data['view_count'],
-                'like_count': video_data['like_count'],
-                'comment_count': video_data['comment_count'],
-            }
-        )
+        try:
+            mongo_service = MongoDBService()
+            video_id = mongo_service.store_video(video_data, user_google_id)
+            mongo_service.close_connection()
+            return video_id
+        except Exception as e:
+            raise Exception(f"Failed to store video in MongoDB: {str(e)}")
 
-        if not created:
-            # Update fields if video already exists
-            video.title = video_data['title']
-            video.channel_title = video_data['channel_title']
-            video.view_count = video_data['view_count']
-            video.like_count = video_data['like_count']
-            video.comment_count = video_data['comment_count']
-            video.save()
-
-        return video
-
-    def store_comments(self, comments_data: List[Dict], video: Video) -> List[Comment]:
+    def store_comments(self, comments_data: List[Dict], video_id: str, user_google_id: str) -> List[str]:
         """
-        Saves comments in the database.
-        Updates existing ones if text or like count changes.
+        Saves comments in MongoDB.
+        Returns list of comment IDs.
         """
-        stored_comments = []
+        try:
+            mongo_service = MongoDBService()
+            comment_ids = mongo_service.store_comments(comments_data, video_id, user_google_id)
+            mongo_service.close_connection()
+            return comment_ids
+        except Exception as e:
+            raise Exception(f"Failed to store comments in MongoDB: {str(e)}")
 
-        for comment_data in comments_data:
-            comment, created = Comment.objects.get_or_create(
-                comment_id=comment_data['comment_id'],
-                defaults={
-                    'video_id': comment_data['video_id'],
-                    'channel_id': comment_data['channel_id'],
-                    'author_name': comment_data['author_name'],
-                    'author_channel_url': comment_data['author_channel_url'],
-                    'text': comment_data['text'],
-                    'like_count': comment_data['like_count'],
-                    'published_at': comment_data['published_at'],
-                }
-            )
-
-            if not created:
-                # Update fields for existing comment
-                comment.text = comment_data['text']
-                comment.like_count = comment_data['like_count']
-                comment.save()
-
-            stored_comments.append(comment)
-
-        return stored_comments
-
-    def process_video_url(self, url: str, fetch_transcript: bool = False) -> Dict:
+    def process_video_url(self, url: str, user_google_id: str, fetch_transcript: bool = False) -> Dict:
         """
         High-level method to process a YouTube video URL:
         1. Extracts video ID
         2. Fetches metadata
-        3. Stores metadata
+        3. Stores metadata in MongoDB linked to user
         4. Fetches comments
-        5. Optionally fetches transcript
+        5. Stores comments in MongoDB linked to user and video
+
+        Args:
+            url: YouTube video URL
+            user_google_id: Google ID of the user processing the video
+            fetch_transcript: Whether to fetch video transcript
 
         Returns:
             Dict containing:
             - video_id
-            - video object
+            - video_data
             - total_comments
-            - comments list
+            - comments_count
         """
         # Extract ID from given URL
         video_id = self.extract_video_id_from_url(url)
 
         # Fetch and store metadata
         video_data = self.get_video_metadata(video_id)
-        video = self.store_video_metadata(video_data)
+        stored_video_id = self.store_video_metadata(video_data, user_google_id)
 
         # Fetch and store comments
         comments_data = self.fetch_video_comments(video_id)
-        comments = self.store_comments(comments_data, video)
+        comment_ids = self.store_comments(comments_data, video_id, user_google_id)
 
         # Optional transcript fetching (currently disabled)
         # if fetch_transcript:
         #     transcript = self.fetch_video_transcript(video_id)
         #     if transcript:
-        #         video.transcript = transcript
-        #         video.transcript_available = True
-        #         video.save()
+        #         # Store transcript in MongoDB if needed
+        #         pass
 
         return {
             'video_id': video_id,
-            'video': video,
-            'total_comments': len(comments),
-            'comments': comments,
+            'video_data': video_data,
+            'total_comments': len(comments_data),
+            'comments_count': len(comment_ids),
         }
