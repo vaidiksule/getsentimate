@@ -73,28 +73,28 @@ export default function AnalyticsDashboard({ videoId }: AnalyticsDashboardProps)
     }, [videoId])
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header */}
-            <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">Analytics Dashboard</h2>
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md p-8 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Analytics Overview</h2>
 
                 {!analyticsData ? (
-                    <div className="text-center py-8">
-                        <p className="text-gray-500">Enter a YouTube URL to start analyzing comments</p>
+                    <div className="text-center py-12 bg-gray-50 rounded-2xl">
+                        <p className="text-gray-600 font-medium">Analyze a video to see insights here</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div className="rounded-xl p-4 bg-gradient-to-br from-blue-50 to-white border border-blue-100 shadow-sm">
-                            <h3 className="text-sm font-medium text-blue-600">Total Comments</h3>
-                            <p className="text-2xl font-bold text-gray-800 mt-1">{analyticsData.total_comments}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="rounded-2xl p-6 bg-gradient-to-br from-blue-100 to-blue-50 shadow-inner text-center transform hover:scale-105 transition duration-300">
+                            <h3 className="text-sm font-semibold text-blue-700 mb-2">Total Comments</h3>
+                            <p className="text-3xl font-bold text-blue-800">{analyticsData.total_comments}</p>
                         </div>
-                        <div className="rounded-xl p-4 bg-gradient-to-br from-green-50 to-white border border-green-100 shadow-sm">
-                            <h3 className="text-sm font-medium text-green-600">Analyzed</h3>
-                            <p className="text-2xl font-bold text-gray-800 mt-1">{analyticsData.analyzed_comments}</p>
+                        <div className="rounded-2xl p-6 bg-gradient-to-br from-green-100 to-green-50 shadow-inner text-center transform hover:scale-105 transition duration-300">
+                            <h3 className="text-sm font-semibold text-green-700 mb-2">Analyzed</h3>
+                            <p className="text-3xl font-bold text-green-800">{analyticsData.analyzed_comments}</p>
                         </div>
-                        <div className="rounded-xl p-4 bg-gradient-to-br from-purple-50 to-white border border-purple-100 shadow-sm">
-                            <h3 className="text-sm font-medium text-purple-600">Progress</h3>
-                            <p className="text-2xl font-bold text-gray-800 mt-1">
+                        <div className="rounded-2xl p-6 bg-gradient-to-br from-purple-100 to-purple-50 shadow-inner text-center transform hover:scale-105 transition duration-300">
+                            <h3 className="text-sm font-semibold text-purple-700 mb-2">Progress</h3>
+                            <p className="text-3xl font-bold text-purple-800">
                                 {Math.round(analyticsData.analysis_progress)}%
                             </p>
                         </div>
@@ -104,14 +104,14 @@ export default function AnalyticsDashboard({ videoId }: AnalyticsDashboardProps)
 
             {/* Charts */}
             {analyticsData && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Sentiment Distribution</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition duration-300">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Sentiment Distribution</h3>
                         <SentimentChart data={analyticsData.sentiment_distribution} />
                     </div>
 
-                    <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 p-6">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-4">Toxicity Analysis</h3>
+                    <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition duration-300">
+                        <h3 className="text-xl font-semibold text-gray-900 mb-4">Toxicity Analysis</h3>
                         <ToxicityChart data={analyticsData.toxicity_distribution} />
                     </div>
                 </div>
@@ -119,16 +119,16 @@ export default function AnalyticsDashboard({ videoId }: AnalyticsDashboardProps)
 
             {/* Comments List */}
             {analyticsData && (
-                <div className="bg-white/80 backdrop-blur-md rounded-2xl shadow-md border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Comments</h3>
+                <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-md p-8 border border-gray-100 hover:shadow-xl transition duration-300">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-4">Comment Explorer</h3>
                     <CommentList videoId={analyticsData.video_id} />
                 </div>
             )}
 
             {/* Error Display */}
             {error && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
-                    <p className="text-red-600">{error}</p>
+                <div className="bg-red-50 border border-red-100 rounded-3xl p-6 shadow-inner">
+                    <p className="text-red-700 font-medium">{error}</p>
                 </div>
             )}
         </div>

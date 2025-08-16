@@ -24,66 +24,57 @@ export default function SentimentChart({ data }: SentimentChartProps) {
       case 'negative':
         return 'bg-red-500'
       case 'neutral':
-        return 'bg-gray-500'
+        return 'bg-yellow-500'
       default:
         return 'bg-gray-300'
     }
   }
 
   const getLabel = (sentiment: string) => {
+    return sentiment.charAt(0).toUpperCase() + sentiment.slice(1)
+  }
+
+  const getBgColor = (sentiment: string) => {
     switch (sentiment) {
       case 'positive':
-        return 'Positive'
+        return 'bg-green-50 text-green-700'
       case 'negative':
-        return 'Negative'
+        return 'bg-red-50 text-red-700'
       case 'neutral':
-        return 'Neutral'
+        return 'bg-yellow-50 text-yellow-700'
       default:
-        return sentiment
+        return 'bg-gray-50 text-gray-700'
     }
   }
 
   return (
-    <div className="space-y-6 p-4 bg-white shadow-lg rounded-xl border border-gray-100">
+    <div className="space-y-6">
       {/* Bar Chart */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {Object.entries(data).map(([sentiment, count]) => (
-          <div key={sentiment} className="flex items-center space-x-4">
-            {/* Label */}
-            <div className="w-20 text-sm font-semibold text-gray-800">
-              {getLabel(sentiment)}
+          <div key={sentiment} className="space-y-2">
+            <div className="flex items-center justify-between text-sm font-medium text-gray-700">
+              <span>{getLabel(sentiment)}</span>
+              <span>{count} ({getPercentage(count)}%)</span>
             </div>
-            
-            {/* Progress Bar */}
-            <div className="flex-1 bg-gray-200 rounded-full h-4 overflow-hidden">
+            <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
               <div
-                className={`h-4 ${getColor(sentiment)} transition-all duration-500 ease-out shadow-inner`}
+                className={`${getColor(sentiment)} h-full transition-all duration-500`}
                 style={{ width: `${getPercentage(count)}%` }}
               ></div>
-            </div>
-            
-            {/* Count & % */}
-            <div className="w-16 text-xs font-medium text-gray-600 text-right">
-              {count} ({getPercentage(count)}%)
             </div>
           </div>
         ))}
       </div>
 
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
-        <div className="text-center p-2 rounded-lg bg-green-50">
-          <div className="text-2xl font-bold text-green-600">{data.positive}</div>
-          <div className="text-xs font-medium text-green-700">Positive</div>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-red-50">
-          <div className="text-2xl font-bold text-red-600">{data.negative}</div>
-          <div className="text-xs font-medium text-red-700">Negative</div>
-        </div>
-        <div className="text-center p-2 rounded-lg bg-gray-50">
-          <div className="text-2xl font-bold text-gray-600">{data.neutral}</div>
-          <div className="text-xs font-medium text-gray-700">Neutral</div>
-        </div>
+      {/* Summary Cards */}
+      <div className="grid grid-cols-3 gap-4">
+        {Object.entries(data).map(([sentiment, count]) => (
+          <div key={sentiment} className={`p-4 rounded-2xl text-center ${getBgColor(sentiment)} shadow-inner`}>
+            <div className="text-2xl font-bold">{count}</div>
+            <div className="text-sm font-medium">{getLabel(sentiment)}</div>
+          </div>
+        ))}
       </div>
     </div>
   )

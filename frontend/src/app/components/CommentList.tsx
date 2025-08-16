@@ -58,54 +58,54 @@ export default function CommentList({ videoId }: CommentListProps) {
     return matchesSearch && matchesSentiment && matchesToxicity
   })
 
-  const badgeStyle = (color: string) => `px-2 py-0.5 text-xs rounded-full font-medium ${color} bg-opacity-20`
+  const badgeStyle = (color: string) => `px-3 py-1 text-xs font-semibold rounded-full ${color} bg-opacity-10 border ${color.replace('text', 'border')}`
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
       case 'positive':
-        return badgeStyle('text-green-600 bg-green-500')
+        return badgeStyle('text-green-600 border-green-200')
       case 'negative':
-        return badgeStyle('text-red-600 bg-red-500')
+        return badgeStyle('text-red-600 border-red-200')
       case 'neutral':
-        return badgeStyle('text-gray-600 bg-gray-500')
+        return badgeStyle('text-gray-600 border-gray-200')
       default:
-        return badgeStyle('text-gray-600 bg-gray-500')
+        return badgeStyle('text-gray-600 border-gray-200')
     }
   }
 
   const getToxicityColor = (toxicity: string) => {
     switch (toxicity) {
       case 'toxic':
-        return badgeStyle('text-red-600 bg-red-500')
+        return badgeStyle('text-red-600 border-red-200')
       case 'non-toxic':
-        return badgeStyle('text-green-600 bg-green-500')
+        return badgeStyle('text-green-600 border-green-200')
       default:
-        return badgeStyle('text-gray-600 bg-gray-500')
+        return badgeStyle('text-gray-600 border-gray-200')
     }
   }
 
   if (loading) return <LoadingSpinner />
   if (error) {
     return (
-      <div className="text-center py-8 text-red-600">{error}</div>
+      <div className="text-center py-12 text-red-600 font-medium">{error}</div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 bg-white/70 backdrop-blur-md p-4 rounded-xl shadow-sm border border-gray-200">
+      <div className="flex flex-col md:flex-row gap-4 bg-gradient-to-br from-gray-50 to-white p-4 rounded-2xl shadow-inner border border-gray-100">
         <input
           type="text"
-          placeholder="Search comments..."
+          placeholder="Search comments or authors..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="flex-1 px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
         />
         <select
           value={sentimentFilter}
           onChange={(e) => setSentimentFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
         >
           <option value="all">All Sentiments</option>
           <option value="positive">Positive</option>
@@ -115,33 +115,33 @@ export default function CommentList({ videoId }: CommentListProps) {
         <select
           value={toxicityFilter}
           onChange={(e) => setToxicityFilter(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
         >
-          <option value="all">All Toxicity</option>
+          <option value="all">All Toxicity Levels</option>
           <option value="toxic">Toxic</option>
           <option value="non-toxic">Non-toxic</option>
         </select>
       </div>
 
       {/* Comments Count */}
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-gray-600 font-medium">
         Showing {filteredComments.length} of {comments.length} comments
       </div>
 
       {/* Comments List */}
-      <div className="space-y-4 max-h-96 overflow-y-auto pr-1">
+      <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
         {filteredComments.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No comments found</div>
+          <div className="text-center py-12 text-gray-500 font-medium">No comments match your filters</div>
         ) : (
           filteredComments.map((comment) => (
             <div
               key={comment.id}
-              className="bg-white/80 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
+              className="bg-white rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100"
             >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className="font-medium text-gray-800">{comment.author_name}</span>
-                  <span className="text-xs text-gray-500">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <span className="font-semibold text-gray-900">{comment.author_name}</span>
+                  <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                     {new Date(comment.published_at).toLocaleDateString()}
                   </span>
                 </div>
@@ -149,21 +149,23 @@ export default function CommentList({ videoId }: CommentListProps) {
                   {comment.analyzed && (
                     <>
                       <span className={getSentimentColor(comment.sentiment_label)}>
-                        {comment.sentiment_label}
+                        {comment.sentiment_label.charAt(0).toUpperCase() + comment.sentiment_label.slice(1)}
                       </span>
                       <span className={getToxicityColor(comment.toxicity_label)}>
-                        {comment.toxicity_label}
+                        {comment.toxicity_label.charAt(0).toUpperCase() + comment.toxicity_label.slice(1)}
                       </span>
                     </>
                   )}
-                  <span className="text-sm text-gray-500">👍 {comment.like_count}</span>
+                  <span className="text-sm text-gray-600 flex items-center">
+                    <span className="mr-1">👍</span> {comment.like_count}
+                  </span>
                 </div>
               </div>
-              <p className="text-gray-700">{comment.text}</p>
+              <p className="text-gray-800 leading-relaxed mb-3">{comment.text}</p>
               {comment.analyzed && (
-                <div className="mt-2 flex items-center space-x-4 text-xs text-gray-500">
-                  <span>Sentiment: {Math.round(comment.sentiment_score * 100)}%</span>
-                  <span>Toxicity: {Math.round(comment.toxicity_score * 100)}%</span>
+                <div className="flex items-center space-x-6 text-xs text-gray-600">
+                  <span className="bg-blue-50 px-3 py-1 rounded-full">Sentiment: {Math.round(comment.sentiment_score * 100)}%</span>
+                  <span className="bg-purple-50 px-3 py-1 rounded-full">Toxicity: {Math.round(comment.toxicity_score * 100)}%</span>
                 </div>
               )}
             </div>

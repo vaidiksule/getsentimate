@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import LoadingSpinner from './LoadingSpinner'
+import Image from 'next/image'
 
 interface VideoData {
   video_id: string
@@ -23,7 +24,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
 
   const extractVideoId = (url: string) => {
     const regex =
-      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^\"&?\/\\s]{11})/
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^\"&?\/ ]{11})/
     const match = url.match(regex)
     return match ? match[1] : null
   }
@@ -78,7 +79,6 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
         total_comments: data.total_comments,
       })
 
-      // Show credit information
       const creditMessage = data.credits_remaining !== undefined 
         ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
         : ''
@@ -124,7 +124,6 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
         throw new Error(data.error || 'Failed to analyze comments')
       }
 
-      // Show credit information
       const creditMessage = data.credits_remaining !== undefined 
         ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
         : ''
@@ -142,82 +141,68 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-5 border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-900">Video Analysis</h2>
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold text-gray-900">Start Your Analysis</h2>
 
       {/* URL Input */}
-      <div className="space-y-2">
-        <label
-          htmlFor="video-url"
-          className="block text-sm font-semibold text-gray-700"
+      <div className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200 transition duration-200 bg-white shadow-inner">
+        <input
+          type="url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="Paste YouTube video URL here..."
+          className="flex-1 px-6 py-4 text-gray-900 outline-none"
+          disabled={loading}
+        />
+        <button
+          onClick={fetchVideoData}
+          disabled={loading || !url.trim()}
+          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold px-8 py-4 transition duration-300 disabled:opacity-50"
         >
-          YouTube Video URL
-        </label>
-        <div className="flex rounded-lg overflow-hidden border border-gray-300 focus-within:border-blue-500 focus-within:ring focus-within:ring-blue-200 transition">
-          <input
-            type="url"
-            id="video-url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://www.youtube.com/watch?v=..."
-            className="flex-1 px-4 py-2 text-sm text-gray-900 outline-none"
-            disabled={loading}
-          />
-          <button
-            onClick={fetchVideoData}
-            disabled={loading || !url.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 flex items-center justify-center transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? <LoadingSpinner /> : 'Fetch'}
-          </button>
-        </div>
+          {loading ? 'Fetching...' : 'Fetch Comments'}
+        </button>
       </div>
 
-      {/* Error Display */}
+      {/* Error */}
       {error && (
-        <div className="rounded-lg bg-red-50 p-3 border border-red-200">
-          <p className="text-sm font-medium text-red-700">{error}</p>
+        <div className="bg-red-50 p-4 rounded-2xl border border-red-100 text-red-700 font-medium">
+          {error}
         </div>
       )}
 
-      {/* Video Preview */}
+      {/* Video Info */}
       {videoData && (
-        <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900 mb-3">
-            Video Information
-          </h3>
-          <div className="space-y-2 text-gray-800 text-sm">
-            <p>
-              <span className="font-medium">Title:</span> {videoData.title}
-            </p>
-            <p>
-              <span className="font-medium">Channel:</span>{' '}
-              {videoData.channel_title}
-            </p>
-            <p>
-              <span className="font-medium">Comments:</span>{' '}
-              {videoData.total_comments}
-            </p>
-            <p>
-              <span className="font-medium">Video ID:</span>{' '}
-              {videoData.video_id}
-            </p>
+        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 space-y-6">
+          <div className="flex gap-6">
+            <div className="w-48 h-28 rounded-2xl overflow-hidden shadow-md">
+              <Image
+                src={`https://img.youtube.com/vi/${videoData.video_id}/hqdefault.jpg`}
+                alt={videoData.title}
+                width={480}
+                height={360}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">{videoData.title}</h3>
+              <p className="text-gray-600 mb-1">{videoData.channel_title}</p>
+              <p className="text-gray-600">Comments: {videoData.total_comments}</p>
+            </div>
           </div>
-
           <button
             onClick={analyzeComments}
             disabled={loading}
-            className="mt-5 w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50"
           >
-            {loading ? <LoadingSpinner /> : 'Analyze Comments'}
+            {loading ? 'Analyzing...' : 'Analyze Now'}
           </button>
         </div>
       )}
 
-      {/* Status Display */}
+      {/* Status */}
       {analysisStatus && (
-        <div className="rounded-lg bg-blue-50 p-3 border border-blue-200">
-          <p className="text-sm font-medium text-blue-700">{analysisStatus}</p>
+        <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-blue-700 font-medium">
+          {analysisStatus}
         </div>
       )}
     </div>
