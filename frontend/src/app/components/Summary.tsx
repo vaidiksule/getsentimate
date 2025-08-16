@@ -23,15 +23,15 @@ export default function Summary({ videoId }: SummaryProps) {
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Video Summary</h2>
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 min-h-[100px]">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">AI-Generated Summary</h2>
+      <div className="bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-gray-100 shadow-inner min-h-[150px] flex items-center justify-center">
         {loading ? (
-          <div className="flex items-center text-gray-500">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            Generating summary...
+          <div className="flex items-center space-x-3 text-gray-600">
+            <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="font-medium">Generating insights...</span>
           </div>
         ) : (
-          <p className="text-gray-700 text-sm leading-relaxed">{summary}</p>
+          <p className="text-gray-800 leading-relaxed">{summary}</p>
         )}
       </div>
     </div>

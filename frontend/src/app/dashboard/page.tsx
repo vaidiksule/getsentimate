@@ -8,6 +8,7 @@ import CreditDisplay from '../components/CreditDisplay'
 import UserProfile from '../components/UserProfile'
 import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 export default function Home() {
   const [currentVideoId, setCurrentVideoId] = useState('')
@@ -34,61 +35,56 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-800">
       {/* Header */}
-      <header className="backdrop-blur-md bg-white/80 border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center py-5">
-          
-          {/* Left side: Logo + tagline */}
-          <div className="flex flex-col">
-            <img
+      <header className="sticky top-0 z-20 backdrop-blur-lg bg-white/90 border-b border-gray-100 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-3 px-30">
+            <Image
               src="/getsentimate-logo.svg"
               alt="GetSentimate"
-              className="w-14 h-auto mb-1 drop-shadow-sm"
+              width={160}
+              height={60}
+              className="drop-shadow-md"
             />
-            <p className="text-gray-500 text-sm tracking-wide">
-              AI-Powered YouTube Comment Analysis
-            </p>
+            {/* <span className="text-xl font-bold text-blue-600">GetSentimate</span> */}
           </div>
-
-          {/* Right side: Credits + Logout */}
-          <div className="flex items-center space-x-4">
-            <CreditDisplay />
-            <button
-              onClick={logout}
-              className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            >
-              Logout
-            </button>
-          </div>
+          <button
+            onClick={logout}
+            className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
+          >
+            Logout
+          </button>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column */}
-          <div className="lg:col-span-1 space-y-8">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-              <UserProfile />
-            </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-              <VideoInput onVideoAnalyzed={handleVideoAnalyzed} />
-            </div>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+      {/* Main Layout */}
+      <div className="flex min-h-[calc(100vh-64px)] max-w-7xl mx-auto px-6 py-8 gap-8">
+        {/* Sidebar */}
+        <aside className="hidden lg:block w-80 space-y-6">
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 hover:shadow-2xl transition-all duration-300">
+            <UserProfile />
+          </div>
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-6 border border-white/50 hover:shadow-2xl transition-all duration-300">
+            <CreditDisplay />
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 space-y-8">
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
+            <VideoInput onVideoAnalyzed={handleVideoAnalyzed} />
+          </div>
+          {currentVideoId && (
+            <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
               <Summary videoId={currentVideoId} />
             </div>
+          )}
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
+            <AnalyticsDashboard videoId={currentVideoId} />
           </div>
-
-          {/* Analytics Dashboard */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
-              <AnalyticsDashboard videoId={currentVideoId} />
-            </div>
-          </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

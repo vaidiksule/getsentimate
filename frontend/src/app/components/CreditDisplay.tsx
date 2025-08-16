@@ -56,18 +56,18 @@ export default function CreditDisplay({ className = '' }: CreditDisplayProps) {
 
   if (loading) {
     return (
-      <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg bg-gray-100 ${className}`}>
-        <div className="w-4 h-4 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
-        <span className="text-sm text-gray-600">Loading credits...</span>
+      <div className={`flex flex-col items-center justify-center p-6 rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-50 shadow-inner ${className}`}>
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+        <span className="text-sm font-medium text-blue-600">Loading credits...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className={`flex items-center space-x-2 px-3 py-2 rounded-lg bg-red-50 border border-red-200 ${className}`}>
-        <FaExclamationTriangle className="text-red-500 text-sm" />
-        <span className="text-sm text-red-600">Error loading credits</span>
+      <div className={`flex flex-col items-center justify-center p-6 rounded-3xl bg-red-50 shadow-inner ${className}`}>
+        <FaExclamationTriangle className="text-2xl text-red-500 mb-2" />
+        <span className="text-sm font-medium text-red-600">Error loading credits</span>
       </div>
     )
   }
@@ -77,36 +77,34 @@ export default function CreditDisplay({ className = '' }: CreditDisplayProps) {
   }
 
   const isLowCredits = creditInfo.credits <= 2
-  const bgColor = isLowCredits ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'
+  const bgGradient = isLowCredits ? 'from-orange-100 to-orange-50' : 'from-green-100 to-green-50'
   const textColor = isLowCredits ? 'text-orange-700' : 'text-green-700'
   const iconColor = isLowCredits ? 'text-orange-500' : 'text-green-500'
 
   return (
-    <div className={`flex items-center space-x-3 px-4 py-3 rounded-lg border ${bgColor} ${className}`}>
-      <div className="flex items-center space-x-2">
-        <FaCoins className={`text-lg ${iconColor}`} />
+    <div className={`p-6 rounded-3xl bg-gradient-to-br ${bgGradient} shadow-inner ${className}`}>
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Credits</h3>
+      <div className="flex items-center justify-center space-x-4 mb-4">
+        <FaCoins className={`text-3xl ${iconColor}`} />
         <div className="text-center">
-          <div className={`text-lg font-bold ${textColor}`}>
+          <div className={`text-4xl font-bold ${textColor}`}>
             {creditInfo.credits}
-          </div>
-          <div className={`text-xs ${textColor}`}>
-            Credits
           </div>
         </div>
       </div>
       
-      <div className="text-xs text-gray-600">
-        <div className={creditInfo.can_fetch ? 'text-green-600' : 'text-red-600'}>
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className={`text-center p-2 rounded-xl ${creditInfo.can_fetch ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
           {creditInfo.can_fetch ? '✓ Can fetch' : '✗ Cannot fetch'}
         </div>
-        <div className={creditInfo.can_analyze ? 'text-green-600' : 'text-red-600'}>
+        <div className={`text-center p-2 rounded-xl ${creditInfo.can_analyze ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
           {creditInfo.can_analyze ? '✓ Can analyze' : '✗ Cannot analyze'}
         </div>
       </div>
 
       {isLowCredits && (
-        <div className="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded">
-          Low credits!
+        <div className="mt-4 text-center text-sm text-orange-600 bg-orange-50 p-2 rounded-xl">
+          Low credits! Consider topping up.
         </div>
       )}
     </div>

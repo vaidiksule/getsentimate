@@ -52,8 +52,14 @@ export default function Home() {
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <Image src="/getsentimate-logo.svg" alt="GetSentimate Logo" width={48} height={48} className="drop-shadow-sm" />
-            <span className="text-2xl font-extrabold text-blue-600 tracking-tight">GetSentimate</span>
+          <Image
+              src="/getsentimate-logo.svg"
+              alt="GetSentimate"
+              width={160}
+              height={60}
+              className="drop-shadow-md"
+            />
+            {/* <span className="text-2xl font-extrabold text-blue-600 tracking-tight">GetSentimate</span> */}
           </div>
           {!user && (
             <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
