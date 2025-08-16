@@ -4,7 +4,7 @@ import React, { createContext, useState, useEffect, useContext, ReactNode } from
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
-  user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number } | null;
+  user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number; token?: string;} | null;
   login: (user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number }) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
@@ -37,7 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setLoading(false);
   }, []);
 
-  const login = (user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number }) => {
+  const login = (user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number; token?: string; }) => {
     setUser(user);
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
