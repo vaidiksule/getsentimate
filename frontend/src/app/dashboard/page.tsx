@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react'
 import VideoInput from '../components/VideoInput'
 import AnalyticsDashboard from '../components/AnalyticsDashboard'
 import Summary from '../components/Summary'
-// import AIServiceStatus from '../components/AIServiceStatus'
+import CreditDisplay from '../components/CreditDisplay'
+import UserProfile from '../components/UserProfile'
 import { useAuth } from '../components/AuthProvider'
 import { useRouter } from 'next/navigation'
 
@@ -22,7 +23,7 @@ export default function Home() {
 
   // Fetch AI status from backend
   useEffect(() => {
-    fetch('/api/ai-status')
+    fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/ai-status/`)
       .then(res => res.json())
       .then(data => setAiStatus(data))
       .catch(() => setAiStatus(null))
@@ -50,9 +51,9 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Right side: AI Status + Logout */}
+          {/* Right side: Credits + Logout */}
           <div className="flex items-center space-x-4">
-          {/* <AIServiceStatus /> */}
+            <CreditDisplay />
             <button
               onClick={logout}
               className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
@@ -69,6 +70,9 @@ export default function Home() {
           
           {/* Left Column */}
           <div className="lg:col-span-1 space-y-8">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
+              <UserProfile />
+            </div>
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300">
               <VideoInput onVideoAnalyzed={handleVideoAnalyzed} />
             </div>

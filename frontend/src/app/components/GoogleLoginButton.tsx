@@ -34,8 +34,20 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({ clientId }
 
         if (res.ok) {
           const data = await res.json();
-          login(data.access, data.refresh, data.user);
-          router.push('/dashboard'); // Redirect to dashboard after successful login
+          
+          // Store JWT token in localStorage
+          localStorage.setItem('token', data.token);
+          
+          // Create user object with all necessary fields
+          const userData = {
+            id: data.user.id,
+            email: data.user.email,
+            name: data.user.name,
+            avatar: data.user.avatar,
+            google_id: data.user.google_id,
+            credits: data.user.credits
+          };
+          login(userData);
         } else {
           console.error('Google login failed', res);
         }

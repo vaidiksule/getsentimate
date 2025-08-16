@@ -4,10 +4,8 @@ import React, { createContext, useState, useEffect, useContext, ReactNode } from
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
-  accessToken: string | null;
-  refreshToken: string | null;
-  user: { id: number; email: string; name: string; avatar?: string } | null;
-  login: (access: string, refresh: string, user: { id: number; email: string; name: string; avatar?: string } | null) => void;
+  user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number } | null;
+  login: (user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number }) => void;
   logout: () => void;
   isAuthenticated: () => boolean;
   loading: boolean;
@@ -20,56 +18,46 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [user, setUser] = useState<{ id: number; email: string; name: string; avatar?: string } | null>(null);
+  const [user, setUser] = useState<{ id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const storedAccessToken = localStorage.getItem('access');
-    const storedRefreshToken = localStorage.getItem('refresh');
     const storedUser = localStorage.getItem('user');
-
-    if (storedAccessToken) setAccessToken(storedAccessToken);
-    if (storedRefreshToken) setRefreshToken(storedRefreshToken);
-    if (storedUser) setUser(JSON.parse(storedUser));
-
-    setLoading(false); // finished loading
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedUser && storedToken) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    }
+    setLoading(false);
   }, []);
 
-  const login = (access: string, refresh: string, user: { id: number; email: string; name: string; avatar?: string } | null) => {
-    setAccessToken(access);
-    setRefreshToken(refresh);
+  const login = (user: { id: number; email: string; name: string; avatar?: string; google_id?: string; credits?: number }) => {
     setUser(user);
-
     if (user) {
-      localStorage.setItem('access', access);
-      localStorage.setItem('refresh', refresh);
       localStorage.setItem('user', JSON.stringify(user));
     } else {
-      localStorage.removeItem('access');
-      localStorage.removeItem('refresh');
       localStorage.removeItem('user');
     }
-
-    router.push('/dashboard'); // redirect immediately after login
+    router.push('/dashboard');
   };
 
   const logout = () => {
-    setAccessToken(null);
-    setRefreshToken(null);
     setUser(null);
-    localStorage.removeItem('access');
-    localStorage.removeItem('refresh');
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     router.push('/');
   };
 
-  const isAuthenticated = () => !!accessToken;
+  const isAuthenticated = () => !!user;
 
   return (
-    <AuthContext.Provider value={{ accessToken, refreshToken, user, login, logout, isAuthenticated, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated, loading }}>
       {children}
     </AuthContext.Provider>
   );

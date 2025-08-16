@@ -1,21 +1,19 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.contrib.auth import get_user_model
+from rest_framework.permissions import AllowAny
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from rest_framework_simplejwt.tokens import RefreshToken
+from ..services.mongodb_service import MongoDBService
+from ..jwt_utils import create_jwt_token
 import os
-
-User = get_user_model()
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def google_auth(request):
     """
     Authenticates a user with a Google ID token.
+    Creates/updates user in MongoDB and returns JWT token.
     """
     try:
         id_token_str = request.data.get('id_token')
@@ -31,45 +29,74 @@ def google_auth(request):
         name = idinfo['name']
         picture = idinfo.get('picture')
 
-        # Create or update user
-        user, created = User.objects.get_or_create(email=email, defaults={'username': email, 'first_name': name})
-        # Basic profile update; consider a separate UserProfile model
-        user.first_name = name
-        user.save()
+        # Create or update user in MongoDB
+        mongo_service = MongoDBService()
+        user_data = {
+            'google_id': google_id,
+            'name': name,
+            'email': email,
+            'avatar': picture
+        }
+        
+        mongo_user = mongo_service.create_or_update_user(user_data)
+        mongo_service.close_connection()
 
-        # Generate JWTs
-        refresh = RefreshToken.for_user(user)
-        access_token = str(refresh.access_token)
+        # Create JWT token
+        token = create_jwt_token(mongo_user)
 
         return Response({
-            'access': access_token,
-            'refresh': str(refresh),
+            'token': token,
             'user': {
-                'id': user.id,
-                'email': user.email,
-                'name': user.first_name,
-                'avatar': picture,
+                'id': str(mongo_user['_id']),
+                'email': mongo_user['email'],
+                'name': mongo_user['name'],
+                'avatar': mongo_user['avatar'],
+                'google_id': mongo_user['google_id'],
+                'credits': mongo_user['credits']
              }
         }, status=status.HTTP_200_OK)
 
     except ValueError as e:
-        # Invalid token
         print(f"ValueError: {e}")
         return Response({'error': 'Invalid ID token'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        # Handle other exceptions
         print(f"Exception: {e}")
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def get_me(request):
     """
-    Returns the current user's information.
+    Returns the current user's information from JWT token.
     """
-    user = request.user
-    return Response({
-        'id': user.id,
-        'email': user.email,
-        'name': user.first_name,
-    }, status=status.HTTP_200_OK)
+    try:
+        # Get token from Authorization header
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return Response({'error': 'No valid token provided'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        token = auth_header.split(' ')[1]
+        payload = verify_jwt_token(token)
+        
+        if not payload:
+            return Response({'error': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
+        # Get user data from MongoDB
+        mongo_service = MongoDBService()
+        user_data = mongo_service.get_user_by_google_id(payload['google_id'])
+        mongo_service.close_connection()
+        
+        if not user_data:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({
+            'id': str(user_data['_id']),
+            'email': user_data['email'],
+            'name': user_data['name'],
+            'avatar': user_data['avatar'],
+            'google_id': user_data['google_id'],
+            'credits': user_data['credits']
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

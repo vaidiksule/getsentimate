@@ -1,13 +1,10 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from ..models import Comment, Video, AnalysisSession
-from ..serializers import CommentSerializer, VideoSerializer, AnalysisSessionSerializer
 from ..services.youtube_service import YouTubeService
 from ..services.ai_service import AIService
+from ..services.mongodb_service import MongoDBService
 
 
 # -----------------------
@@ -67,41 +64,100 @@ def ai_service_status(request):
 # -----------------------
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def comments_list(request):
     """
-    Retrieves a list of comments from the database.
+    Retrieves a list of comments from MongoDB for the authenticated user.
     Supports optional query parameters:
       - video_id: Filter comments for a specific video
       - sentiment: Filter by sentiment label
       - toxicity: Filter by toxicity label
     """
-    comments = Comment.objects.all()
-    
-    # Apply filters based on query params
-    video_id = request.query_params.get('video_id')
-    if video_id:
-        comments = comments.filter(video_id=video_id)
-    
-    sentiment = request.query_params.get('sentiment')
-    if sentiment:
-        comments = comments.filter(sentiment_label=sentiment)
-    
-    toxicity = request.query_params.get('toxicity')
-    if toxicity:
-        comments = comments.filter(toxicity_label=toxicity)
-    
-    serializer = CommentSerializer(comments, many=True)
-    return Response(serializer.data)
+    try:
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        mongo_service = MongoDBService()
+        
+        # Get user's videos
+        user_videos = mongo_service.get_user_videos(user_google_id)
+        video_ids = [v['video_id'] for v in user_videos]
+        
+        # Get comments for user's videos
+        comments = []
+        for video_id in video_ids:
+            video_comments = mongo_service.get_video_comments(video_id, user_google_id)
+            comments.extend(video_comments)
+        
+        # Apply filters
+        video_id_filter = request.query_params.get('video_id')
+        if video_id_filter:
+            comments = [c for c in comments if c['video_id'] == video_id_filter]
+        
+        sentiment_filter = request.query_params.get('sentiment')
+        if sentiment_filter:
+            comments = [c for c in comments if c.get('sentiment_label') == sentiment_filter]
+        
+        toxicity_filter = request.query_params.get('toxicity')
+        if toxicity_filter:
+            comments = [c for c in comments if c.get('toxicity_label') == toxicity_filter]
+        
+        mongo_service.close_connection()
+        
+        return Response(comments)
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get comments: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def comment_detail(request, comment_id):
-    """Retrieves detailed information for a single comment by ID."""
-    comment = get_object_or_404(Comment, comment_id=comment_id)
-    serializer = CommentSerializer(comment)
-    return Response(serializer.data)
+    """Retrieves detailed information for a single comment by ID for the authenticated user."""
+    try:
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        mongo_service = MongoDBService()
+        
+        # Get user's videos
+        user_videos = mongo_service.get_user_videos(user_google_id)
+        video_ids = [v['video_id'] for v in user_videos]
+        
+        # Find comment in user's videos
+        comment = None
+        for video_id in video_ids:
+            video_comments = mongo_service.get_video_comments(video_id, user_google_id)
+            comment = next((c for c in video_comments if c['comment_id'] == comment_id), None)
+            if comment:
+                break
+        
+        mongo_service.close_connection()
+        
+        if not comment:
+            return Response(
+                {"error": "Comment not found or access denied"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response(comment)
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get comment: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 # -----------------------
@@ -109,7 +165,7 @@ def comment_detail(request, comment_id):
 # -----------------------
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def analyze_video(request):
     """
     Starts the analysis process for a given YouTube video.
@@ -158,7 +214,7 @@ def analysis_status(request, session_id):
 
 
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def video_analytics(request, video_id):
     """
     Returns analytics summary for a specific video:
@@ -167,32 +223,29 @@ def video_analytics(request, video_id):
       - Sentiment distribution
       - Toxicity distribution
       - Progress percentage
+    Requires authentication and uses MongoDB.
     """
-    video = get_object_or_404(Video, video_id=video_id)
-    comments = Comment.objects.filter(video_id=video_id)
-    
-    total_comments = comments.count()
-    analyzed_comments = comments.filter(analyzed=True).count()
-    
-    sentiment_distribution = {
-        'positive': comments.filter(sentiment_label='positive').count(),
-        'negative': comments.filter(sentiment_label='negative').count(),
-        'neutral': comments.filter(sentiment_label='neutral').count(),
-    }
-    
-    toxicity_distribution = {
-        'toxic': comments.filter(toxicity_label='toxic').count(),
-        'non-toxic': comments.filter(toxicity_label='non-toxic').count(),
-    }
-    
-    return Response({
-        "video_id": video_id,
-        "total_comments": total_comments,
-        "analyzed_comments": analyzed_comments,
-        "sentiment_distribution": sentiment_distribution,
-        "toxicity_distribution": toxicity_distribution,
-        "analysis_progress": (analyzed_comments / total_comments * 100) if total_comments > 0 else 0
-    })
+    try:
+        # Get user's Google ID from the request
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Get analytics from MongoDB
+        mongo_service = MongoDBService()
+        analytics = mongo_service.get_user_analytics(user_google_id, video_id)
+        mongo_service.close_connection()
+        
+        return Response(analytics)
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get video analytics: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 # -----------------------
@@ -200,11 +253,11 @@ def video_analytics(request, video_id):
 # -----------------------
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def fetch_youtube_comments(request):
     """
     Fetches comments for a given YouTube video URL.
-    Uses YouTubeService to process video data and return video & comment details.
+    Requires authentication and stores data in MongoDB linked to user.
     """
     url = request.data.get('url')
     
@@ -215,15 +268,43 @@ def fetch_youtube_comments(request):
         )
     
     try:
+        # Get user's Google ID from the request
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if user has credits
+        mongo_service = MongoDBService()
+        user_credits = mongo_service.get_user_credits(user_google_id)
+        
+        if user_credits < 1:
+            return Response(
+                {"error": "Insufficient credits. You need at least 1 credit to fetch comments."}, 
+                status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+        
+        # Process video with YouTube service
         youtube_service = YouTubeService()
-        result = youtube_service.process_video_url(url, fetch_transcript=False)
+        result = youtube_service.process_video_url(url, user_google_id, fetch_transcript=False)
+        
+        # Deduct 1 credit for fetching comments
+        mongo_service.deduct_user_credits(user_google_id, 1)
+        
+        # Get updated user info
+        updated_user = mongo_service.get_user_by_google_id(user_google_id)
+        mongo_service.close_connection()
         
         return Response({
             "message": "Comments fetched successfully",
             "video_id": result['video_id'],
             "total_comments": result['total_comments'],
-            "video": VideoSerializer(result['video']).data,
-            "comments_count": len(result['comments']),
+            "video_data": result['video_data'],
+            "comments_count": result['comments_count'],
+            "credits_remaining": updated_user['credits'],
+            "credits_used": 1
         })
         
     except ValueError as e:
@@ -236,7 +317,7 @@ def fetch_youtube_comments(request):
 
 
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def analyze_comments(request):
     """
     Analyzes all comments for a given video:
@@ -244,7 +325,7 @@ def analyze_comments(request):
       - Toxicity detection
       - Summarization
       - Key topics extraction
-    Can be triggered via GET (query param) or POST (body).
+    Requires authentication and uses MongoDB.
     """
     # Determine how video_id was sent (GET or POST)
     if request.method == 'GET':
@@ -256,20 +337,30 @@ def analyze_comments(request):
         return Response({"error": "video_id is required"}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        # Ensure the video exists in DB
-        try:
-            video = Video.objects.get(video_id=video_id)
-        except Video.DoesNotExist:
-            return Response({
-                "error": f"Video with ID {video_id} not found. Please fetch comments first using /api/youtube/fetch-comments/",
-                "video_id": video_id
-            }, status=status.HTTP_404_NOT_FOUND)
+        # Get user's Google ID from the request
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
-        # Get all comments for this video
-        all_comments = Comment.objects.filter(video_id=video_id)
-        total_comments = all_comments.count()
+        # Check if user has credits for analysis
+        mongo_service = MongoDBService()
+        user_credits = mongo_service.get_user_credits(user_google_id)
+        
+        if user_credits < 1:
+            return Response(
+                {"error": "Insufficient credits. You need at least 1 credit to analyze comments."}, 
+                status=status.HTTP_402_PAYMENT_REQUIRED
+            )
+        
+        # Get comments from MongoDB for this user and video
+        comments = mongo_service.get_video_comments(video_id, user_google_id)
+        total_comments = len(comments)
         
         if total_comments == 0:
+            mongo_service.close_connection()
             return Response({
                 "error": f"No comments found for video {video_id}. Please fetch comments first using /api/youtube/fetch-comments/",
                 "video_id": video_id,
@@ -277,23 +368,22 @@ def analyze_comments(request):
             }, status=status.HTTP_404_NOT_FOUND)
         
         # Find comments that have not yet been analyzed
-        unanalyzed_comments = all_comments.filter(analyzed=False)
-        unanalyzed_count = unanalyzed_comments.count()
+        unanalyzed_comments = [c for c in comments if not c.get('analyzed', False)]
+        unanalyzed_count = len(unanalyzed_comments)
         
         # If all comments are analyzed, just return summary & topics
         if unanalyzed_count == 0:
-            analyzed_comments = all_comments.filter(analyzed=True)
-            analyzed_count = analyzed_comments.count()
-            comment_texts = [c.text for c in all_comments]
+            comment_texts = [c['text'] for c in comments]
             ai_service = AIService()
             summary_result = ai_service.summarize_comments(comment_texts)
             key_topics = ai_service.extract_key_topics(comment_texts)
             
+            mongo_service.close_connection()
             return Response({
                 "message": "All comments already analyzed",
                 "video_id": video_id,
                 "total_comments": total_comments,
-                "analyzed_count": analyzed_count,
+                "analyzed_count": total_comments,
                 "unanalyzed_count": 0,
                 "summary": summary_result.get('summary', ''),
                 "key_topics": key_topics,
@@ -308,32 +398,40 @@ def analyze_comments(request):
         for comment in unanalyzed_comments:
             try:
                 # Sentiment analysis
-                sentiment_result = ai_service.analyze_sentiment(comment.text)
-                comment.sentiment_score = sentiment_result.get('sentiment_score', 0.0)
-                comment.sentiment_label = sentiment_result.get('sentiment_label', 'neutral')
+                sentiment_result = ai_service.analyze_sentiment(comment['text'])
+                toxicity_result = ai_service.detect_toxicity(comment['text'])
                 
-                # Toxicity detection
-                toxicity_result = ai_service.detect_toxicity(comment.text)
-                comment.toxicity_score = toxicity_result.get('toxicity_score', 0.0)
-                comment.toxicity_label = toxicity_result.get('toxicity_label', 'non-toxic')
+                # Update comment in MongoDB
+                analysis_data = {
+                    'sentiment_score': sentiment_result.get('sentiment_score', 0.0),
+                    'sentiment_label': sentiment_result.get('sentiment_label', 'neutral'),
+                    'toxicity_score': toxicity_result.get('toxicity_score', 0.0),
+                    'toxicity_label': toxicity_result.get('toxicity_label', 'non-toxic'),
+                }
                 
-                comment.analyzed = True
-                comment.save()
+                mongo_service.update_comment_analysis(
+                    comment['comment_id'], 
+                    analysis_data, 
+                    user_google_id
+                )
                 analyzed_count += 1
                 
             except Exception as e:
                 # Skip this comment if analysis fails
-                print(f"Error analyzing comment {comment.id}: {str(e)}")
+                print(f"Error analyzing comment {comment['comment_id']}: {str(e)}")
                 continue
         
-        # Generate summary and topics for all comments (analyzed + newly analyzed)
-        comment_texts = [c.text for c in all_comments]
+        # Generate summary and topics for all comments
+        comment_texts = [c['text'] for c in comments]
         summary_result = ai_service.summarize_comments(comment_texts)
         key_topics = ai_service.extract_key_topics(comment_texts)
         
-        # Update video metadata
-        video.comments_analyzed = all_comments.filter(analyzed=True).count()
-        video.save()
+        # Deduct 1 credit for analysis
+        mongo_service.deduct_user_credits(user_google_id, 1)
+        
+        # Get updated user info
+        updated_user = mongo_service.get_user_by_google_id(user_google_id)
+        mongo_service.close_connection()
         
         return Response({
             "message": "Comments analyzed successfully",
@@ -344,7 +442,9 @@ def analyze_comments(request):
             "summary": summary_result.get('summary', ''),
             "key_topics": key_topics,
             "suggestions": summary_result.get('suggestions', []),
-            "pain_points": summary_result.get('pain_points', [])
+            "pain_points": summary_result.get('pain_points', []),
+            "credits_remaining": updated_user['credits'],
+            "credits_used": 1
         })
         
     except Exception as e:
@@ -420,5 +520,126 @@ def debug_video_comments(request, video_id):
     except Exception as e:
         return Response(
             {"error": f"Failed to get debug info: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# -----------------------
+# User Profile & Credit Management
+# -----------------------
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """
+    Get current user's profile information including credits and statistics.
+    """
+    try:
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        mongo_service = MongoDBService()
+        user_data = mongo_service.get_user_by_google_id(user_google_id)
+        mongo_service.close_connection()
+        
+        if not user_data:
+            return Response(
+                {"error": "User not found in database"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        return Response({
+            "google_id": user_data.get("google_id"),
+            "name": user_data.get("name"),
+            "email": user_data.get("email"),
+            "avatar": user_data.get("avatar"),
+            "credits": user_data.get("credits", 0),
+            "videos_fetched": user_data.get("videos_fetched", 0),
+            "total_analyses": user_data.get("total_analyses", 0),
+            "account_joined_at": user_data.get("account_joined_at"),
+            "last_active": user_data.get("last_active")
+        })
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get user profile: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_videos(request):
+    """
+    Get all videos fetched by the current user.
+    """
+    try:
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        mongo_service = MongoDBService()
+        videos = mongo_service.get_user_videos(user_google_id)
+        mongo_service.close_connection()
+        
+        # Format video data for response
+        formatted_videos = []
+        for video in videos:
+            formatted_videos.append({
+                "video_id": video.get("video_id"),
+                "title": video.get("title"),
+                "channel_title": video.get("channel_title"),
+                "view_count": video.get("view_count"),
+                "comment_count": video.get("comment_count"),
+                "created_at": video.get("created_at"),
+                "last_analyzed": video.get("last_analyzed")
+            })
+        
+        return Response({
+            "videos": formatted_videos,
+            "total_videos": len(formatted_videos)
+        })
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get user videos: {str(e)}"}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_credits(request):
+    """
+    Get current user's credit balance.
+    """
+    try:
+        user_google_id = request.user.google_id
+        if not user_google_id:
+            return Response(
+                {"error": "User profile not properly configured"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        mongo_service = MongoDBService()
+        credits = mongo_service.get_user_credits(user_google_id)
+        mongo_service.close_connection()
+        
+        return Response({
+            "credits": credits,
+            "can_analyze": credits >= 1,
+            "can_fetch": credits >= 1
+        })
+        
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to get user credits: {str(e)}"}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
