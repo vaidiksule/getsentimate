@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from ..services.mongodb_service import MongoDBService
-from ..jwt_utils import create_jwt_token
+from ..jwt_utils import create_jwt_token, verify_jwt_token
 import os
 
 @api_view(['POST'])
@@ -23,11 +23,15 @@ def google_auth(request):
         # Verify the ID token
         idinfo = id_token.verify_oauth2_token(id_token_str, requests.Request(), os.environ.get('GOOGLE_CLIENT_ID'))
 
+        print("Im here")
+
         # Get user info from token
         google_id = idinfo['sub']
         email = idinfo['email']
         name = idinfo['name']
         picture = idinfo.get('picture')
+
+        print("got details")
 
         # Create or update user in MongoDB
         mongo_service = MongoDBService()
@@ -37,12 +41,15 @@ def google_auth(request):
             'email': email,
             'avatar': picture
         }
+
         
         mongo_user = mongo_service.create_or_update_user(user_data)
         mongo_service.close_connection()
 
         # Create JWT token
         token = create_jwt_token(mongo_user)
+
+        print("successfully here")
 
         return Response({
             'token': token,

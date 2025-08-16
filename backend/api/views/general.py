@@ -5,6 +5,8 @@ from rest_framework import status
 from ..services.youtube_service import YouTubeService
 from ..services.ai_service import AIService
 from ..services.mongodb_service import MongoDBService
+from ..serializers import VideoSerializer, AnalysisSessionSerializer
+from django.shortcuts import get_object_or_404
 
 
 # -----------------------
@@ -164,53 +166,141 @@ def comment_detail(request, comment_id):
 # Video analysis endpoints
 # -----------------------
 
-@api_view(['POST'])
+# @api_view(['POST'])
+# @permission_classes([IsAuthenticated])
+# def analyze_video(request):
+#     """
+#     Starts the analysis process for a given YouTube video.
+#     Creates or retrieves a Video entry, then creates an AnalysisSession.
+#     """
+
+    
+#     video_id = request.data.get('video_id')
+#     if not video_id:
+#         return Response(
+#             {"error": "video_id is required"}, 
+#             status=status.HTTP_400_BAD_REQUEST
+#         )
+    
+#     # Create or get existing video entry
+#     video, created = Video.objects.get_or_create(
+#         video_id=video_id,
+#         defaults={
+#             'title': request.data.get('title', ''),
+#             'channel_id': request.data.get('channel_id', ''),
+#             'channel_title': request.data.get('channel_title', ''),
+#         }
+#     )
+    
+#     # Create new analysis session for this video
+#     session = AnalysisSession.objects.create(
+#         video=video,
+#         status='pending',
+#         total_comments=request.data.get('comment_count', 0)
+#     )
+    
+#     # Async analysis task would be triggered here
+#     return Response({
+#         "message": "Analysis started",
+#         "session_id": session.id,
+#         "video_id": video_id,
+#         "status": "pending"
+#     })
+
+@api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def analyze_video(request):
     """
     Starts the analysis process for a given YouTube video.
-    Creates or retrieves a Video entry, then creates an AnalysisSession.
+    Creates or retrieves a Video entry, then creates an AnalysisSession in MongoDB.
     """
-    video_id = request.data.get('video_id')
+    video_id = request.data.get("video_id")
     if not video_id:
         return Response(
-            {"error": "video_id is required"}, 
-            status=status.HTTP_400_BAD_REQUEST
+            {"error": "video_id is required"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
-    
-    # Create or get existing video entry
-    video, created = Video.objects.get_or_create(
-        video_id=video_id,
-        defaults={
-            'title': request.data.get('title', ''),
-            'channel_id': request.data.get('channel_id', ''),
-            'channel_title': request.data.get('channel_title', ''),
+
+    mongo_service = MongoDBService()
+    try:
+        # Check if video exists
+        video = mongo_service.get_video_by_id(video_id)
+
+        if not video:
+            # Create new video entry
+            video_data = {
+                "video_id": video_id,
+                "title": request.data.get("title", ""),
+                "channel_id": request.data.get("channel_id", ""),
+                "channel_title": request.data.get("channel_title", ""),
+            }
+            mongo_service.insert_video(video_data)
+            video = video_data
+
+        # Create a new analysis session
+        session_data = {
+            "video_id": video_id,
+            "status": "pending",
+            "total_comments": request.data.get("comment_count", 0),
         }
-    )
-    
-    # Create new analysis session for this video
-    session = AnalysisSession.objects.create(
-        video=video,
-        status='pending',
-        total_comments=request.data.get('comment_count', 0)
-    )
-    
-    # Async analysis task would be triggered here
-    return Response({
-        "message": "Analysis started",
-        "session_id": session.id,
-        "video_id": video_id,
-        "status": "pending"
-    })
+        session_id = mongo_service.insert_analysis_session(session_data)
+
+        return Response(
+            {
+                "message": "Analysis started",
+                "session_id": str(session_id),
+                "video_id": video_id,
+                "status": "pending",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to analyze video: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    finally:
+        mongo_service.close_connection()
 
 
-@api_view(['GET'])
+# @api_view(['GET'])
+# @permission_classes([AllowAny])
+# def analysis_status(request, session_id):
+#     """Returns the status of a specific AnalysisSession."""
+#     session = get_object_or_404(AnalysisSession, id=session_id)
+#     serializer = AnalysisSessionSerializer(session)
+#     return Response(serializer.data)
+
+
+@api_view(["GET"])
 @permission_classes([AllowAny])
 def analysis_status(request, session_id):
-    """Returns the status of a specific AnalysisSession."""
-    session = get_object_or_404(AnalysisSession, id=session_id)
-    serializer = AnalysisSessionSerializer(session)
-    return Response(serializer.data)
+    """
+    Returns the status of a specific AnalysisSession (from MongoDB).
+    """
+    mongo_service = MongoDBService()
+    try:
+        session = mongo_service.get_analysis_session_by_id(session_id)
+
+        if not session:
+            return Response(
+                {"error": "Analysis session not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Convert ObjectId to string for JSON serialization
+        session["_id"] = str(session["_id"])
+
+        return Response(session, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": f"Failed to fetch session status: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    finally:
+        mongo_service.close_connection()
 
 
 @api_view(['GET'])
@@ -458,71 +548,157 @@ def analyze_comments(request):
 # Video info & debugging
 # -----------------------
 
-@api_view(['GET'])
+# @api_view(['GET'])
+# @permission_classes([AllowAny])
+# def video_info(request, video_id):
+#     """
+#     Returns video metadata and analysis progress:
+#       - Total comments
+#       - Analyzed comments
+#       - Progress percentage
+#     """
+#     try:
+#         video = get_object_or_404(Video, video_id=video_id)
+#         serializer = VideoSerializer(video)
+        
+#         comments = Comment.objects.filter(video_id=video_id)
+#         total_comments = comments.count()
+#         analyzed_comments = comments.filter(analyzed=True).count()
+        
+#         return Response({
+#             "video": serializer.data,
+#             "total_comments": total_comments,
+#             "analyzed_comments": analyzed_comments,
+#             "analysis_progress": (analyzed_comments / total_comments * 100) if total_comments > 0 else 0
+#         })
+        
+#     except Exception as e:
+#         return Response(
+#             {"error": f"Failed to get video info: {str(e)}"}, 
+#             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#         )
+@api_view(["GET"])
 @permission_classes([AllowAny])
 def video_info(request, video_id):
     """
-    Returns video metadata and analysis progress:
+    Returns video metadata and analysis progress from MongoDB:
       - Total comments
       - Analyzed comments
       - Progress percentage
     """
+    mongo_service = MongoDBService()
     try:
-        video = get_object_or_404(Video, video_id=video_id)
-        serializer = VideoSerializer(video)
-        
-        comments = Comment.objects.filter(video_id=video_id)
-        total_comments = comments.count()
-        analyzed_comments = comments.filter(analyzed=True).count()
-        
+        # Fetch video metadata
+        video = mongo_service.get_video_by_id(video_id)
+        if not video:
+            return Response(
+                {"error": "Video not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Fetch comment stats
+        total_comments = mongo_service.count_comments(video_id)
+        analyzed_comments = mongo_service.count_comments(video_id, analyzed=True)
+
         return Response({
-            "video": serializer.data,
+            "video": {
+                "video_id": video.get("video_id"),
+                "title": video.get("title"),
+                "channel_id": video.get("channel_id"),
+                "channel_title": video.get("channel_title"),
+            },
             "total_comments": total_comments,
             "analyzed_comments": analyzed_comments,
             "analysis_progress": (analyzed_comments / total_comments * 100) if total_comments > 0 else 0
-        })
-        
+        }, status=status.HTTP_200_OK)
+
     except Exception as e:
         return Response(
-            {"error": f"Failed to get video info: {str(e)}"}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": f"Failed to get video info: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
+    finally:
+        mongo_service.close_connection()
 
 
-@api_view(['GET'])
+# @api_view(['GET'])
+# @permission_classes([AllowAny])
+# def debug_video_comments(request, video_id):
+#     """
+#     Debugging endpoint that returns the first 10 comments for a video
+#     (shortened text, sentiment, toxicity) to help with inspection.
+#     """
+#     try:
+#         video = get_object_or_404(Video, video_id=video_id)
+#         comments = Comment.objects.filter(video_id=video_id)
+        
+#         return Response({
+#             "video_id": video_id,
+#             "video_title": video.title,
+#             "total_comments": comments.count(),
+#             "comments": [
+#                 {
+#                     "id": c.id,
+#                     "text": c.text[:100] + "..." if len(c.text) > 100 else c.text,
+#                     "author": c.author_name,
+#                     "sentiment": c.sentiment_label,
+#                     "toxicity": c.toxicity_label,
+#                     "analyzed": c.analyzed
+#                 }
+#                 for c in comments[:10]  # Show only first 10 for debugging purposes
+#             ]
+#         })
+        
+#     except Exception as e:
+#         return Response(
+#             {"error": f"Failed to get debug info: {str(e)}"}, 
+#             status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#         )
+@api_view(["GET"])
 @permission_classes([AllowAny])
 def debug_video_comments(request, video_id):
     """
-    Debugging endpoint that returns the first 10 comments for a video
+    Debug endpoint that returns the first 10 comments for a video
     (shortened text, sentiment, toxicity) to help with inspection.
     """
+    mongo_service = MongoDBService()
     try:
-        video = get_object_or_404(Video, video_id=video_id)
-        comments = Comment.objects.filter(video_id=video_id)
-        
+        # Fetch video metadata
+        video = mongo_service.get_video_by_id(video_id)
+        if not video:
+            return Response(
+                {"error": "Video not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Fetch first 10 comments
+        comments_cursor = mongo_service.get_comments(video_id, limit=10)
+        comments = list(comments_cursor)
+
         return Response({
             "video_id": video_id,
-            "video_title": video.title,
-            "total_comments": comments.count(),
+            "video_title": video.get("title"),
+            "total_comments": mongo_service.count_comments(video_id),
             "comments": [
                 {
-                    "id": c.id,
-                    "text": c.text[:100] + "..." if len(c.text) > 100 else c.text,
-                    "author": c.author_name,
-                    "sentiment": c.sentiment_label,
-                    "toxicity": c.toxicity_label,
-                    "analyzed": c.analyzed
+                    "id": str(c.get("_id")),
+                    "text": (c.get("text", "")[:100] + "...") if len(c.get("text", "")) > 100 else c.get("text", ""),
+                    "author": c.get("author_name"),
+                    "sentiment": c.get("sentiment_label"),
+                    "toxicity": c.get("toxicity_label"),
+                    "analyzed": c.get("analyzed", False)
                 }
-                for c in comments[:10]  # Show only first 10 for debugging purposes
+                for c in comments
             ]
-        })
-        
+        }, status=status.HTTP_200_OK)
+
     except Exception as e:
         return Response(
-            {"error": f"Failed to get debug info: {str(e)}"}, 
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            {"error": f"Failed to get debug info: {str(e)}"},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
+    finally:
+        mongo_service.close_connection()
 
 # -----------------------
 # User Profile & Credit Management

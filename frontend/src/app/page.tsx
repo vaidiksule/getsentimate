@@ -1,3 +1,4 @@
+
 "use client";
 
 import { GoogleLoginButton } from './components/GoogleLoginButton';
@@ -5,6 +6,7 @@ import { useAuth } from './components/AuthProvider';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaRegSmile, FaShieldAlt, FaLightbulb } from 'react-icons/fa';
+import Image from 'next/image';
 
 export default function Home() {
   const { user, login, logout } = useAuth();
@@ -46,42 +48,59 @@ export default function Home() {
   return (
     <main className="min-h-screen font-sans text-gray-900 bg-white antialiased">
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-white py-32">
-        <div className="absolute inset-0 bg-[url('/public/getsentimate-logo.svg')] opacity-50 bg-no-repeat bg-center bg-contain mix-blend-soft-light"></div>
-        <div className="max-w-7xl mx-auto px-6 py-32 text-center relative">
-          <h1 className="text-5xl md:text-6xl font-semibold mb-6 leading-tight tracking-tight text-gray-800">
-            Unlock the Power of <span className="text-blue-600">YouTube Comment Analysis</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-12">
-            GetSentimate helps you understand audience sentiment, detect toxicity, and extract insights from comments — elegantly and effortlessly.
-          </p>
-
+      {/* Navbar */}
+      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-lg shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Image src="/getsentimate-logo.svg" alt="GetSentimate Logo" width={48} height={48} className="drop-shadow-sm" />
+            <span className="text-2xl font-extrabold text-blue-600 tracking-tight">GetSentimate</span>
+          </div>
           {!user && (
             <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
           )}
         </div>
+      </nav>
+
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 py-32 md:py-48">
+        <div className="absolute inset-0 opacity-5 bg-[url('/getsentimate-logo.svg')] bg-no-repeat bg-center bg-contain mix-blend-overlay"></div>
+        <div className="max-w-7xl mx-auto px-6 text-center relative">
+          <h1 className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight tracking-tighter text-gray-900">
+            Skyrocket Your YouTube Success with <span className="text-blue-600">AI Insights</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto mb-12 font-medium">
+            Unleash the full potential of your channel with GetSentimate. Dive deep into viewer sentiments, eliminate toxic comments, and uncover trends that drive engagement and growth.
+          </p>
+          {!user && (
+            <div className="flex justify-center gap-6">
+              <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
+            </div>
+          )}
+          <div className="mt-12">
+            <p className="text-sm text-gray-500 italic">Trusted by thousands of creators worldwide</p>
+          </div>
+        </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50/50">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-semibold mb-16 text-gray-800">Features You’ll Love</h2>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-16 text-gray-900 tracking-tight">Why Top Creators Choose GetSentimate</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="bg-white p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default text-center">
-              <FaRegSmile className="text-4xl text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-medium mb-3 text-gray-700">Sentiment Analysis</h3>
-              <p className="text-gray-500">Understand the emotions behind your comments with clarity.</p>
+            <div className="bg-white p-12 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-default text-center transform hover:-translate-y-2">
+              <FaRegSmile className="text-6xl text-blue-600 mx-auto mb-6 drop-shadow-sm" />
+              <h3 className="text-3xl font-semibold mb-4 text-gray-800">Sentiment Analysis</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Understand your audience’s emotions with precision, creating content that resonates and builds a loyal fanbase.</p>
             </div>
-            <div className="bg-white p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default text-center">
-              <FaShieldAlt className="text-4xl text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-medium mb-3 text-gray-700">Toxicity Detection</h3>
-              <p className="text-gray-500">Filter out spammy or harmful comments to maintain a clean community.</p>
+            <div className="bg-white p-12 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-default text-center transform hover:-translate-y-2">
+              <FaShieldAlt className="text-6xl text-blue-600 mx-auto mb-6 drop-shadow-sm" />
+              <h3 className="text-3xl font-semibold mb-4 text-gray-800">Toxicity Detection</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Keep your community safe by instantly identifying and filtering harmful comments for a positive viewer experience.</p>
             </div>
-            <div className="bg-white p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default text-center">
-              <FaLightbulb className="text-4xl text-blue-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-medium mb-3 text-gray-700">Insight Extraction</h3>
-              <p className="text-gray-500">Discover recurring topics and trends effortlessly.</p>
+            <div className="bg-white p-12 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 cursor-default text-center transform hover:-translate-y-2">
+              <FaLightbulb className="text-6xl text-blue-600 mx-auto mb-6 drop-shadow-sm" />
+              <h3 className="text-3xl font-semibold mb-4 text-gray-800">Trend Insights</h3>
+              <p className="text-gray-600 text-lg leading-relaxed">Discover hidden patterns and viewer demands to craft videos that spark engagement and growth.</p>
             </div>
           </div>
         </div>
@@ -90,30 +109,39 @@ export default function Home() {
       {/* How It Works Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-semibold mb-16 text-gray-800">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <div className="bg-blue-50 p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default">
-              <h3 className="text-xl font-medium mb-3 text-gray-700">1. Connect Your Channel</h3>
-              <p className="text-gray-500">Sign in with Google to connect your YouTube channel securely.</p>
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-16 text-gray-900 tracking-tight">Grow Smarter in Three Easy Steps</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
+            <div className="bg-blue-50/50 p-12 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-default relative group">
+              <span className="absolute top-6 left-6 text-5xl font-extrabold text-blue-200/50 group-hover:text-blue-300 transition-colors">1</span>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 relative z-10">Connect Your Channel</h3>
+              <p className="text-gray-600 text-lg relative z-10 leading-relaxed">Link your YouTube channel securely with Google in just one click to access your comment data.</p>
             </div>
-            <div className="bg-blue-50 p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default">
-              <h3 className="text-xl font-medium mb-3 text-gray-700">2. AI Analyzes Comments</h3>
-              <p className="text-gray-500">Comments are analyzed for sentiment, toxicity, and insights instantly.</p>
+            <div className="bg-blue-50/50 p-12 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-default relative group">
+              <span className="absolute top-6 left-6 text-5xl font-extrabold text-blue-200/50 group-hover:text-blue-300 transition-colors">2</span>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 relative z-10">AI-Driven Analysis</h3>
+              <p className="text-gray-600 text-lg relative z-10 leading-relaxed">Our cutting-edge AI instantly processes comments for sentiment, toxicity, and actionable insights.</p>
             </div>
-            <div className="bg-blue-50 p-10 rounded-2xl shadow-md hover:shadow-lg transition cursor-default">
-              <h3 className="text-xl font-medium mb-3 text-gray-700">3. Get Actionable Insights</h3>
-              <p className="text-gray-500">See trends and audience feedback to make smarter content decisions.</p>
+            <div className="bg-blue-50/50 p-12 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-default relative group">
+              <span className="absolute top-6 left-6 text-5xl font-extrabold text-blue-200/50 group-hover:text-blue-300 transition-colors">3</span>
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 relative z-10">Boost Your Growth</h3>
+              <p className="text-gray-600 text-lg relative z-10 leading-relaxed">Use powerful insights to create content that captivates viewers and skyrockets your channel.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-24 bg-blue-100 text-center">
-        <h2 className="text-4xl md:text-5xl font-semibold mb-6 text-gray-800">Start Understanding Your Audience</h2>
-        <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-          Sign in with Google and start analyzing YouTube comments effortlessly.
+      <section className="py-24 bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white text-center">
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6 tracking-tight">Join the Future of YouTube Growth</h2>
+        <p className="text-lg md:text-xl mb-10 max-w-3xl mx-auto leading-relaxed">
+          Don’t miss out—thousands of creators are already using GetSentimate to unlock audience insights and dominate their niche. Start your journey today.
         </p>
+        {!user && (
+          <GoogleLoginButton clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ''} />
+        )}
+        <div className="mt-8">
+          <p className="text-sm opacity-80">No credit card required. Try risk-free!</p>
+        </div>
       </section>
 
     </main>
