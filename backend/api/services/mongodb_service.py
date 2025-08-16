@@ -80,6 +80,7 @@ class MongoDBService:
                     {"google_id": user_data.get("google_id")},
                     {"$set": update_data}
                 )
+
                 return self.users_collection.find_one({"google_id": user_data.get("google_id")})
             else:
                 # Create new user with default credits
@@ -97,6 +98,7 @@ class MongoDBService:
                 
                 result = self.users_collection.insert_one(new_user)
                 new_user["_id"] = result.inserted_id
+
                 return new_user
                 
         except Exception as e:

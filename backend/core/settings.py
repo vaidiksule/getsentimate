@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
 
     # Local apps - API handled via MongoDB service
-    # "api",  # Removed - using pure MongoDB instead
+    "api",  # Removed - using pure MongoDB instead
 ]
 
 # Site ID for django.contrib.sites
