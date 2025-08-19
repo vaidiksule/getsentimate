@@ -21,29 +21,29 @@ export default function Home() {
   }, [user, router]);
 
   // Optional: fetch user info (can be removed if not needed)
-  useEffect(() => {
-    const fetchMe = async () => {
-      if (user) { // Check if user is authenticated
-        try {
-          const token = user?.token || ''; // Get the token from the user object
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setMessage(`Hello ${data.name}!`);
-          } else {
-            setMessage('Failed to fetch /api/me/');
-          }
-        } catch {
-          setMessage('Error fetching /api/me/');
-        }
-      } else {
-        setMessage('Not authenticated.');
-      }
-    };
-    fetchMe();
-  }, [user]);
+  // useEffect(() => {
+  //   const fetchMe = async () => {
+  //     if (user) { // Check if user is authenticated
+  //       try {
+  //         const token = user?.token || ''; // Get the token from the user object
+  //         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/me/`, {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         });
+  //         if (res.ok) {
+  //           const data = await res.json();
+  //           setMessage(`Hello ${data.name}!`);
+  //         } else {
+  //           setMessage('Failed to fetch /api/me/');
+  //         }
+  //       } catch {
+  //         setMessage('Error fetching /api/me/');
+  //       }
+  //     } else {
+  //       setMessage('Not authenticated.');
+  //     }
+  //   };
+  //   fetchMe();
+  // }, [user]);
 
   return (
     <main className="min-h-screen font-sans text-gray-900 bg-white antialiased">

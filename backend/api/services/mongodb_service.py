@@ -157,7 +157,8 @@ class MongoDBService:
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow(),
                 "comments_analyzed": 0,
-                "last_analyzed": None
+                "last_analyzed": None,
+                "summary": ""  # Added summary field
             }
             
             # Use upsert to avoid duplicates
@@ -209,10 +210,6 @@ class MongoDBService:
                     "sentiment_label": None,
                     "toxicity_score": None,
                     "toxicity_label": None,
-                    "summary": "",
-                    "key_topics": [],
-                    "suggestions": [],
-                    "pain_points": [],
                     "analyzed": False,
                     "created_at": datetime.utcnow(),
                     "updated_at": datetime.utcnow()
@@ -259,6 +256,22 @@ class MongoDBService:
             {"$set": update_data}
         )
     
+    def update_video_summary(self, video_id: str, user_google_id: str, summary_data: Dict):
+        """Update video with summary results"""
+        update_data = {
+            "summary": summary_data.get("summary", ""),
+            "updated_at": datetime.utcnow()
+        }
+        
+        self.videos_collection.update_one(
+            {"video_id": video_id, "user_google_id": user_google_id},
+            {"$set": update_data}
+        )
+    
+    def get_video_by_id(self, video_id: str) -> Optional[Dict]:
+        """Get video by video_id"""
+        return self.videos_collection.find_one({"video_id": video_id})
+    
     def get_user_analytics(self, user_google_id: str, video_id: str = None) -> Dict:
         """Get analytics for user's videos and comments"""
         try:
@@ -300,6 +313,10 @@ class MongoDBService:
             
         except Exception as e:
             raise Exception(f"Failed to get analytics: {str(e)}")
+    
+    def count_comments(self, video_id: str) -> int:
+        """Count comments for a specific video"""
+        return self.comments_collection.count_documents({"video_id": video_id})
     
     def close_connection(self):
         """Close MongoDB connection"""

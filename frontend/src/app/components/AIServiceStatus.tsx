@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 
 interface AIServiceStatusProps {}
 
@@ -14,8 +14,10 @@ interface AIStatus {
 
 export default function AIServiceStatus({}: AIServiceStatusProps) {
   const [status, setStatus] = useState<AIStatus | null>(null)
+  const hasFetched = useRef(false)
 
   useEffect(() => {
+    if (hasFetched.current) return
     const fetchStatus = async () => {
       try {
         const res = await fetch('/api/ai-status')

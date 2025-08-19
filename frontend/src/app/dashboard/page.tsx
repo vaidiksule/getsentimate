@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import VideoInput from '../components/VideoInput'
 import AnalyticsDashboard from '../components/AnalyticsDashboard'
-import Summary from '../components/Summary'
 import CreditDisplay from '../components/CreditDisplay'
 import UserProfile from '../components/UserProfile'
 import { useAuth } from '../components/AuthProvider'
@@ -13,6 +12,7 @@ import Image from 'next/image'
 export default function Home() {
   const [currentVideoId, setCurrentVideoId] = useState('')
   const [aiStatus, setAiStatus] = useState(null)
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState(false)
   const { logout, isAuthenticated } = useAuth()
   const router = useRouter()
 
@@ -30,8 +30,39 @@ export default function Home() {
       .catch(() => setAiStatus(null))
   }, [])
 
-  const handleVideoAnalyzed = (videoId: string) => {
+  const handleVideoAnalyzed = async (videoId: string) => {
     setCurrentVideoId(videoId)
+    setIsAnalysisComplete(false)
+    
+    // Poll for analysis completion
+    const checkAnalysis = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          console.error('No authentication token found')
+          return
+        }
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/analytics/${videoId}/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        const data = await response.json()
+        if (data.summary && data.summary !== 'Unable to generate summary') {
+          setIsAnalysisComplete(true)
+        }
+      } catch (err) {
+        console.error('Error polling analytics:', err)
+      }
+    }
+
+    // Poll every 2 seconds for up to 30 seconds
+    const interval = setInterval(checkAnalysis, 2000)
+    setTimeout(() => {
+      clearInterval(interval)
+      setIsAnalysisComplete(true) // Proceed even if summary isn't ready
+    }, 30000)
   }
 
   return (
@@ -47,7 +78,6 @@ export default function Home() {
               height={60}
               className="drop-shadow-md"
             />
-            {/* <span className="text-xl font-bold text-blue-600">GetSentimate</span> */}
           </div>
           <button
             onClick={logout}
@@ -75,14 +105,11 @@ export default function Home() {
           <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
             <VideoInput onVideoAnalyzed={handleVideoAnalyzed} />
           </div>
-          {currentVideoId && (
+          {currentVideoId && isAnalysisComplete && (
             <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
-              <Summary videoId={currentVideoId} />
+              <AnalyticsDashboard videoId={currentVideoId} />
             </div>
           )}
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-8 border border-white/50 hover:shadow-2xl transition-all duration-300">
-            <AnalyticsDashboard videoId={currentVideoId} />
-          </div>
         </main>
       </div>
     </div>

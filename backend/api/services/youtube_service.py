@@ -9,6 +9,8 @@ from .mongodb_service import MongoDBService
 
 load_dotenv()
 
+MAX_COMMENTS_TO_FETCH = 20
+
 class YouTubeService:
     """Service for interacting with the YouTube Data API"""
 
@@ -111,7 +113,7 @@ class YouTubeService:
             print(f"Error fetching transcript: {e}")
             return None
 
-    def fetch_video_comments(self, video_id: str, max_results: int = 100) -> List[Dict]:
+    def fetch_video_comments(self, video_id: str, max_results: int = MAX_COMMENTS_TO_FETCH) -> List[Dict]:
         """
         Fetches comments for a given video.
 
