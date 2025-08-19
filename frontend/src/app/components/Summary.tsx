@@ -9,16 +9,41 @@ interface SummaryProps {
 export default function Summary({ videoId }: SummaryProps) {
   const [summary, setSummary] = useState<string>('No summary available yet.')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!videoId) return
-    setLoading(true)
+    if (!videoId) {
+      setSummary('No video ID provided.')
+      return
+    }
 
-    // Simulate API call to fetch summary
-    setTimeout(() => {
-      setSummary(`This is a placeholder AI-generated summary for video ID: ${videoId}. Replace this with actual API call.`)
-      setLoading(false)
-    }, 1200)
+    const fetchSummary = async () => {
+      setLoading(true)
+      setError(null)
+
+      try {
+        const response = await fetch(`/api/analytics/${videoId}/`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const data = await response.json()
+        setSummary(data.summary || 'No summary available.')
+      } catch (err) {
+        setError('Failed to fetch summary. Please try again.')
+        setSummary('No summary available.')
+        console.error('Error fetching summary:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchSummary()
   }, [videoId])
 
   return (
@@ -30,6 +55,8 @@ export default function Summary({ videoId }: SummaryProps) {
             <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             <span className="font-medium">Generating insights...</span>
           </div>
+        ) : error ? (
+          <p className="text-red-600">{error}</p>
         ) : (
           <p className="text-gray-800 leading-relaxed">{summary}</p>
         )}

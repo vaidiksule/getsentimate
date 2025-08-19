@@ -33,8 +33,21 @@ export default function CommentList({ videoId }: CommentListProps) {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/comments/?video_id=${videoId}`)
+      const token = localStorage.getItem('token')
+      console.log("got token, ", token)
+      if (!token) {
+        throw new Error('No authentication token found')
+      }
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/comments/?video_id=${videoId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      console.log(response)
+      console.log(response.type)
       const data = await response.json()
+      console.log("DATAAA: ", data)
       if (!response.ok) throw new Error(data.error || 'Failed to fetch comments')
       setComments(data)
     } catch (err: any) {
@@ -84,28 +97,33 @@ export default function CommentList({ videoId }: CommentListProps) {
     }
   }
 
-  if (loading) return <LoadingSpinner />
+  if (loading) {
+    return <LoadingSpinner />
+  }
+
   if (error) {
     return (
-      <div className="text-center py-12 text-red-600 font-medium">{error}</div>
+      <div className="bg-red-50 p-4 rounded-2xl border border-red-100 text-red-700 font-medium">
+        {error}
+      </div>
     )
   }
 
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-col md:flex-row gap-4 bg-gradient-to-br from-gray-50 to-white p-4 rounded-2xl shadow-inner border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-4 sm:space-y-0">
         <input
           type="text"
-          placeholder="Search comments or authors..."
+          placeholder="Search comments..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
+          className="flex-1 px-4 py-2 rounded-full border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
         />
         <select
           value={sentimentFilter}
           onChange={(e) => setSentimentFilter(e.target.value)}
-          className="px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
+          className="px-4 py-2 rounded-full border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
         >
           <option value="all">All Sentiments</option>
           <option value="positive">Positive</option>
@@ -115,9 +133,9 @@ export default function CommentList({ videoId }: CommentListProps) {
         <select
           value={toxicityFilter}
           onChange={(e) => setToxicityFilter(e.target.value)}
-          className="px-4 py-3 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition duration-200 bg-white"
+          className="px-4 py-2 rounded-full border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 outline-none"
         >
-          <option value="all">All Toxicity Levels</option>
+          <option value="all">All Toxicity</option>
           <option value="toxic">Toxic</option>
           <option value="non-toxic">Non-toxic</option>
         </select>

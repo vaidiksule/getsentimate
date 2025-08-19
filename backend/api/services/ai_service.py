@@ -101,6 +101,15 @@ class AIService:
 
         try:
             result = self._call_ai_api(prompt, system_prompt, 150)
+
+            # Clean Markdown wrappers from Gemini response
+            result = result.strip()
+            if result.startswith('```json'):
+                result = result[7:].strip()  # Remove '```json'
+            if result.endswith('```'):
+                result = result[:-3].strip()  # Remove '```'
+
+            print("result", result)
             return json.loads(result)
         except Exception as e:
             # Fallback to neutral if analysis fails
@@ -145,6 +154,14 @@ class AIService:
 
         try:
             result = self._call_ai_api(prompt, system_prompt, 150)
+
+            # Clean Markdown wrappers from Gemini response
+            result = result.strip()
+            if result.startswith('```json'):
+                result = result[7:].strip()  # Remove '```json'
+            if result.endswith('```'):
+                result = result[:-3].strip()  # Remove '```'
+
             return json.loads(result)
         except Exception as e:
             return {
@@ -189,6 +206,15 @@ class AIService:
 
         try:
             result = self._call_ai_api(prompt, system_prompt, 500)
+
+            # Clean Markdown wrappers from Gemini response
+            result = result.strip()
+            if result.startswith('```json'):
+                result = result[7:].strip()  # Remove '```json'
+            if result.endswith('```'):
+                result = result[:-3].strip()  # Remove '```'
+
+            print("summary", result)
             return json.loads(result)
         except Exception as e:
             return {

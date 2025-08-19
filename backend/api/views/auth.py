@@ -23,15 +23,11 @@ def google_auth(request):
         # Verify the ID token
         idinfo = id_token.verify_oauth2_token(id_token_str, requests.Request(), os.environ.get('GOOGLE_CLIENT_ID'))
 
-        print("Im here")
-
         # Get user info from token
         google_id = idinfo['sub']
         email = idinfo['email']
         name = idinfo['name']
         picture = idinfo.get('picture')
-
-        print("got details")
 
         # Create or update user in MongoDB
         mongo_service = MongoDBService()
@@ -48,8 +44,6 @@ def google_auth(request):
 
         # Create JWT token
         token = create_jwt_token(mongo_user)
-
-        print("successfully here")
 
         return Response({
             'token': token,

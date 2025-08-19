@@ -7,11 +7,13 @@ interface SentimentData {
 }
 
 interface SentimentChartProps {
-  data: SentimentData
+  data: SentimentData | null // Allow null to handle undefined/missing data
 }
 
 export default function SentimentChart({ data }: SentimentChartProps) {
-  const total = data.positive + data.negative + data.neutral
+  // Default to zeros if data is null or undefined
+  const sentimentData: SentimentData = data ?? { positive: 0, negative: 0, neutral: 0 }
+  const total = sentimentData.positive + sentimentData.negative + sentimentData.neutral
   
   const getPercentage = (value: number) => {
     return total > 0 ? Math.round((value / total) * 100) : 0
@@ -47,11 +49,20 @@ export default function SentimentChart({ data }: SentimentChartProps) {
     }
   }
 
+  // Show a loading or empty state if no data is available
+  if (!data || total === 0) {
+    return (
+      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-gray-700 font-medium">
+        No sentiment data available yet. Please analyze the video to see sentiment distribution.
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Bar Chart */}
       <div className="space-y-4">
-        {Object.entries(data).map(([sentiment, count]) => (
+        {Object.entries(sentimentData).map(([sentiment, count]) => (
           <div key={sentiment} className="space-y-2">
             <div className="flex items-center justify-between text-sm font-medium text-gray-700">
               <span>{getLabel(sentiment)}</span>
@@ -69,7 +80,7 @@ export default function SentimentChart({ data }: SentimentChartProps) {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4">
-        {Object.entries(data).map(([sentiment, count]) => (
+        {Object.entries(sentimentData).map(([sentiment, count]) => (
           <div key={sentiment} className={`p-4 rounded-2xl text-center ${getBgColor(sentiment)} shadow-inner`}>
             <div className="text-2xl font-bold">{count}</div>
             <div className="text-sm font-medium">{getLabel(sentiment)}</div>

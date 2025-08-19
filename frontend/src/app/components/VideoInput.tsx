@@ -1,3 +1,5 @@
+// app/components/VideoInput.tsx (Full Updated File)
+
 'use client'
 
 import { useState } from 'react'
@@ -21,6 +23,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
   const [videoData, setVideoData] = useState<VideoData | null>(null)
   const [error, setError] = useState('')
   const [analysisStatus, setAnalysisStatus] = useState('')
+  const [statusMessage, setStatusMessage] = useState('')
 
   const extractVideoId = (url: string) => {
     const regex =
@@ -46,9 +49,9 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
     setVideoData(null)
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error('No authentication token found')
       }
 
       const response = await fetch(
@@ -59,7 +62,7 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ url, fetch_transcript: false }),
+          body: JSON.stringify({ video_url: url, fetch_transcript: false }),
         }
       )
 
@@ -74,16 +77,15 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
 
       setVideoData({
         video_id: data.video_id,
-        title: data.video_data.title,
-        channel_title: data.video_data.channel_title,
+        title: data.video_title,
+        channel_title: data.channel_title,
         total_comments: data.total_comments,
       })
-
-      const creditMessage = data.credits_remaining !== undefined 
-        ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
-        : ''
+      // const creditMessage = data.credits !== undefined 
+      //   ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
+      //   : ''
       
-      setAnalysisStatus(`Comments fetched successfully! Ready for analysis.${creditMessage}`)
+      setAnalysisStatus("Comments fetched successfully! Ready for analysis.")
     } catch (err: any) {
       setError(err.message || 'Failed to fetch video data')
     } finally {
@@ -95,12 +97,13 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
     if (!videoData) return
 
     setLoading(true)
-    setAnalysisStatus('Analyzing comments...')
+    setError('')
+    setAnalysisStatus('')
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('token')
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error('No authentication token found')
       }
 
       const response = await fetch(
@@ -117,21 +120,14 @@ export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
 
       const data = await response.json()
 
+      console.log("analyed data ", data)
+
       if (!response.ok) {
         if (response.status === 402) {
           throw new Error('Insufficient credits to analyze comments. Please purchase more credits.')
         }
         throw new Error(data.error || 'Failed to analyze comments')
       }
-
-      const creditMessage = data.credits_remaining !== undefined 
-        ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
-        : ''
-      
-      setAnalysisStatus(
-        `Analysis complete! ${data.analyzed_count} comments analyzed.${creditMessage}`
-      )
-
       onVideoAnalyzed(videoData.video_id)
     } catch (err: any) {
       setError(err.message || 'Failed to analyze comments')

@@ -6,18 +6,29 @@ interface ToxicityData {
 }
 
 interface ToxicityChartProps {
-  data: ToxicityData
+  data: ToxicityData | null // Allow null to handle undefined/missing data
 }
 
 export default function ToxicityChart({ data }: ToxicityChartProps) {
-  const total = data.toxic + data['non-toxic']
+  // Default to zeros if data is null or undefined
+  const toxicityData: ToxicityData = data ?? { toxic: 0, 'non-toxic': 0 }
+  const total = toxicityData.toxic + toxicityData['non-toxic']
 
   const getPercentage = (value: number) => {
     return total > 0 ? Math.round((value / total) * 100) : 0
   }
 
-  const toxicPercentage = getPercentage(data.toxic)
-  const nonToxicPercentage = getPercentage(data['non-toxic'])
+  const toxicPercentage = getPercentage(toxicityData.toxic)
+  const nonToxicPercentage = getPercentage(toxicityData['non-toxic'])
+
+  // Show a loading or empty state if no data is available
+  if (!data || total === 0) {
+    return (
+      <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 text-gray-700 font-medium">
+        No toxicity data available yet. Please analyze the video to see toxicity distribution.
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -71,14 +82,14 @@ export default function ToxicityChart({ data }: ToxicityChartProps) {
           <div className="w-4 h-4 bg-red-500 rounded-full"></div>
           <div>
             <span className="text-sm font-medium text-gray-700">Toxic</span>
-            <div className="text-lg font-bold text-red-600">{data.toxic} ({toxicPercentage}%)</div>
+            <div className="text-lg font-bold text-red-600">{toxicityData.toxic} ({toxicPercentage}%)</div>
           </div>
         </div>
         <div className="flex items-center space-x-3 bg-green-50 p-3 rounded-xl">
           <div className="w-4 h-4 bg-green-500 rounded-full"></div>
           <div>
             <span className="text-sm font-medium text-gray-700">Non-toxic</span>
-            <div className="text-lg font-bold text-green-600">{data['non-toxic']} ({nonToxicPercentage}%)</div>
+            <div className="text-lg font-bold text-green-600">{toxicityData['non-toxic']} ({nonToxicPercentage}%)</div>
           </div>
         </div>
       </div>
