@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: getsentimate-backend
+    env: python
+    plan: starter
+    buildCommand: chmod +x build.sh && ./build.sh
+    startCommand: chmod +x start.sh && ./start.sh
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.18
+      - key: DEBUG
+        value: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://getsentimate.com
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://getsentimate.com,https://www.getsentimate.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://getsentimate.com,https://www.getsentimate.com
+      - key: SECURE_SSL_REDIRECT
+        value: true
+      - key: SESSION_COOKIE_SECURE
+        value: true
+      - key: CSRF_COOKIE_SECURE
+        value: true
