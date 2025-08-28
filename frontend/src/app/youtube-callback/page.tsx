@@ -3,7 +3,7 @@
 import React, { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import YouTubeCallbackContent from './YouTubeCallbackContent';
+import YouTubeCallbackContent from '@/app/youtube-callback/YouTubeCallbackContent';
 
 export default function YouTubeCallbackPage() {
   return (
