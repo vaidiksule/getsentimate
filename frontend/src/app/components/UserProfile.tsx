@@ -1,172 +1,325 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { FaUser, FaCalendarAlt, FaVideo, FaChartBar } from 'react-icons/fa'
+import React, { useState } from 'react';
+import { useAuth } from './AuthProvider';
+import { 
+  User, 
+  Mail, 
+  Calendar, 
+  Shield, 
+  Settings, 
+  Key, 
+  Globe,
+  Edit,
+  Save,
+  X,
+  CheckCircle,
+  AlertCircle
+} from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
 
-interface UserProfileData {
-  name: string
-  email: string
-  avatar: string
-  credits: number
-  videos_fetched: number
-  total_analyses: number
-  account_joined_at: string
-  last_active: string
-}
+export function UserProfile() {
+  const { user, logout } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: user?.name || '',
+    email: user?.email || '',
+    username: user?.name || ''
+  });
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
-interface UserProfileProps {
-  className?: string
-}
-
-export default function UserProfile({ className = '' }: UserProfileProps) {
-  const [profileData, setProfileData] = useState<UserProfileData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  const fetchProfile = async () => {
+  const handleSave = async () => {
     try {
-      setLoading(true)
-      setError('')
-      
-      const token = localStorage.getItem('token');
+      setSaving(true);
+      setMessage(null);
+
+      const token = localStorage.getItem('access_token');
       if (!token) {
-        throw new Error('No authentication token found');
+        setMessage({ type: 'error', text: 'Authentication required' });
+        return;
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/user/profile/`,
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        }
-      )
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile/update/`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editForm),
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch profile information')
+      if (response.ok) {
+        setMessage({ type: 'success', text: 'Profile updated successfully!' });
+        setIsEditing(false);
+        // You might want to update the user context here
+      } else {
+        const errorData = await response.json();
+        setMessage({ type: 'error', text: errorData.error || 'Failed to update profile' });
       }
-
-      const data = await response.json()
-      setProfileData(data)
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch profile')
+      setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
     } finally {
-      setLoading(false)
+      setSaving(false);
     }
-  }
+  };
 
-  useEffect(() => {
-    fetchProfile()
-  }, [])
+  const handleCancel = () => {
+    setEditForm({
+      name: user?.name || '',
+      email: user?.email || '',
+      username: user?.name || ''
+    });
+    setIsEditing(false);
+    setMessage(null);
+  };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A'
-    try {
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    } catch {
-      return 'Invalid date'
-    }
-  }
+  const handleInputChange = (field: string, value: string) => {
+    setEditForm(prev => ({ ...prev, [field]: value }));
+  };
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className={`rounded-3xl p-6 space-y-6 bg-gradient-to-br from-white to-gray-50 shadow-inner ${className}`}>
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gray-200 rounded-full animate-pulse"></div>
-          <div className="space-y-2 flex-1">
-            <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center text-muted-foreground">
+            <User className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <p className="text-lg font-medium mb-2">User not found</p>
+            <p className="text-sm">Please log in to view your profile.</p>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="h-20 bg-gray-200 rounded-2xl animate-pulse"></div>
-          <div className="h-20 bg-gray-200 rounded-2xl animate-pulse"></div>
-        </div>
-        <div className="space-y-3">
-          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-          <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className={`rounded-3xl p-6 text-center text-red-600 bg-red-50 shadow-inner ${className}`}>
-        <FaUser className="text-4xl mx-auto mb-3 text-red-400" />
-        <p className="font-medium">Error: {error}</p>
-      </div>
-    )
-  }
-
-  if (!profileData) {
-    return (
-      <div className={`rounded-3xl p-6 text-center text-gray-500 bg-gray-50 shadow-inner ${className}`}>
-        <FaUser className="text-4xl mx-auto mb-3 text-gray-400" />
-        <p className="font-medium">No profile data</p>
-      </div>
-    )
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div className={`space-y-6 ${className}`}>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-blue-200 ring-offset-2">
-          {profileData.avatar ? (
-            <img 
-              src={profileData.avatar} 
-              alt={profileData.name}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <FaUser className="w-full h-full p-4 text-gray-400 bg-gray-100" />
-          )}
-        </div>
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-gray-900">{profileData.name}</h3>
-          <p className="text-gray-600">{profileData.email}</p>
+          <h2 className="section-title">User Profile</h2>
+          <p className="text-muted-foreground">
+            Manage your account information and preferences
+          </p>
         </div>
+        
+        {!isEditing && (
+          <Button onClick={() => setIsEditing(true)} variant="outline">
+            <Edit className="w-4 h-4 mr-2" />
+            Edit Profile
+          </Button>
+        )}
       </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-blue-50 rounded-2xl p-4 text-center shadow-inner">
-          <FaVideo className="text-blue-500 text-2xl mx-auto mb-2" />
-          <div className="text-3xl font-bold text-blue-700">{profileData.videos_fetched}</div>
-          <div className="text-xs text-blue-600 font-medium">Videos Fetched</div>
-        </div>
-        <div className="bg-green-50 rounded-2xl p-4 text-center shadow-inner">
-          <FaChartBar className="text-green-500 text-2xl mx-auto mb-2" />
-          <div className="text-3xl font-bold text-green-700">{profileData.total_analyses}</div>
-          <div className="text-xs text-green-600 font-medium">Analyses Performed</div>
-        </div>
-      </div>
+      {/* Message Display */}
+      {message && (
+        <Card className={`border-l-4 ${
+          message.type === 'success' 
+            ? 'border-green-500 bg-green-50' 
+            : 'border-red-500 bg-red-50'
+        }`}>
+          <CardContent className="pt-6">
+            <div className="flex items-center space-x-2">
+              {message.type === 'success' ? (
+                <CheckCircle className="w-5 h-5 text-green-500" />
+              ) : (
+                <AlertCircle className="w-5 h-5 text-red-500" />
+              )}
+              <p className={`text-sm ${
+                message.type === 'success' ? 'text-green-800' : 'text-red-800'
+              }`}>
+                {message.text}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Dates */}
-      <div className="space-y-3 text-sm text-gray-600">
-        <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-xl">
-          <FaCalendarAlt className="text-gray-500" />
-          <span>Joined: {formatDate(profileData.account_joined_at)}</span>
-        </div>
-        <div className="flex items-center space-x-3 bg-gray-50 p-3 rounded-xl">
-          <FaCalendarAlt className="text-gray-500" />
-          <span>Last Active: {formatDate(profileData.last_active)}</span>
-        </div>
-      </div>
+      {/* Profile Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <User className="w-5 h-5" />
+            <span>Profile Information</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Full Name
+              </label>
+              {isEditing ? (
+                <Input
+                  value={editForm.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              ) : (
+                <p className="text-foreground">{user.name || 'Not provided'}</p>
+              )}
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Username
+              </label>
+              {isEditing ? (
+                <Input
+                  value={editForm.username}
+                  onChange={(e) => handleInputChange('username', e.target.value)}
+                  placeholder="Enter username"
+                />
+              ) : (
+                <p className="text-foreground">{user.name || 'Not provided'}</p>
+              )}
+            </div>
+            
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Email Address
+              </label>
+              {isEditing ? (
+                <Input
+                  value={editForm.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  placeholder="Enter your email"
+                  type="email"
+                />
+              ) : (
+                <p className="text-foreground">{user.email}</p>
+              )}
+            </div>
+          </div>
 
-      {/* Refresh */}
-      <button
-        onClick={fetchProfile}
-        className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300"
-      >
-        Refresh Profile
-      </button>
+          {/* Edit Actions */}
+          {isEditing && (
+            <div className="flex items-center space-x-3 pt-4">
+              <Button onClick={handleSave} disabled={saving}>
+                <Save className="w-4 h-4 mr-2" />
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button onClick={handleCancel} variant="outline">
+                <X className="w-4 h-4 mr-2" />
+                Cancel
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Account Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Shield className="w-5 h-5" />
+            <span>Account Details</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Account Status
+              </label>
+              <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
+                Active
+              </Badge>
+            </div>
+            
+            <div>
+              <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                Member Since
+              </label>
+                              <p className="text-foreground">
+                  Recently
+                </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Connected Services */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Globe className="w-5 h-5" />
+            <span>Connected Services</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">YT</span>
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">YouTube</p>
+                  <p className="text-sm text-muted-foreground">Video analytics platform</p>
+                </div>
+              </div>
+              <Badge variant="default" className="bg-green-100 text-green-800 hover:bg-green-100">
+                Connected
+              </Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Security & Privacy */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Key className="w-5 h-5" />
+            <span>Security & Privacy</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div>
+                <p className="font-medium text-foreground">Two-Factor Authentication</p>
+                <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+              </div>
+              <Badge variant="secondary">Not Enabled</Badge>
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div>
+                <p className="font-medium text-foreground">Password</p>
+                <p className="text-sm text-muted-foreground">Last changed recently</p>
+              </div>
+              <Button variant="outline" size="sm">
+                Change
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-red-200 bg-red-50">
+        <CardHeader>
+          <CardTitle className="text-red-800">Danger Zone</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-red-700 mb-3">
+                Once you delete your account, there is no going back. Please be certain.
+              </p>
+              <Button variant="destructive" size="sm">
+                Delete Account
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

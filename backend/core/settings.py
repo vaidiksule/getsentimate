@@ -2,6 +2,10 @@ import os
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # --------------------
 # BASE DIR
@@ -39,8 +43,8 @@ INSTALLED_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
 
-    # Local apps - API handled via MongoDB service
-    "api",  # Removed - using pure MongoDB instead
+    # Local apps
+"youtube_analytics",
 ]
 
 # Site ID for django.contrib.sites
@@ -88,18 +92,35 @@ ROOT_URLCONF = "core.urls"
 WSGI_APPLICATION = "core.wsgi.application"
 
 # --------------------
-# DATABASE (MongoDB Only)
+# DATABASE
 # --------------------
-# We're using PyMongo directly - no Django ORM database needed
-DATABASES = {}
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
 
 # MongoDB Configuration
-MONGODB_DATABASE_NAME = "getsentimatedb"
+MONGODB_DATABASE_NAME = "getsentimate"
 MONGODB_URI = os.getenv('DATABASE_URL')
+
+# Force MongoDB to use 'getsentimate' database
+MONGODB_DATABASE_NAME = "getsentimate"
+
+# Import MongoDB configuration
+try:
+    from .mongo_config import connect_to_mongodb
+    # Connect to MongoDB on startup
+    connect_to_mongodb()
+except Exception as e:
+    print(f"Warning: Could not connect to MongoDB: {e}")
 
 # --------------------
 # AUTHENTICATION
 # --------------------
+AUTH_USER_MODEL = 'youtube_analytics.User'
+
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
@@ -120,7 +141,7 @@ LOGOUT_REDIRECT_URL = "/"
 # --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "api.authentication.JWTAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",

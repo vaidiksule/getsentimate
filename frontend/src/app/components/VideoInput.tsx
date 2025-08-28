@@ -1,206 +1,119 @@
-// app/components/VideoInput.tsx (Full Updated File)
+"use client";
 
-'use client'
+import React, { useState } from 'react';
+import { useAuth } from './AuthProvider';
 
-import { useState } from 'react'
-import LoadingSpinner from './LoadingSpinner'
-import Image from 'next/image'
+export function VideoInput() {
+  const { user } = useAuth();
+  const [videoUrl, setVideoUrl] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-interface VideoData {
-  video_id: string
-  title: string
-  channel_title: string
-  total_comments: number
-}
-
-interface VideoInputProps {
-  onVideoAnalyzed: (videoId: string) => void
-}
-
-export default function VideoInput({ onVideoAnalyzed }: VideoInputProps) {
-  const [url, setUrl] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [videoData, setVideoData] = useState<VideoData | null>(null)
-  const [error, setError] = useState('')
-  const [analysisStatus, setAnalysisStatus] = useState('')
-  const [statusMessage, setStatusMessage] = useState('')
-
-  const extractVideoId = (url: string) => {
-    const regex =
-      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^\"&?\/ ]{11})/
-    const match = url.match(regex)
-    return match ? match[1] : null
-  }
-
-  const fetchVideoData = async () => {
-    if (!url.trim()) {
-      setError('Please enter a YouTube URL')
-      return
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!videoUrl.trim()) {
+      setError('Please enter a YouTube video URL');
+      return;
     }
 
-    const videoId = extractVideoId(url)
-    if (!videoId) {
-      setError('Invalid YouTube URL')
-      return
+    // Basic YouTube URL validation
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+    if (!youtubeRegex.test(videoUrl)) {
+      setError('Please enter a valid YouTube video URL');
+      return;
     }
 
-    setLoading(true)
-    setError('')
-    setVideoData(null)
+    setLoading(true);
+    setError('');
+    setSuccess('');
 
     try {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('access_token');
       if (!token) {
-        throw new Error('No authentication token found')
+        throw new Error('Authentication required');
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/youtube/fetch-comments/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ video_url: url, fetch_transcript: false }),
-        }
-      )
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (response.status === 402) {
-          throw new Error('Insufficient credits to fetch comments. Please purchase more credits.')
-        }
-        throw new Error(data.error || 'Failed to fetch video data')
-      }
-
-      setVideoData({
-        video_id: data.video_id,
-        title: data.video_title,
-        channel_title: data.channel_title,
-        total_comments: data.total_comments,
-      })
-      // const creditMessage = data.credits !== undefined 
-      //   ? ` (Credits used: ${data.credits_used}, Remaining: ${data.credits_remaining})`
-      //   : ''
+      // Extract video ID from URL
+      const videoId = videoUrl.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)?.[1];
       
-      setAnalysisStatus("Comments fetched successfully! Ready for analysis.")
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch video data')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const analyzeComments = async () => {
-    if (!videoData) return
-
-    setLoading(true)
-    setError('')
-    setAnalysisStatus('')
-
-    try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        throw new Error('No authentication token found')
+      if (!videoId) {
+        throw new Error('Could not extract video ID');
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/youtube/analyze-comments/`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({ video_id: videoData.video_id }),
-        }
-      )
-
-      const data = await response.json()
-
-      console.log("analyed data ", data)
-
-      if (!response.ok) {
-        if (response.status === 402) {
-          throw new Error('Insufficient credits to analyze comments. Please purchase more credits.')
-        }
-        throw new Error(data.error || 'Failed to analyze comments')
-      }
-      onVideoAnalyzed(videoData.video_id)
+      // For now, just show success message
+      // TODO: Implement actual video analysis
+      setSuccess(`Video "${videoId}" queued for analysis! This feature will be implemented in the next phase.`);
+      setVideoUrl('');
+      
     } catch (err: any) {
-      setError(err.message || 'Failed to analyze comments')
+      setError(err.message || 'Failed to process video');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Start Your Analysis</h2>
-
-      {/* URL Input */}
-      <div className="flex rounded-full overflow-hidden border border-gray-200 focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-200 transition duration-200 bg-white shadow-inner">
-        <input
-          type="url"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          placeholder="Paste YouTube video URL here..."
-          className="flex-1 px-6 py-4 text-gray-900 outline-none"
-          disabled={loading}
-        />
-        <button
-          onClick={fetchVideoData}
-          disabled={loading || !url.trim()}
-          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-semibold px-8 py-4 transition duration-300 disabled:opacity-50"
-        >
-          {loading ? 'Fetching...' : 'Fetch Comments'}
-        </button>
+    <div className="card max-w-2xl mx-auto">
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold text-white mb-2">
+          Analyze YouTube Video
+        </h3>
+        <p className="text-white/70">
+          Enter a YouTube video URL to analyze comments and sentiment
+        </p>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="bg-red-50 p-4 rounded-2xl border border-red-100 text-red-700 font-medium">
-          {error}
-        </div>
-      )}
-
-      {/* Video Info */}
-      {videoData && (
-        <div className="bg-white rounded-3xl p-6 shadow-md border border-gray-100 space-y-6">
-          <div className="flex gap-6">
-            <div className="w-48 h-28 rounded-2xl overflow-hidden shadow-md">
-              <Image
-                src={`https://img.youtube.com/vi/${videoData.video_id}/hqdefault.jpg`}
-                alt={videoData.title}
-                width={480}
-                height={360}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">{videoData.title}</h3>
-              <p className="text-gray-600 mb-1">{videoData.channel_title}</p>
-              <p className="text-gray-600">Comments: {videoData.total_comments}</p>
-            </div>
-          </div>
-          <button
-            onClick={analyzeComments}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="videoUrl" className="block text-sm font-medium text-white/80 mb-2">
+            YouTube Video URL
+          </label>
+          <input
+            type="url"
+            id="videoUrl"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://www.youtube.com/watch?v=..."
+            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50"
-          >
-            {loading ? 'Analyzing...' : 'Analyze Now'}
-          </button>
+          />
         </div>
-      )}
 
-      {/* Status */}
-      {analysisStatus && (
-        <div className="bg-blue-50 p-4 rounded-2xl border border-blue-100 text-blue-700 font-medium">
-          {analysisStatus}
-        </div>
-      )}
+        {error && (
+          <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
+            <p className="text-red-300 text-sm">{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-3">
+            <p className="text-green-300 text-sm">{success}</p>
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={loading || !videoUrl.trim()}
+          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              Processing...
+            </div>
+          ) : (
+            'Analyze Video'
+          )}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <p className="text-white/50 text-sm">
+          💡 <strong>Coming Soon:</strong> AI-powered comment analysis, sentiment tracking, and audience insights
+        </p>
+      </div>
     </div>
-  )
+  );
 }

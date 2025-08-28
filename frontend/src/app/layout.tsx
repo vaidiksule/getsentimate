@@ -1,36 +1,33 @@
-import type { Metadata } from "next";
-import localFont from "next/font/local";
-import "./globals.css";
-import { AuthProvider } from "./components/AuthProvider";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { AuthProvider } from './components/AuthProvider'
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: "GetSentimate",
-  description: "AI-Powered YouTube Comment Analysis",
-};
+  title: 'GetSentimate - AI-Powered YouTube Analytics',
+  description: 'Understand your YouTube audience with AI-powered comment analysis, sentiment detection, and actionable insights.',
+  keywords: 'YouTube analytics, comment analysis, sentiment analysis, AI, content creators, audience insights',
+  authors: [{ name: 'GetSentimate Team' }],
+  viewport: 'width=device-width, initial-scale=1',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <AuthProvider>{children}</AuthProvider>
+      <head>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
+      </head>
+      <body className={inter.className}>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
-  );
+  )
 }
