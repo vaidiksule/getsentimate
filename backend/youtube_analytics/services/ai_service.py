@@ -2,6 +2,7 @@ import os
 import json
 import time
 from typing import Dict, List, Optional, Tuple
+from datetime import datetime
 import google.generativeai as genai
 from django.conf import settings
 from django.utils import timezone
@@ -661,13 +662,83 @@ class AIService:
                 'trends': insights.get('trends', []),
                 
                 # Metadata
-                'analysis_timestamp': timezone.now().isoformat(),
+                'analysis_timestamp': datetime.now().isoformat(),
                 'model_used': self.model_name if self.is_available else 'fallback'
             }
             
         except Exception as e:
             print(f"Error aggregating video insights: {e}")
             return self._fallback_audience_insights(comments_data)
+    
+    def analyze_url_comments(self, comments_data: List[Dict], video_title: str = "", video_description: str = "") -> Dict:
+        """
+        Analyze raw comments from URL analysis and generate comprehensive insights
+        
+        Args:
+            comments_data: List of raw comment data from URL analysis
+            video_title: Title of the video being analyzed
+            video_description: Description of the video being analyzed
+            
+        Returns:
+            Dictionary with comprehensive insights, engagement analysis, and recommendations
+        """
+        if not comments_data:
+            return self._fallback_url_analysis_insights(comments_data)
+        
+        try:
+            # Prepare comments for analysis
+            comment_texts = [comment.get('text', '') for comment in comments_data if comment.get('text')]
+            
+            if not comment_texts:
+                return self._fallback_url_analysis_insights(comments_data)
+            
+            # Generate comprehensive AI insights
+            if self.is_available:
+                insights = self._generate_url_analysis_insights(comment_texts, video_title, video_description)
+            else:
+                insights = self._generate_fallback_url_insights(comment_texts)
+            
+            # Calculate engagement metrics
+            engagement_metrics = self._calculate_url_engagement_metrics(comments_data)
+            
+            # Generate sentiment analysis
+            sentiment_analysis = self._analyze_url_sentiment(comment_texts)
+            
+            # Generate content recommendations
+            content_recommendations = self._generate_url_content_recommendations(comment_texts, video_title, insights)
+            
+            # Generate audience insights
+            audience_insights = self._generate_url_audience_insights(comment_texts, insights)
+            
+            return {
+                'total_comments': len(comments_data),
+                'analyzed_comments': len(comment_texts),
+                'analysis_coverage': len(comment_texts) / len(comments_data) if comments_data else 0,
+                
+                # Sentiment analysis
+                'sentiment_analysis': sentiment_analysis,
+                
+                # Engagement metrics
+                'engagement_metrics': engagement_metrics,
+                
+                # AI-generated insights
+                'audience_insights': audience_insights,
+                'content_recommendations': content_recommendations,
+                'key_findings': insights.get('key_findings', []),
+                'user_suggestions': insights.get('user_suggestions', []),
+                'what_users_like': insights.get('what_users_like', []),
+                'what_users_dislike': insights.get('what_users_dislike', []),
+                'video_requests': insights.get('video_requests', []),
+                'engagement_level': insights.get('engagement_level', 'medium'),
+                
+                # Metadata
+                'analysis_timestamp': datetime.now().isoformat(),
+                'model_used': self.model_name if self.is_available else 'fallback'
+            }
+            
+        except Exception as e:
+            print(f"Error analyzing URL comments: {e}")
+            return self._fallback_url_analysis_insights(comments_data)
     
     def _generate_ai_insights(self, comments_data: List[Dict]) -> Dict:
         """Generate insights using AI analysis"""
@@ -821,6 +892,303 @@ class AIService:
             return f"Audience reaction is {mood}. Key findings: {'; '.join(key_points)}"
         else:
             return f"Audience reaction is {mood}. {positive_count} positive, {negative_count} negative, {total_comments - positive_count - negative_count} neutral comments."
+
+
+    def _generate_url_analysis_insights(self, comment_texts: List[str], video_title: str, video_description: str) -> Dict:
+        """Generate comprehensive insights for URL analysis using AI"""
+        try:
+            comments_text = "\n".join([f"Comment {i+1}: {text}" for i, text in enumerate(comment_texts[:50])])  # Limit to 50 comments
+            
+            prompt = f"""
+            Analyze these YouTube video comments and provide comprehensive insights. The video is titled "{video_title}".
+
+            Comments to analyze:
+            {comments_text}
+
+            Please provide a detailed analysis in JSON format with the following structure:
+            {{
+                "engagement_level": "low/medium/high",
+                "key_findings": [
+                    "Key insight 1",
+                    "Key insight 2",
+                    "Key insight 3"
+                ],
+                "user_suggestions": [
+                    "Suggestion 1",
+                    "Suggestion 2",
+                    "Suggestion 3"
+                ],
+                "what_users_like": [
+                    "What users appreciate 1",
+                    "What users appreciate 2",
+                    "What users appreciate 3"
+                ],
+                "what_users_dislike": [
+                    "What users don't like 1",
+                    "What users don't like 2",
+                    "What users don't like 3"
+                ],
+                "video_requests": [
+                    "Video topic request 1",
+                    "Video topic request 2",
+                    "Video topic request 3"
+                ],
+                "audience_insights": "Detailed analysis of the audience's interests, concerns, and engagement patterns",
+                "content_recommendations": "Specific recommendations for improving future content based on comment analysis",
+                "overall_sentiment": "positive/negative/neutral",
+                "main_themes": [
+                    "Theme 1",
+                    "Theme 2",
+                    "Theme 3"
+                ]
+            }}
+
+            Focus on:
+            1. What users are saying about the video content
+            2. Their suggestions for improvement
+            3. What they like and dislike
+            4. Requests for future videos
+            5. Overall engagement level
+            6. Audience interests and concerns
+            7. Actionable recommendations for content creators
+
+            Return only valid JSON.
+            """
+            
+            response = self.model.generate_content(prompt)
+            insights_text = response.text.strip()
+            
+            # Clean up the response
+            if insights_text.startswith('```json'):
+                insights_text = insights_text[7:]
+            if insights_text.endswith('```'):
+                insights_text = insights_text[:-3]
+            
+            insights = json.loads(insights_text)
+            return insights
+            
+        except Exception as e:
+            print(f"Error generating URL analysis insights: {e}")
+            return self._generate_fallback_url_insights(comment_texts)
+    
+    def _analyze_url_sentiment(self, comment_texts: List[str]) -> Dict:
+        """Analyze sentiment of comments for URL analysis"""
+        try:
+            if not self.is_available:
+                return self._fallback_sentiment_analysis(" ".join(comment_texts))
+            
+            # Use bulk sentiment analysis instead of individual comments
+            try:
+                # Analyze all comments together for better accuracy
+                combined_text = " ".join(comment_texts[:50])  # Limit to 50 comments
+                sentiment_result = self.analyze_sentiment(combined_text)
+                
+                # Extract sentiment from the result
+                sentiment_label = sentiment_result.get('sentiment_label', 'neutral')
+                sentiment_score = sentiment_result.get('sentiment_score', 0)
+                
+                # Determine overall sentiment
+                if sentiment_score > 0.2:
+                    overall_sentiment = 'positive'
+                    positive_ratio = 0.6
+                    negative_ratio = 0.2
+                    neutral_ratio = 0.2
+                elif sentiment_score < -0.2:
+                    overall_sentiment = 'negative'
+                    positive_ratio = 0.2
+                    negative_ratio = 0.6
+                    neutral_ratio = 0.2
+                else:
+                    overall_sentiment = 'neutral'
+                    positive_ratio = 0.3
+                    negative_ratio = 0.3
+                    neutral_ratio = 0.4
+                
+                return {
+                    'overall_sentiment': overall_sentiment,
+                    'positive_ratio': positive_ratio,
+                    'negative_ratio': negative_ratio,
+                    'neutral_ratio': neutral_ratio,
+                    'total_analyzed': len(comment_texts),
+                    'sentiment_score': sentiment_score
+                }
+                
+            except Exception as e:
+                print(f"Bulk sentiment analysis failed: {e}")
+                return self._fallback_sentiment_analysis(" ".join(comment_texts))
+            
+        except Exception as e:
+            print(f"Error analyzing URL sentiment: {e}")
+            return self._fallback_sentiment_analysis(" ".join(comment_texts))
+    
+    def _calculate_url_engagement_metrics(self, comments_data: List[Dict]) -> Dict:
+        """Calculate engagement metrics for URL analysis"""
+        try:
+            total_comments = len(comments_data)
+            if total_comments == 0:
+                return {'overall_score': 0, 'engagement_level': 'low'}
+            
+            # Calculate engagement based on comment characteristics
+            engagement_score = 0
+            
+            # Factor 1: Comment length (longer comments = more engagement)
+            avg_length = sum(len(comment.get('text', '')) for comment in comments_data) / total_comments
+            if avg_length > 100:
+                engagement_score += 0.3
+            elif avg_length > 50:
+                engagement_score += 0.2
+            else:
+                engagement_score += 0.1
+            
+            # Factor 2: Like counts (if available)
+            like_counts = [comment.get('like_count', 0) for comment in comments_data if isinstance(comment.get('like_count', 0), (int, float))]
+            avg_likes = sum(like_counts) / total_comments if like_counts else 0
+            if avg_likes > 10:
+                engagement_score += 0.4
+            elif avg_likes > 5:
+                engagement_score += 0.3
+            elif avg_likes > 0:
+                engagement_score += 0.2
+            
+            # Factor 3: Comment diversity (more unique authors = more engagement)
+            authors = set(comment.get('author_name', '') for comment in comments_data)
+            author_diversity = len(authors) / total_comments
+            engagement_score += author_diversity * 0.3
+            
+            # Determine engagement level
+            if engagement_score > 0.7:
+                engagement_level = 'high'
+            elif engagement_score > 0.4:
+                engagement_level = 'medium'
+            else:
+                engagement_level = 'low'
+            
+            return {
+                'overall_score': round(engagement_score, 3),
+                'engagement_level': engagement_level,
+                'average_comment_length': round(avg_length, 1),
+                'average_likes': round(avg_likes, 1),
+                'unique_authors': len(authors),
+                'author_diversity': round(author_diversity, 3)
+            }
+            
+        except Exception as e:
+            print(f"Error calculating URL engagement metrics: {e}")
+            return {'overall_score': 0, 'engagement_level': 'low'}
+    
+    def _generate_url_content_recommendations(self, comment_texts: List[str], video_title: str, insights: Dict) -> str:
+        """Generate content recommendations based on URL analysis"""
+        try:
+            if not self.is_available:
+                return "Based on comment analysis, consider addressing user concerns and incorporating their suggestions."
+            
+            prompt = f"""
+            Based on the analysis of comments for the video "{video_title}", provide specific content recommendations for the creator.
+
+            Key insights from comments:
+            - What users like: {insights.get('what_users_like', [])}
+            - What users dislike: {insights.get('what_users_dislike', [])}
+            - User suggestions: {insights.get('user_suggestions', [])}
+            - Video requests: {insights.get('video_requests', [])}
+
+            Provide 3-5 specific, actionable recommendations for improving future content. Focus on:
+            1. Addressing user concerns
+            2. Incorporating popular suggestions
+            3. Creating requested content
+            4. Improving engagement
+
+            Keep recommendations concise and actionable.
+            """
+            
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+            
+        except Exception as e:
+            print(f"Error generating URL content recommendations: {e}")
+            return "Consider addressing user concerns and incorporating their suggestions for better engagement."
+    
+    def _generate_url_audience_insights(self, comment_texts: List[str], insights: Dict) -> str:
+        """Generate audience insights based on URL analysis"""
+        try:
+            if not self.is_available:
+                return "Audience shows interest in the content with various suggestions and feedback."
+            
+            prompt = f"""
+            Based on the comment analysis, provide insights about the audience for this video.
+
+            Key findings: {insights.get('key_findings', [])}
+            Main themes: {insights.get('main_themes', [])}
+            Overall sentiment: {insights.get('overall_sentiment', 'neutral')}
+
+            Provide insights about:
+            1. Audience interests and concerns
+            2. Engagement patterns
+            3. Demographics hints
+            4. Content preferences
+            5. Community dynamics
+
+            Keep insights concise and actionable.
+            """
+            
+            response = self.model.generate_content(prompt)
+            return response.text.strip()
+            
+        except Exception as e:
+            print(f"Error generating URL audience insights: {e}")
+            return "Audience shows interest in the content with various suggestions and feedback."
+    
+    def _generate_fallback_url_insights(self, comment_texts: List[str]) -> Dict:
+        """Generate fallback insights when AI is not available"""
+        return {
+            'engagement_level': 'medium',
+            'key_findings': [
+                'Comments show active engagement with the content',
+                'Users are providing feedback and suggestions',
+                'Mixed sentiment across comments'
+            ],
+            'user_suggestions': [
+                'Consider user feedback for content improvement',
+                'Address common concerns mentioned in comments'
+            ],
+            'what_users_like': [
+                'Content quality and information',
+                'Creators approach and style'
+            ],
+            'what_users_dislike': [
+                'Some aspects need improvement',
+                'Areas for better explanation'
+            ],
+            'video_requests': [
+                'More content on similar topics',
+                'Follow-up videos requested'
+            ],
+            'overall_sentiment': 'neutral',
+            'main_themes': [
+                'Content feedback',
+                'Engagement and discussion',
+                'Suggestions for improvement'
+            ]
+        }
+    
+    def _fallback_url_analysis_insights(self, comments_data: List[Dict]) -> Dict:
+        """Fallback insights when analysis fails"""
+        return {
+            'total_comments': len(comments_data),
+            'analyzed_comments': 0,
+            'analysis_coverage': 0,
+            'sentiment_analysis': {'overall_sentiment': 'neutral', 'positive_ratio': 0, 'negative_ratio': 0, 'neutral_ratio': 1},
+            'engagement_metrics': {'overall_score': 0, 'engagement_level': 'low'},
+            'audience_insights': 'Unable to analyze comments at this time.',
+            'content_recommendations': 'Consider analyzing comments manually for insights.',
+            'key_findings': [],
+            'user_suggestions': [],
+            'what_users_like': [],
+            'what_users_dislike': [],
+            'video_requests': [],
+            'engagement_level': 'low',
+            'analysis_timestamp': timezone.now().isoformat(),
+            'model_used': 'fallback'
+        }
 
 
 # Global instance

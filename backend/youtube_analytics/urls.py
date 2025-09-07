@@ -20,6 +20,7 @@ urlpatterns = [
     path('videos/<str:video_id>/', views.VideoDetailView.as_view(), name='video_detail'),
     
     # Analysis
+    path('analysis/url/', views.URLAnalysisView.as_view(), name='url_analysis'),
     path('analysis/<str:video_id>/', views.AnalysisView.as_view(), name='analysis'),
     
     # Comments

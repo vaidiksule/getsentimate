@@ -6,6 +6,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute';
 import { VideoLibrary } from '../components/VideoLibrary';
 import { ChannelList } from '../components/ChannelList';
 import { UserProfile } from '../components/UserProfile';
+import { URLAnalysis } from '../components/URLAnalysis';
 import { 
   BarChart3, 
   Video, 
@@ -15,12 +16,13 @@ import {
   Menu,
   X,
   Home,
-  TrendingUp
+  TrendingUp,
+  Link
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-type TabType = 'overview' | 'videos' | 'channels' | 'profile';
+type TabType = 'overview' | 'videos' | 'channels' | 'profile' | 'url_analysis';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -220,6 +222,8 @@ export default function DashboardPage() {
         return <VideoLibrary />;
       case 'channels':
         return <ChannelList />;
+      case 'url_analysis':
+        return <URLAnalysis />;
       case 'profile':
         return <UserProfile />;
       default:
@@ -287,6 +291,15 @@ export default function DashboardPage() {
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Channels
+                </Button>
+                
+                <Button
+                  variant={activeTab === 'url_analysis' ? 'default' : 'ghost'}
+                  className="w-full justify-start"
+                  onClick={() => setActiveTab('url_analysis')}
+                >
+                  <Link className="w-4 h-4 mr-2" />
+                  URL Analysis
                 </Button>
                 
                 <Button

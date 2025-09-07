@@ -25,9 +25,11 @@ from .serializers import (
     AnalysisResultSerializer, UserPreferenceSerializer, VideoDetailSerializer,
     ChannelDetailSerializer, CommentAnalysisSerializer, ChannelConnectionSerializer
 )
-from .services.youtube_service import get_youtube_service
+from .services.youtube_service import get_youtube_service, YouTubeService
+from .services.youtube_scraper_service import get_youtube_scraper_service
 from .services.ai_service import ai_service
 from django.utils import timezone
+from datetime import datetime
 
 # Import MongoDB service for user creation
 from .services.mongo_service import MongoService
@@ -1872,5 +1874,136 @@ class VideoInsightsView(APIView):
         except Exception as e:
             return Response(
                 {'error': f'Failed to fetch video insights: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class URLAnalysisView(APIView):
+    """URL-based video analysis for any YouTube video"""
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """Analyze any YouTube video by URL"""
+        try:
+            url = request.data.get('url')
+            max_comments = request.data.get('max_comments', 100)
+            
+            if not url:
+                return Response(
+                    {'error': 'YouTube URL is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate max_comments
+            try:
+                max_comments = int(max_comments)
+                if max_comments < 1 or max_comments > 1000:
+                    max_comments = 100
+            except (ValueError, TypeError):
+                max_comments = 100
+            
+            print(f"URL analysis request from user: {request.user.username} for URL: {url}")
+            
+            # Initialize YouTube scraper service (no API key required)
+            youtube_scraper = get_youtube_scraper_service()
+            
+            # Analyze video by URL using scraping
+            success, message, analysis_data = youtube_scraper.analyze_video_by_url(url, max_comments)
+            
+            if not success:
+                return Response(
+                    {'error': message},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Perform AI analysis on comments
+            try:
+                comments_for_analysis = []
+                for comment in analysis_data['comments']:
+                    # Handle published_at safely
+                    published_at_str = None
+                    if comment.get('published_at'):
+                        published_at = comment['published_at']
+                        if hasattr(published_at, 'isoformat'):
+                            published_at_str = published_at.isoformat()
+                        elif isinstance(published_at, (int, float)):
+                            published_at_str = datetime.fromtimestamp(published_at).isoformat()
+                        else:
+                            published_at_str = str(published_at)
+                    
+                    comments_for_analysis.append({
+                        'text': comment['text'],
+                        'author_name': comment['author_name'],
+                        'like_count': comment['like_count'],
+                        'published_at': published_at_str
+                    })
+                
+                # Generate AI insights using the new URL analysis method
+                ai_insights = ai_service.analyze_url_comments(
+                    comments_for_analysis, 
+                    video_title=analysis_data['video_details']['title'],
+                    video_description=analysis_data['video_details']['description']
+                )
+                
+                # Prepare response data
+                response_data = {
+                    'success': True,
+                    'message': message,
+                    'video': {
+                        'id': analysis_data['video_id'],
+                        'title': analysis_data['video_details']['title'],
+                        'description': analysis_data['video_details']['description'],
+                        'thumbnail_url': analysis_data['video_details']['thumbnail_url'],
+                        'published_at': analysis_data['video_details']['published_at'].isoformat() if analysis_data['video_details'].get('published_at') and hasattr(analysis_data['video_details']['published_at'], 'isoformat') else None,
+                        'view_count': analysis_data['video_details']['view_count'],
+                        'like_count': analysis_data['video_details']['like_count'],
+                        'comment_count': analysis_data['video_details']['comment_count'],
+                        'channel_title': analysis_data['video_details']['channel_title'],
+                        'duration': analysis_data['video_details']['duration']
+                    },
+                    'analysis': {
+                        'total_comments_analyzed': analysis_data['total_comments_fetched'],
+                        'analysis_timestamp': analysis_data['analysis_timestamp'],
+                        'ai_insights': ai_insights
+                    },
+                    'comments_sample': comments_for_analysis[:10]  # Return first 10 comments as sample
+                }
+                
+                return Response(response_data, status=status.HTTP_200_OK)
+                
+            except Exception as ai_error:
+                print(f"AI analysis failed: {str(ai_error)}")
+                # Return basic analysis without AI insights
+                response_data = {
+                    'success': True,
+                    'message': f"{message} (AI analysis failed: {str(ai_error)})",
+                    'video': {
+                        'id': analysis_data['video_id'],
+                        'title': analysis_data['video_details']['title'],
+                        'description': analysis_data['video_details']['description'],
+                        'thumbnail_url': analysis_data['video_details']['thumbnail_url'],
+                        'published_at': analysis_data['video_details']['published_at'].isoformat() if analysis_data['video_details'].get('published_at') and hasattr(analysis_data['video_details']['published_at'], 'isoformat') else None,
+                        'view_count': analysis_data['video_details']['view_count'],
+                        'like_count': analysis_data['video_details']['like_count'],
+                        'comment_count': analysis_data['video_details']['comment_count'],
+                        'channel_title': analysis_data['video_details']['channel_title'],
+                        'duration': analysis_data['video_details']['duration']
+                    },
+                    'analysis': {
+                        'total_comments_analyzed': analysis_data['total_comments_fetched'],
+                        'analysis_timestamp': analysis_data['analysis_timestamp'],
+                        'ai_insights': None,
+                        'ai_error': str(ai_error)
+                    },
+                    'comments_sample': [{'text': comment['text'], 'author_name': comment['author_name']} for comment in analysis_data['comments'][:10]]
+                }
+                
+                return Response(response_data, status=status.HTTP_200_OK)
+                
+        except Exception as e:
+            print(f"URL analysis error: {str(e)}")
+            return Response(
+                {'error': f'Analysis failed: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
