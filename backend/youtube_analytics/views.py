@@ -25,7 +25,7 @@ from .serializers import (
     AnalysisResultSerializer, UserPreferenceSerializer, VideoDetailSerializer,
     ChannelDetailSerializer, CommentAnalysisSerializer, ChannelConnectionSerializer
 )
-from .services.youtube_scraper_service import get_youtube_scraper_service
+from .services.youtube_api_service import YouTubeAPIService
 from .services.ai_service import ai_service
 from django.utils import timezone
 from datetime import datetime
@@ -1900,29 +1900,37 @@ class URLAnalysisView(APIView):
             except (ValueError, TypeError):
                 max_comments = 100
             
-            print(f"URL analysis request from user: {request.user.username} for URL: {url}")
+            print(f"URL analysis request for URL: {url}")
             
-            # Initialize YouTube scraper service (no API key required)
-            youtube_scraper = get_youtube_scraper_service()
-            
-            # Analyze video by URL using scraping
-            success, message, analysis_data = youtube_scraper.analyze_video_by_url(url, max_comments)
-            
-            if not success:
-                return Response(
-                    {'error': message},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            # Use YouTube Data API based service instead of yt-dlp scraping
+            yt_service = YouTubeAPIService()
+            success, message, analysis_data = yt_service.analyze_video_by_url(url, max_comments)
+
+            if not success or not analysis_data:
+                # Map structured error messages to HTTP status codes
+                error_msg = message or "Analysis failed"
+                if error_msg.startswith("QUOTA_EXCEEDED:"):
+                    http_status = status.HTTP_429_TOO_MANY_REQUESTS
+                elif error_msg.startswith("INVALID_VIDEO:"):
+                    http_status = status.HTTP_400_BAD_REQUEST
+                elif error_msg.startswith("CONFIG_ERROR:"):
+                    http_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+                else:
+                    http_status = status.HTTP_400_BAD_REQUEST
+
+                return Response({'error': error_msg}, status=http_status)
             
             # Perform AI analysis on comments
             try:
                 comments_for_analysis = []
                 for comment in analysis_data['comments']:
-                    # Handle published_at safely
+                    # Handle published_at safely (can be ISO8601 string from YouTube Data API)
                     published_at_str = None
                     if comment.get('published_at'):
                         published_at = comment['published_at']
-                        if hasattr(published_at, 'isoformat'):
+                        if isinstance(published_at, str):
+                            published_at_str = published_at
+                        elif hasattr(published_at, 'isoformat'):
                             published_at_str = published_at.isoformat()
                         elif isinstance(published_at, (int, float)):
                             published_at_str = datetime.fromtimestamp(published_at).isoformat()
