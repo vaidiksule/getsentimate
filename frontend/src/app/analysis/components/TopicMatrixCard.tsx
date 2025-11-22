@@ -23,10 +23,10 @@ export function TopicMatrixCard({ matrix }: Props) {
 
   return (
     <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 px-6 pt-6">
         <CardTitle className="text-sm font-semibold text-neutral-900">Topic sentiment matrix</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 text-[11px] text-neutral-700">
+      <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
         {matrix.map((row) => {
           const pos = row.positive ?? 0;
           const neu = row.neutral ?? 0;

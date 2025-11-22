@@ -13,10 +13,10 @@ export function TimelineCard({ raw }: Props) {
   if (!Array.isArray(timeline) || timeline.length === 0) {
     return (
       <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-        <CardHeader>
+        <CardHeader className="px-6 pt-6">
           <CardTitle className="text-sm font-semibold text-neutral-900">Timeline</CardTitle>
         </CardHeader>
-        <CardContent className="text-xs text-neutral-500">
+        <CardContent className="px-6 pb-6 text-xs text-neutral-500">
           No timeline provided by backend.
         </CardContent>
       </Card>
@@ -30,11 +30,11 @@ export function TimelineCard({ raw }: Props) {
 
   return (
     <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-2 px-6 pt-6">
         <CardTitle className="text-sm font-semibold text-neutral-900">Timeline</CardTitle>
       </CardHeader>
-      <CardContent className="h-40 text-xs text-neutral-700">
-        <ResponsiveContainer width="100%" height="100%">
+      <CardContent className="h-40 px-6 pb-6 text-xs text-neutral-700">
+        <ResponsiveContainer width="100%" height="100%" minHeight={180}>
           <LineChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
             <XAxis dataKey="ts" hide />
             <YAxis hide />

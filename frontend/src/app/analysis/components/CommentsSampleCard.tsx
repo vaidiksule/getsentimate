@@ -18,7 +18,7 @@ export function CommentsSampleCard({ comments }: Props) {
 
   return (
     <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-center justify-between px-6 pb-2 pt-6">
         <CardTitle className="text-sm font-semibold text-neutral-900">Comments sample</CardTitle>
         <div className="inline-flex rounded-full bg-neutral-100 p-0.5 text-[11px]">
           <button
@@ -41,7 +41,7 @@ export function CommentsSampleCard({ comments }: Props) {
           </button>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2 text-xs text-neutral-700">
+      <CardContent className="max-h-80 space-y-2 overflow-y-auto px-6 pb-6 text-xs text-neutral-700">
         {shown.length === 0 && <p className="text-neutral-400">No comments sample returned.</p>}
         {shown.map((c, idx) => (
           <div key={idx} className="space-y-0.5 rounded-2xl bg-neutral-50 px-3 py-2">

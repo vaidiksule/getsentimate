@@ -44,7 +44,7 @@ export function ResultGrid({ parsed, completedAt }: ResultGridProps) {
         <div className="space-y-1">
           <h2 className="text-base font-semibold text-neutral-900">Analysis results</h2>
           {completedAt && (
-            <p className="text-xs text-neutral-500">Completed at {new Date(completedAt).toLocaleString()}</p>
+            <p className="text-xs text-neutral-500">Completed at {completedAt}</p>
           )}
         </div>
         <div className="flex items-center gap-2">

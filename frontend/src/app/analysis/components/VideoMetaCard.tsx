@@ -23,8 +23,8 @@ export function VideoMetaCard({ video }: Props) {
   }
 
   return (
-    <Card className="flex gap-4 rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <div className="relative m-4 h-28 w-48 overflow-hidden rounded-2xl bg-neutral-100">
+    <Card className="flex items-stretch gap-4 rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
+      <div className="relative m-4 aspect-video w-48 overflow-hidden rounded-2xl bg-neutral-100">
         {video.thumbnailUrl ? (
           <Image
             src={video.thumbnailUrl}
@@ -34,7 +34,7 @@ export function VideoMetaCard({ video }: Props) {
           />
         ) : null}
       </div>
-      <CardContent className="flex flex-1 flex-col justify-center gap-2 p-4 pr-6 text-xs text-neutral-700">
+      <CardContent className="flex flex-1 flex-col justify-center gap-3 px-4 py-4 pr-6 text-xs text-neutral-700">
         <div>
           <CardTitle className="mb-1 text-sm font-semibold text-neutral-900 line-clamp-2">
             {video.title ?? "Untitled video"}

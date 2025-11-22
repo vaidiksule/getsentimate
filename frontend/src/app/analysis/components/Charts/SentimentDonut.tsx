@@ -42,9 +42,9 @@ export function SentimentDonut({ score, positive, neutral, negative }: Sentiment
   const COLORS = ["#0A84FF", "#C7C7CC", "#FF3B30"];
 
   return (
-    <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-neutral-50 px-3 py-2 text-[11px] text-neutral-600">
-      <div className="h-20 w-20">
-        <ResponsiveContainer width="100%" height="100%">
+    <div className="flex w-full items-center justify-between gap-4 rounded-2xl bg-neutral-50 px-4 py-3 text-[11px] text-neutral-600">
+      <div className="h-32 w-32 md:h-40 md:w-40">
+        <ResponsiveContainer width="100%" height="100%" minHeight={180}>
           <PieChart>
             <Pie
               data={data}
