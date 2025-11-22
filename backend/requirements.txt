@@ -7,7 +7,7 @@ dj-rest-auth==2.2.1
 python-decouple==3.8
 python-dotenv==1.1.1
 whitenoise==6.9.0
-gunicorn==23.0.0
+gunicorn>=21.0
 mongoengine==0.29.1
 pymongo==3.11.4
 google-api-python-client==2.179.0
