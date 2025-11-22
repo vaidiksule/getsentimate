@@ -16,7 +16,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # --------------------
 SECRET_KEY = config("SECRET_KEY", default="changeme-in-production")
-DEBUG = config("DEBUG", default=True, cast=bool)
+# DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = True
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
 # --------------------
@@ -144,7 +145,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",  # Changed from IsAuthenticated to AllowAny
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,

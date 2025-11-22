@@ -1,33 +1,25 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import { AuthProvider } from './components/AuthProvider'
+import "./globals.css";
+import type { ReactNode } from "react";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
-const inter = Inter({ subsets: ['latin'] })
+export const metadata = {
+  title: "GetSentimate – YouTube Comments Analyzer",
+  description: "Paste a YouTube URL and get instant, AI-powered insights on your audience.",
+};
 
-export const metadata: Metadata = {
-  title: 'GetSentimate - AI-Powered YouTube Analytics',
-  description: 'Understand your YouTube audience with AI-powered comment analysis, sentiment detection, and actionable insights.',
-  keywords: 'YouTube analytics, comment analysis, sentiment analysis, AI, content creators, audience insights',
-  authors: [{ name: 'GetSentimate Team' }],
-  viewport: 'width=device-width, initial-scale=1',
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
-      </head>
-      <body className={inter.className}>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <div className="flex min-h-screen flex-col bg-white text-neutral-900">
+          <Header />
+          <main className="flex-1 bg-gradient-to-b from-white to-neutral-50/80">
+            <div className="mx-auto max-w-5xl px-4 py-8">{children}</div>
+          </main>
+          <Footer />
+        </div>
       </body>
     </html>
-  )
+  );
 }

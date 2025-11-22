@@ -13,7 +13,7 @@ class AIService:
     
     def __init__(self):
         self.api_key = os.getenv('GEMINI_API_KEY')
-        self.model_name = 'gemini-1.5-pro'
+        self.model_name = 'gemini-2.0-flash-exp'
         self.fallback_model = 'gemini-1.5-flash'
         self._initialize_service()
     
@@ -695,8 +695,32 @@ class AIService:
             # Generate comprehensive AI insights
             if self.is_available:
                 insights = self._generate_url_analysis_insights(comment_texts, video_title, video_description)
+                
+                # Extract topics and categorize comments
+                topic_analysis = self.extract_topics_and_categorize(comment_texts)
+                
+                # Analyze viewer personas
+                persona_analysis = self.analyze_viewer_personas(comment_texts, comments_data)
+                
+                # Generate actionable insights
+                actionable_insights = self.generate_actionable_insights({
+                    **insights,
+                    **topic_analysis,
+                    **persona_analysis
+                })
+                
+                # Calculate content performance score
+                performance_score = self.calculate_content_performance_score({
+                    **insights,
+                    **topic_analysis,
+                    **persona_analysis
+                })
             else:
                 insights = self._generate_fallback_url_insights(comment_texts)
+                topic_analysis = self._fallback_topic_extraction(comment_texts)
+                persona_analysis = self._fallback_persona_analysis(comment_texts)
+                actionable_insights = self._fallback_actionable_insights({})
+                performance_score = self._fallback_performance_score()
             
             # Calculate engagement metrics
             engagement_metrics = self._calculate_url_engagement_metrics(comments_data)
@@ -730,6 +754,12 @@ class AIService:
                 'what_users_dislike': insights.get('what_users_dislike', []),
                 'video_requests': insights.get('video_requests', []),
                 'engagement_level': insights.get('engagement_level', 'medium'),
+                
+                # Enhanced analysis data
+                'topic_analysis': topic_analysis,
+                'persona_analysis': persona_analysis,
+                'actionable_insights': actionable_insights,
+                'performance_score': performance_score,
                 
                 # Metadata
                 'analysis_timestamp': datetime.now().isoformat(),
@@ -1170,24 +1200,466 @@ class AIService:
             ]
         }
     
-    def _fallback_url_analysis_insights(self, comments_data: List[Dict]) -> Dict:
-        """Fallback insights when analysis fails"""
+    def extract_topics_and_categorize(self, comment_texts: List[str]) -> Dict:
+        """Extract main topics and categorize comments by intent"""
+        try:
+            if not self.is_available:
+                return self._fallback_topic_extraction(comment_texts)
+            
+            # Combine comments for analysis
+            combined_text = "\n".join([f"Comment {i+1}: {text}" for i, text in enumerate(comment_texts[:50])])
+            
+            prompt = f"""
+            Analyze these YouTube video comments and extract topics and categorize by intent. Return JSON with:
+            
+            {{
+                "main_topics": [
+                    {{"topic": "topic name", "frequency": number, "sentiment": "positive/negative/neutral"}},
+                    {{"topic": "topic name", "frequency": number, "sentiment": "positive/negative/neutral"}}
+                ],
+                "comment_categories": {{
+                    "praise": ["examples of praise comments"],
+                    "criticism": ["examples of criticism comments"],
+                    "questions": ["examples of question comments"],
+                    "suggestions": ["examples of suggestion comments"],
+                    "requests": ["examples of request comments"]
+                }},
+                "trending_keywords": [
+                    {{"keyword": "word", "frequency": number, "context": "how it's used"}}
+                ],
+                "topic_sentiment_matrix": {{
+                    "topic_name": {{"positive": number, "negative": number, "neutral": number}}
+                }}
+            }}
+            
+            Comments: {combined_text}
+            
+            Return only valid JSON.
+            """
+            
+            response = self.model.generate_content(prompt)
+            result = json.loads(response.text)
+            
+            return {
+                'main_topics': result.get('main_topics', []),
+                'comment_categories': result.get('comment_categories', {}),
+                'trending_keywords': result.get('trending_keywords', []),
+                'topic_sentiment_matrix': result.get('topic_sentiment_matrix', {}),
+                'model_used': self.model_name
+            }
+            
+        except Exception as e:
+            print(f"Topic extraction failed: {e}")
+            return self._fallback_topic_extraction(comment_texts)
+    
+    def analyze_viewer_personas(self, comment_texts: List[str], comment_metadata: List[Dict]) -> Dict:
+        """Categorize commenters into viewer personas"""
+        try:
+            if not self.is_available:
+                return self._fallback_persona_analysis(comment_texts)
+            
+            # Prepare data with metadata
+            comments_with_metadata = []
+            for i, text in enumerate(comment_texts[:50]):
+                metadata = comment_metadata[i] if i < len(comment_metadata) else {}
+                comments_with_metadata.append({
+                    'text': text,
+                    'author_name': metadata.get('author_name', 'Unknown'),
+                    'like_count': metadata.get('like_count', 0),
+                    'published_at': metadata.get('published_at', '')
+                })
+            
+            combined_data = json.dumps(comments_with_metadata, indent=2)
+            
+            prompt = f"""
+            Analyze these YouTube video comments and categorize commenters into viewer personas. Return JSON with:
+            
+            {{
+                "viewer_personas": [
+                    {{
+                        "persona": "persona name",
+                        "percentage": number,
+                        "characteristics": ["characteristic 1", "characteristic 2"],
+                        "what_they_care_about": ["concern 1", "concern 2"],
+                        "engagement_pattern": "description",
+                        "example_comments": ["example 1", "example 2"]
+                    }}
+                ],
+                "persona_insights": {{
+                    "dominant_persona": "persona name",
+                    "persona_conflicts": ["conflict description"],
+                    "engagement_by_persona": {{
+                        "persona_name": {{"avg_likes": number, "comment_length": number}}
+                    }}
+                }}
+            }}
+            
+            Comment data: {combined_data}
+            
+            Common personas to look for:
+            - Loyal Fans: Long-time supporters, positive, engaged
+            - New Viewers: First-time commenters, asking questions
+            - Critics: Providing negative feedback or concerns
+            - Experts: Knowledgeable about the topic
+            - Casuals: Brief, surface-level comments
+            - Trolls: Negative, disruptive comments
+            
+            Return only valid JSON.
+            """
+            
+            response = self.model.generate_content(prompt)
+            result = json.loads(response.text)
+            
+            return {
+                'viewer_personas': result.get('viewer_personas', []),
+                'persona_insights': result.get('persona_insights', {}),
+                'model_used': self.model_name
+            }
+            
+        except Exception as e:
+            print(f"Persona analysis failed: {e}")
+            return self._fallback_persona_analysis(comment_texts)
+    
+    def generate_actionable_insights(self, analysis_data: Dict) -> Dict:
+        """Generate prioritized actionable insights for content creators"""
+        try:
+            if not self.is_available:
+                return self._fallback_actionable_insights(analysis_data)
+            
+            # Prepare comprehensive analysis data
+            analysis_summary = {
+                'topics': analysis_data.get('main_topics', []),
+                'personas': analysis_data.get('viewer_personas', []),
+                'what_users_like': analysis_data.get('what_users_like', []),
+                'what_users_dislike': analysis_data.get('what_users_dislike', []),
+                'user_suggestions': analysis_data.get('user_suggestions', []),
+                'video_requests': analysis_data.get('video_requests', []),
+                'engagement_level': analysis_data.get('engagement_level', 'medium')
+            }
+            
+            prompt = f"""
+            Based on this comprehensive YouTube video analysis, generate prioritized actionable insights for the content creator. Return JSON with:
+            
+            {{
+                "top_3_priorities": [
+                    {{
+                        "action": "specific action to take",
+                        "priority": "high/medium/low",
+                        "effort": "low/medium/high",
+                        "impact": "high/medium/low",
+                        "reasoning": "why this is important",
+                        "supporting_data": ["data point 1", "data point 2"]
+                    }}
+                ],
+                "action_categories": {{
+                    "make_more_of": [
+                        {{
+                            "action": "what to do more of",
+                            "priority": "high/medium/low",
+                            "evidence": "supporting evidence"
+                        }}
+                    ],
+                    "avoid": [
+                        {{
+                            "action": "what to avoid",
+                            "priority": "high/medium/low",
+                            "evidence": "supporting evidence"
+                        }}
+                    ],
+                    "address": [
+                        {{
+                            "action": "what to address",
+                            "priority": "high/medium/low",
+                            "evidence": "supporting evidence"
+                        }}
+                    ],
+                    "future_videos": [
+                        {{
+                            "action": "future video idea",
+                            "priority": "high/medium/low",
+                            "evidence": "supporting evidence"
+                        }}
+                    ]
+                }},
+                "quick_wins": [
+                    {{
+                        "action": "quick action",
+                        "effort": "low",
+                        "impact": "medium/high",
+                        "timeframe": "immediate/short-term"
+                    }}
+                ],
+                "long_term_improvements": [
+                    {{
+                        "action": "long-term action",
+                        "effort": "high",
+                        "impact": "high",
+                        "timeframe": "long-term"
+                    }}
+                ]
+            }}
+            
+            Analysis data: {json.dumps(analysis_summary, indent=2)}
+            
+            Focus on:
+            1. What will have the biggest impact on audience satisfaction
+            2. What's easiest to implement quickly
+            3. What addresses the most common concerns
+            4. What leverages the most positive feedback
+            
+            Return only valid JSON.
+            """
+            
+            response = self.model.generate_content(prompt)
+            result = json.loads(response.text)
+            
+            return {
+                'top_3_priorities': result.get('top_3_priorities', []),
+                'action_categories': result.get('action_categories', {}),
+                'quick_wins': result.get('quick_wins', []),
+                'long_term_improvements': result.get('long_term_improvements', []),
+                'model_used': self.model_name
+            }
+            
+        except Exception as e:
+            print(f"Actionable insights generation failed: {e}")
+            return self._fallback_actionable_insights(analysis_data)
+    
+    def calculate_content_performance_score(self, analysis_data: Dict) -> Dict:
+        """Calculate comprehensive content performance metrics"""
+        try:
+            # Extract metrics from analysis data
+            engagement_level = analysis_data.get('engagement_level', 'medium')
+            sentiment_analysis = analysis_data.get('sentiment_analysis', {})
+            engagement_metrics = analysis_data.get('engagement_metrics', {})
+            
+            # Calculate base scores
+            engagement_score = self._calculate_engagement_score_from_data(engagement_level, engagement_metrics)
+            satisfaction_score = self._calculate_satisfaction_score(sentiment_analysis)
+            viral_potential = self._calculate_viral_potential(analysis_data)
+            
+            # Overall score (weighted average)
+            overall_score = (
+                engagement_score * 0.4 +
+                satisfaction_score * 0.4 +
+                viral_potential * 0.2
+            )
+            
+            # Identify controversial moments
+            controversial_topics = self._identify_controversial_topics(analysis_data)
+            
+            # Topics that resonated most
+            resonating_topics = self._identify_resonating_topics(analysis_data)
+            
+            return {
+                'overall_score': round(overall_score, 1),
+                'sub_scores': {
+                    'engagement': round(engagement_score, 1),
+                    'satisfaction': round(satisfaction_score, 1),
+                    'viral_potential': round(viral_potential, 1)
+                },
+                'controversial_moments': controversial_topics,
+                'resonating_topics': resonating_topics,
+                'performance_grade': self._get_performance_grade(overall_score),
+                'benchmarks': {
+                    'vs_average': 'above' if overall_score > 70 else 'below' if overall_score < 50 else 'average',
+                    'engagement_trend': 'increasing' if engagement_score > 70 else 'stable',
+                    'satisfaction_trend': 'high' if satisfaction_score > 70 else 'moderate'
+                }
+            }
+            
+        except Exception as e:
+            print(f"Content performance scoring failed: {e}")
+            return self._fallback_performance_score()
+    
+    def _calculate_engagement_score_from_data(self, engagement_level: str, engagement_metrics: Dict) -> float:
+        """Calculate engagement score from data"""
+        level_scores = {'low': 30, 'medium': 60, 'high': 85}
+        base_score = level_scores.get(engagement_level, 50)
+        
+        # Adjust based on engagement metrics
+        overall_score = engagement_metrics.get('overall_score', 0.5)
+        return min(100, base_score + (overall_score * 20))
+    
+    def _calculate_satisfaction_score(self, sentiment_analysis: Dict) -> float:
+        """Calculate satisfaction score from sentiment"""
+        positive_ratio = sentiment_analysis.get('positive_ratio', 0.3)
+        negative_ratio = sentiment_analysis.get('negative_ratio', 0.3)
+        
+        # Higher positive ratio = higher satisfaction
+        satisfaction = (positive_ratio * 100) - (negative_ratio * 50)
+        return max(0, min(100, satisfaction))
+    
+    def _calculate_viral_potential(self, analysis_data: Dict) -> float:
+        """Calculate viral potential score"""
+        # Factors that indicate viral potential
+        factors = []
+        
+        # High engagement
+        if analysis_data.get('engagement_level') == 'high':
+            factors.append(30)
+        
+        # Controversial topics (can be viral)
+        controversial_count = len(analysis_data.get('controversial_moments', []))
+        factors.append(min(20, controversial_count * 5))
+        
+        # Video requests (shows demand)
+        requests_count = len(analysis_data.get('video_requests', []))
+        factors.append(min(25, requests_count * 3))
+        
+        # Strong sentiment (positive or negative)
+        sentiment_analysis = analysis_data.get('sentiment_analysis', {})
+        if sentiment_analysis.get('positive_ratio', 0) > 0.7 or sentiment_analysis.get('negative_ratio', 0) > 0.7:
+            factors.append(25)
+        
+        return min(100, sum(factors))
+    
+    def _identify_controversial_topics(self, analysis_data: Dict) -> List[Dict]:
+        """Identify controversial topics"""
+        controversial = []
+        
+        # Look for topics with mixed sentiment
+        topic_sentiment_matrix = analysis_data.get('topic_sentiment_matrix', {})
+        for topic, sentiments in topic_sentiment_matrix.items():
+            positive = sentiments.get('positive', 0)
+            negative = sentiments.get('negative', 0)
+            total = positive + negative + sentiments.get('neutral', 0)
+            
+            if total > 0:
+                controversy_ratio = abs(positive - negative) / total
+                if controversy_ratio < 0.3:  # Mixed sentiment = controversial
+                    controversial.append({
+                        'topic': topic,
+                        'controversy_level': 'high' if controversy_ratio < 0.2 else 'medium',
+                        'sentiment_split': f"{positive:.1%} positive, {negative:.1%} negative"
+                    })
+        
+        return controversial
+    
+    def _identify_resonating_topics(self, analysis_data: Dict) -> List[Dict]:
+        """Identify topics that resonated most with audience"""
+        resonating = []
+        
+        main_topics = analysis_data.get('main_topics', [])
+        for topic in main_topics:
+            if topic.get('sentiment') == 'positive' and topic.get('frequency', 0) > 5:
+                resonating.append({
+                    'topic': topic.get('topic', ''),
+                    'resonance_score': topic.get('frequency', 0),
+                    'sentiment': topic.get('sentiment', 'neutral')
+                })
+        
+        # Sort by resonance score
+        resonating.sort(key=lambda x: x['resonance_score'], reverse=True)
+        return resonating[:5]  # Top 5
+    
+    def _get_performance_grade(self, score: float) -> str:
+        """Get performance grade based on score"""
+        if score >= 90:
+            return 'A+'
+        elif score >= 80:
+            return 'A'
+        elif score >= 70:
+            return 'B+'
+        elif score >= 60:
+            return 'B'
+        elif score >= 50:
+            return 'C'
+        else:
+            return 'D'
+    
+    def _fallback_topic_extraction(self, comment_texts: List[str]) -> Dict:
+        """Fallback topic extraction"""
         return {
-            'total_comments': len(comments_data),
-            'analyzed_comments': 0,
-            'analysis_coverage': 0,
-            'sentiment_analysis': {'overall_sentiment': 'neutral', 'positive_ratio': 0, 'negative_ratio': 0, 'neutral_ratio': 1},
-            'engagement_metrics': {'overall_score': 0, 'engagement_level': 'low'},
-            'audience_insights': 'Unable to analyze comments at this time.',
-            'content_recommendations': 'Consider analyzing comments manually for insights.',
-            'key_findings': [],
-            'user_suggestions': [],
-            'what_users_like': [],
-            'what_users_dislike': [],
-            'video_requests': [],
-            'engagement_level': 'low',
-            'analysis_timestamp': timezone.now().isoformat(),
+            'main_topics': [
+                {'topic': 'Content Quality', 'frequency': len(comment_texts) // 3, 'sentiment': 'positive'},
+                {'topic': 'Engagement', 'frequency': len(comment_texts) // 4, 'sentiment': 'neutral'}
+            ],
+            'comment_categories': {
+                'praise': ['Good content', 'Great video'],
+                'criticism': ['Could be better'],
+                'questions': ['What about...'],
+                'suggestions': ['Maybe try...'],
+                'requests': ['More videos like this']
+            },
+            'trending_keywords': [
+                {'keyword': 'video', 'frequency': 10, 'context': 'general reference'},
+                {'keyword': 'content', 'frequency': 8, 'context': 'quality discussion'}
+            ],
+            'topic_sentiment_matrix': {
+                'Content': {'positive': 0.6, 'negative': 0.2, 'neutral': 0.2}
+            },
             'model_used': 'fallback'
+        }
+    
+    def _fallback_persona_analysis(self, comment_texts: List[str]) -> Dict:
+        """Fallback persona analysis"""
+        return {
+            'viewer_personas': [
+                {
+                    'persona': 'General Audience',
+                    'percentage': 100,
+                    'characteristics': ['Mixed engagement', 'Various interests'],
+                    'what_they_care_about': ['Content quality', 'Entertainment value'],
+                    'engagement_pattern': 'Moderate',
+                    'example_comments': ['Good video', 'Interesting content']
+                }
+            ],
+            'persona_insights': {
+                'dominant_persona': 'General Audience',
+                'persona_conflicts': [],
+                'engagement_by_persona': {
+                    'General Audience': {'avg_likes': 5, 'comment_length': 20}
+                }
+            },
+            'model_used': 'fallback'
+        }
+    
+    def _fallback_actionable_insights(self, analysis_data: Dict) -> Dict:
+        """Fallback actionable insights"""
+        return {
+            'top_3_priorities': [
+                {
+                    'action': 'Continue creating similar content',
+                    'priority': 'medium',
+                    'effort': 'medium',
+                    'impact': 'medium',
+                    'reasoning': 'Audience shows interest',
+                    'supporting_data': ['Positive engagement detected']
+                }
+            ],
+            'action_categories': {
+                'make_more_of': [
+                    {'action': 'Similar content style', 'priority': 'medium', 'evidence': 'Positive feedback'}
+                ],
+                'avoid': [],
+                'address': [],
+                'future_videos': [
+                    {'action': 'Follow-up content', 'priority': 'low', 'evidence': 'User interest'}
+                ]
+            },
+            'quick_wins': [],
+            'long_term_improvements': [],
+            'model_used': 'fallback'
+        }
+    
+    def _fallback_performance_score(self) -> Dict:
+        """Fallback performance score"""
+        return {
+            'overall_score': 60.0,
+            'sub_scores': {
+                'engagement': 60.0,
+                'satisfaction': 60.0,
+                'viral_potential': 60.0
+            },
+            'controversial_moments': [],
+            'resonating_topics': [],
+            'performance_grade': 'C',
+            'benchmarks': {
+                'vs_average': 'average',
+                'engagement_trend': 'stable',
+                'satisfaction_trend': 'moderate'
+            }
         }
 
 

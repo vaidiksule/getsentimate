@@ -10,7 +10,8 @@ const config: Config = {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: 'SF Pro Display'
+				sans: ['-apple-system', 'SF Pro Text', 'Helvetica', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+				mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
   		},
   		borderRadius: {
   			'4xl': '2rem',

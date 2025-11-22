@@ -1,0 +1,287 @@
+{
+    "success": true,
+    "message": "Successfully analyzed video with 100 comments",
+    "video": {
+        "id": "jCtrR8oLehA",
+        "title": "I Made the World's Most 3D Printed Bike... Again",
+        "description": "Let's see if we can finally make a fully rideable bike using a 3D printer!\n\nIf you haven't seen the first video, you have to go check it out: https://youtu.be/9VBtA2Uq12I\n\nIf you want the project files, you can find them here: https://kevdoes.com/products/3d-printed-bike-files-v2?utm_source=copyToPasteBoard&utm_medium=product-links&utm_content=web\n\nThe printers used in this video:\nBambu Lab H2D: https://tidd.ly/4njvmiP\nBambu Lab A1: https://tidd.ly/4qux1VF\nBambu Lab X1C: https://tidd.ly/3WOk3nN\nBambu Lab AMS HT: https://tidd.ly/3IIrw4y\n\nThe filaments I used:\nPET-CF (Frame): https://tidd.ly/4gLywtQ\nPAHT-CF (Wheels and Saddle): https://tidd.ly/48O3b7Q\nTPU 95A HF (Wheels, Saddle, Grips): https://tidd.ly/4nRli14\nPPA-CF (Axles, Cranks, and Pedals): https://tidd.ly/42VxYfe\n\nOther Gear:\nMain Camera: https://bit.ly/3yA3kM5\nAction Camera: https://amzn.to/4km3WrB\n\n*some of the above links are affiliate links - shopping through them doesn't add any incremental cost to you, but helps support future projects on the channel. Thank you for using them to shop!*\n\nTo Support on Patreon: https://bit.ly/4eCPHN5\nFor Daily Updates: https://www.instagram.com/kevdoesinsta/",
+        "thumbnail_url": "https://i.ytimg.com/vi_webp/jCtrR8oLehA/maxresdefault.webp",
+        "published_at": "2025-10-22T00:00:00",
+        "view_count": 28837,
+        "like_count": 1835,
+        "comment_count": null,
+        "channel_title": "KevDoes",
+        "duration": "16:24"
+    },
+    "analysis": {
+        "total_comments_analyzed": 100,
+        "analysis_timestamp": "2025-11-22T21:57:52.274263",
+        "ai_insights": {
+            "total_comments": 100,
+            "analyzed_comments": 100,
+            "analysis_coverage": 1.0,
+            "sentiment_analysis": {
+                "overall_sentiment": "positive",
+                "positive_ratio": 0.6,
+                "negative_ratio": 0.2,
+                "neutral_ratio": 0.2,
+                "total_analyzed": 100,
+                "sentiment_score": 0.6
+            },
+            "engagement_metrics": {
+                "overall_score": 0.44,
+                "engagement_level": "medium",
+                "average_comment_length": 93.2,
+                "average_likes": 0,
+                "unique_authors": 80,
+                "author_diversity": 0.8
+            },
+            "audience_insights": "Here are audience insights based on the provided analysis:\n\n**1. Audience Interests and Concerns:**\n\n*   **Interests:** Innovation, 3D printing technology, electric vehicles, unconventional engineering projects, the development process of complex builds, future improvements.\n*   **Concerns:** High cost, practicality, performance relative to cost, limitations of 3D printing technology.\n\n**2. Engagement Patterns:**\n\n*   **Highly Engaged:** Actively follows the project's development.\n*   **Appreciative:** Values the creator's effort and perseverance.\n*   **Comparative:** Compares to existing solutions (e-bikes).\n\n**3. Demographics Hints:**\n\n*   **Tech-Savvy:** Interest in 3D printing and electric vehicles suggests a technologically informed audience.\n*   **Cost-Conscious:** Concerns about cost indicate a likely demographic with financial constraints or a desire for value.\n*   **Likely DIY/Maker-Oriented:** Interest in the development process and unconventional projects points to an audience with DIY or maker tendencies.\n\n**4. Content Preferences:**\n\n*   **Development Logs:** Enjoys behind-the-scenes content showing the project's progress.\n*   **Technical Details:** Appreciates information about the 3D printing technology and its limitations.\n*   **Future Plans:** Interested in electrification and other potential improvements.\n*   **Performance Data:** Wants to see objective data on the bike's performance and limitations.\n\n**5. Community Dynamics:**\n\n*   **Supportive:** Positive overall sentiment suggests a supportive and encouraging community.\n*   **Constructive Criticism:** Concerns about cost and performance are likely expressed as constructive feedback, rather than negativity.\n*   **Future-Oriented:** Focus on electrification indicates a community interested in the project's future evolution.",
+            "content_recommendations": "Okay, based on the comment analysis, here are 3 actionable recommendations for the creator:\n\n1.  **Address Cost & Performance Concerns with a Follow-Up & Material Exploration:** Dedicate a video or section in an upcoming video to directly address the cost vs. performance criticism. This could involve a breakdown of the project's cost, a discussion of the challenges of 3D-printed bikes compared to conventional options, and a comparative performance test. **Critically, explore and experiment with alternative materials (ASA, carbon fiber tubes with 3D-printed connectors, or printing negatives and filling with resin) to improve strength, durability, and potentially reduce cost. Document this process thoroughly and explain the reasoning behind each material choice.** This directly addresses a major point of contention and positions the creator as responsive to feedback.\n\n2.  **Embrace the Electric Version Suggestion & Prototype Design Process:**  Prioritize the electric bike project.  **Dedicate a series of videos to the design and prototyping of an electric 3D-printed bike.** This not only fulfills a highly requested video topic, but also provides ongoing content opportunities. Show the design process, the challenges of integrating an electric motor and battery, and document the iterations and improvements. Consider the suggested use of larger nozzle sizes, fewer infill layers, and bearing optimization when designing. This leverages popular demand and opens up new avenues for engineering exploration.\n\n3.  **Improve Engagement by Highlighting Community Involvement & Addressing Specific Feedback:** Actively acknowledge and respond to user suggestions in future videos. **Specifically, mention and credit user names when incorporating their ideas.** Even if you don't adopt every suggestion, explaining why you chose a different approach shows you value the community's input. Also, explicitly address concerns about plastic fumes by discussing safety measures and ventilation used during the printing process.  Furthermore, consider a short segment comparing your methods of joining 3D printed parts to that of @KevDoes (referencing the commenter). This fosters a stronger sense of community and shows that the creator is actively listening to and engaging with their audience.",
+            "key_findings": [
+                "The audience is highly engaged with the project, following the development process and appreciating the creator's perseverance.",
+                "Cost and practicality are significant concerns for the audience, with comparisons to cheaper alternatives like e-bikes and concerns about the bike's performance relative to its cost.",
+                "There is a strong desire for an electric version of the 3D printed bike."
+            ],
+            "user_suggestions": [
+                "Make an electric version of the bike (many suggestions).",
+                "Use carbon fiber tubes with 3D printed connectors.",
+                "Explore alternative printing methods, such as printing negatives and filling them with plastic or resin.",
+                "Use ASA and annealing for better strength and durability.",
+                "Add more bearings to improve performance.",
+                "Focus on single print wheels to reduce points of failure.",
+                "Collaborate with EmilyTheEngineer for similar projects.",
+                "Consider using Pantheon Design if working with a Voron printer.",
+                "Use larger nozzle sizes and fewer infill layers for structural stiffness when printing with a Voron.",
+                "Only print the negatives and then fill with resin."
+            ],
+            "what_users_like": [
+                "The creator's perseverance and willingness to keep trying despite failures.",
+                "The unconventional nature of the project and seeing a unique idea brought to life.",
+                "The creator's personality and the overall atmosphere of the video.",
+                "Seeing the final product work, even if it's not perfect.",
+                "The authenticity of the creator's reactions and relatable moments (e.g., 6:43)."
+            ],
+            "what_users_dislike": [
+                "The perceived high cost of the project compared to the bike's performance.",
+                "The bike's performance compared to readily available alternatives (dumpster bikes, e-bikes).",
+                "Some concerns regarding the use of Bambu Lab printers compared to Voron printers.",
+                "Potential health concerns regarding melted plastic fumes.",
+                "Joining 3D printed parts together (per @KevDoes reference)"
+            ],
+            "video_requests": [
+                "An electric version of the 3D printed bike.",
+                "A 3D printed wheelchair for kids.",
+                "A Velomobile project.",
+                "A video comparing different 3D printing materials and techniques for bike construction.",
+                "A follow-up video addressing the cost and practicality concerns."
+            ],
+            "engagement_level": "high",
+            "topic_analysis": {
+                "main_topics": [
+                    {
+                        "topic": "Content Quality",
+                        "frequency": 33,
+                        "sentiment": "positive"
+                    },
+                    {
+                        "topic": "Engagement",
+                        "frequency": 25,
+                        "sentiment": "neutral"
+                    }
+                ],
+                "comment_categories": {
+                    "praise": [
+                        "Good content",
+                        "Great video"
+                    ],
+                    "criticism": [
+                        "Could be better"
+                    ],
+                    "questions": [
+                        "What about..."
+                    ],
+                    "suggestions": [
+                        "Maybe try..."
+                    ],
+                    "requests": [
+                        "More videos like this"
+                    ]
+                },
+                "trending_keywords": [
+                    {
+                        "keyword": "video",
+                        "frequency": 10,
+                        "context": "general reference"
+                    },
+                    {
+                        "keyword": "content",
+                        "frequency": 8,
+                        "context": "quality discussion"
+                    }
+                ],
+                "topic_sentiment_matrix": {
+                    "Content": {
+                        "positive": 0.6,
+                        "negative": 0.2,
+                        "neutral": 0.2
+                    }
+                },
+                "model_used": "fallback"
+            },
+            "persona_analysis": {
+                "viewer_personas": [
+                    {
+                        "persona": "General Audience",
+                        "percentage": 100,
+                        "characteristics": [
+                            "Mixed engagement",
+                            "Various interests"
+                        ],
+                        "what_they_care_about": [
+                            "Content quality",
+                            "Entertainment value"
+                        ],
+                        "engagement_pattern": "Moderate",
+                        "example_comments": [
+                            "Good video",
+                            "Interesting content"
+                        ]
+                    }
+                ],
+                "persona_insights": {
+                    "dominant_persona": "General Audience",
+                    "persona_conflicts": [],
+                    "engagement_by_persona": {
+                        "General Audience": {
+                            "avg_likes": 5,
+                            "comment_length": 20
+                        }
+                    }
+                },
+                "model_used": "fallback"
+            },
+            "actionable_insights": {
+                "top_3_priorities": [
+                    {
+                        "action": "Continue creating similar content",
+                        "priority": "medium",
+                        "effort": "medium",
+                        "impact": "medium",
+                        "reasoning": "Audience shows interest",
+                        "supporting_data": [
+                            "Positive engagement detected"
+                        ]
+                    }
+                ],
+                "action_categories": {
+                    "make_more_of": [
+                        {
+                            "action": "Similar content style",
+                            "priority": "medium",
+                            "evidence": "Positive feedback"
+                        }
+                    ],
+                    "avoid": [],
+                    "address": [],
+                    "future_videos": [
+                        {
+                            "action": "Follow-up content",
+                            "priority": "low",
+                            "evidence": "User interest"
+                        }
+                    ]
+                },
+                "quick_wins": [],
+                "long_term_improvements": [],
+                "model_used": "fallback"
+            },
+            "performance_score": {
+                "overall_score": 53.0,
+                "sub_scores": {
+                    "engagement": 95.0,
+                    "satisfaction": 15.0,
+                    "viral_potential": 45
+                },
+                "controversial_moments": [],
+                "resonating_topics": [
+                    {
+                        "topic": "Content Quality",
+                        "resonance_score": 33,
+                        "sentiment": "positive"
+                    }
+                ],
+                "performance_grade": "C",
+                "benchmarks": {
+                    "vs_average": "average",
+                    "engagement_trend": "increasing",
+                    "satisfaction_trend": "moderate"
+                }
+            },
+            "analysis_timestamp": "2025-11-22T21:58:38.039413",
+            "model_used": "gemini-2.0-flash-exp"
+        }
+    },
+    "comments_sample": [
+        {
+            "text": "Hahaha, that feeling then youre finally done after weeks of fails -)))",
+            "author_name": "@TheGumanoidAN",
+            "like_count": "0",
+            "published_at": "2025-11-20T21:57:45.593176"
+        },
+        {
+            "text": "The atmosphere was on point.",
+            "author_name": "@josemon-b2l",
+            "like_count": "0",
+            "published_at": "2025-11-19T21:57:45.594112"
+        },
+        {
+            "text": "Subbed",
+            "author_name": "@universal7564",
+            "like_count": "0",
+            "published_at": "2025-11-17T21:57:45.594757"
+        },
+        {
+            "text": "great job with the bike! This might work better as a scooter imo",
+            "author_name": "@iTzZM7TRF",
+            "like_count": "0",
+            "published_at": "2025-11-13T21:57:45.595385"
+        },
+        {
+            "text": "ITS OVER ONE THOUSAND??? Wtf not worth it",
+            "author_name": "@AB-cd5gd",
+            "like_count": "0",
+            "published_at": "2025-11-11T21:57:45.595999"
+        },
+        {
+            "text": "all that money and time for something that works worse than a kids bike from the dumpster.",
+            "author_name": "@womplestilskin",
+            "like_count": "0",
+            "published_at": "2025-11-11T21:57:45.596607"
+        },
+        {
+            "text": "Striga sdhdshhsdhds your wife is amazing man",
+            "author_name": "@stsiete2987",
+            "like_count": "0",
+            "published_at": "2025-11-10T21:57:45.597221"
+        },
+        {
+            "text": "i like this guy",
+            "author_name": "@mattwyd4",
+            "like_count": "0",
+            "published_at": "2025-11-10T21:57:45.597826"
+        },
+        {
+            "text": "Thanks for putting this together.",
+            "author_name": "@JenneterrMada",
+            "like_count": "0",
+            "published_at": "2025-11-10T21:57:45.598429"
+        },
+        {
+            "text": "Bambulab \"can\" print TPU they just don't really care how well.",
+            "author_name": "@MrTree421",
+            "like_count": "0",
+            "published_at": "2025-11-08T21:57:45.598998"
+        }
+    ]
+}

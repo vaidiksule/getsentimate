@@ -25,7 +25,6 @@ from .serializers import (
     AnalysisResultSerializer, UserPreferenceSerializer, VideoDetailSerializer,
     ChannelDetailSerializer, CommentAnalysisSerializer, ChannelConnectionSerializer
 )
-from .services.youtube_service import get_youtube_service, YouTubeService
 from .services.youtube_scraper_service import get_youtube_scraper_service
 from .services.ai_service import ai_service
 from django.utils import timezone
@@ -1879,9 +1878,7 @@ class VideoInsightsView(APIView):
 
 
 class URLAnalysisView(APIView):
-    """URL-based video analysis for any YouTube video"""
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    """URL-based video analysis for any YouTube video (no auth required)"""
     
     def post(self, request):
         """Analyze any YouTube video by URL"""
