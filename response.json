@@ -2,20 +2,20 @@
     "success": true,
     "message": "Successfully analyzed video with 100 comments",
     "video": {
-        "id": "jCtrR8oLehA",
-        "title": "I Made the World's Most 3D Printed Bike... Again",
-        "description": "Let's see if we can finally make a fully rideable bike using a 3D printer!\n\nIf you haven't seen the first video, you have to go check it out: https://youtu.be/9VBtA2Uq12I\n\nIf you want the project files, you can find them here: https://kevdoes.com/products/3d-printed-bike-files-v2?utm_source=copyToPasteBoard&utm_medium=product-links&utm_content=web\n\nThe printers used in this video:\nBambu Lab H2D: https://tidd.ly/4njvmiP\nBambu Lab A1: https://tidd.ly/4qux1VF\nBambu Lab X1C: https://tidd.ly/3WOk3nN\nBambu Lab AMS HT: https://tidd.ly/3IIrw4y\n\nThe filaments I used:\nPET-CF (Frame): https://tidd.ly/4gLywtQ\nPAHT-CF (Wheels and Saddle): https://tidd.ly/48O3b7Q\nTPU 95A HF (Wheels, Saddle, Grips): https://tidd.ly/4nRli14\nPPA-CF (Axles, Cranks, and Pedals): https://tidd.ly/42VxYfe\n\nOther Gear:\nMain Camera: https://bit.ly/3yA3kM5\nAction Camera: https://amzn.to/4km3WrB\n\n*some of the above links are affiliate links - shopping through them doesn't add any incremental cost to you, but helps support future projects on the channel. Thank you for using them to shop!*\n\nTo Support on Patreon: https://bit.ly/4eCPHN5\nFor Daily Updates: https://www.instagram.com/kevdoesinsta/",
-        "thumbnail_url": "https://i.ytimg.com/vi_webp/jCtrR8oLehA/maxresdefault.webp",
-        "published_at": "2025-10-22T00:00:00",
-        "view_count": 28837,
-        "like_count": 1835,
+        "id": "2hUA0R-iwiI",
+        "title": "3D Printing an ENTIRE Porsche GT3 RS",
+        "description": "We're 3d printing an entire Porsche 992 GT3 RS using normal every day 3d printers!\n\nThe  Elegoo 3d printers i'm using: https://rb.gy/ub1jyx\n\nBecome an all access member to get access to perks:\nhttps://www.youtube.com/channel/UC6OnbzVF_xLo5uprS8bfjYg/join\n\nRaceworks goodness - https://raceworks.com.au\nSP tools = the BEST tools -  https://www.sptools.com/\n\n➡️ Two Step Garage Store - https://twostepgarage.com/\n➡️ Instagram @itsmikelake",
+        "thumbnail_url": "https://i.ytimg.com/vi/2hUA0R-iwiI/maxresdefault.jpg",
+        "published_at": "2025-09-21T00:00:00",
+        "view_count": 530815,
+        "like_count": 28172,
         "comment_count": null,
-        "channel_title": "KevDoes",
-        "duration": "16:24"
+        "channel_title": "Mike Lake",
+        "duration": "28:17"
     },
     "analysis": {
         "total_comments_analyzed": 100,
-        "analysis_timestamp": "2025-11-22T21:57:52.274263",
+        "analysis_timestamp": "2025-11-22T23:12:23.209648",
         "ai_insights": {
             "total_comments": 100,
             "analyzed_comments": 100,
@@ -29,52 +29,50 @@
                 "sentiment_score": 0.6
             },
             "engagement_metrics": {
-                "overall_score": 0.44,
+                "overall_score": 0.558,
                 "engagement_level": "medium",
-                "average_comment_length": 93.2,
+                "average_comment_length": 157.0,
                 "average_likes": 0,
-                "unique_authors": 80,
-                "author_diversity": 0.8
+                "unique_authors": 86,
+                "author_diversity": 0.86
             },
-            "audience_insights": "Here are audience insights based on the provided analysis:\n\n**1. Audience Interests and Concerns:**\n\n*   **Interests:** Innovation, 3D printing technology, electric vehicles, unconventional engineering projects, the development process of complex builds, future improvements.\n*   **Concerns:** High cost, practicality, performance relative to cost, limitations of 3D printing technology.\n\n**2. Engagement Patterns:**\n\n*   **Highly Engaged:** Actively follows the project's development.\n*   **Appreciative:** Values the creator's effort and perseverance.\n*   **Comparative:** Compares to existing solutions (e-bikes).\n\n**3. Demographics Hints:**\n\n*   **Tech-Savvy:** Interest in 3D printing and electric vehicles suggests a technologically informed audience.\n*   **Cost-Conscious:** Concerns about cost indicate a likely demographic with financial constraints or a desire for value.\n*   **Likely DIY/Maker-Oriented:** Interest in the development process and unconventional projects points to an audience with DIY or maker tendencies.\n\n**4. Content Preferences:**\n\n*   **Development Logs:** Enjoys behind-the-scenes content showing the project's progress.\n*   **Technical Details:** Appreciates information about the 3D printing technology and its limitations.\n*   **Future Plans:** Interested in electrification and other potential improvements.\n*   **Performance Data:** Wants to see objective data on the bike's performance and limitations.\n\n**5. Community Dynamics:**\n\n*   **Supportive:** Positive overall sentiment suggests a supportive and encouraging community.\n*   **Constructive Criticism:** Concerns about cost and performance are likely expressed as constructive feedback, rather than negativity.\n*   **Future-Oriented:** Focus on electrification indicates a community interested in the project's future evolution.",
-            "content_recommendations": "Okay, based on the comment analysis, here are 3 actionable recommendations for the creator:\n\n1.  **Address Cost & Performance Concerns with a Follow-Up & Material Exploration:** Dedicate a video or section in an upcoming video to directly address the cost vs. performance criticism. This could involve a breakdown of the project's cost, a discussion of the challenges of 3D-printed bikes compared to conventional options, and a comparative performance test. **Critically, explore and experiment with alternative materials (ASA, carbon fiber tubes with 3D-printed connectors, or printing negatives and filling with resin) to improve strength, durability, and potentially reduce cost. Document this process thoroughly and explain the reasoning behind each material choice.** This directly addresses a major point of contention and positions the creator as responsive to feedback.\n\n2.  **Embrace the Electric Version Suggestion & Prototype Design Process:**  Prioritize the electric bike project.  **Dedicate a series of videos to the design and prototyping of an electric 3D-printed bike.** This not only fulfills a highly requested video topic, but also provides ongoing content opportunities. Show the design process, the challenges of integrating an electric motor and battery, and document the iterations and improvements. Consider the suggested use of larger nozzle sizes, fewer infill layers, and bearing optimization when designing. This leverages popular demand and opens up new avenues for engineering exploration.\n\n3.  **Improve Engagement by Highlighting Community Involvement & Addressing Specific Feedback:** Actively acknowledge and respond to user suggestions in future videos. **Specifically, mention and credit user names when incorporating their ideas.** Even if you don't adopt every suggestion, explaining why you chose a different approach shows you value the community's input. Also, explicitly address concerns about plastic fumes by discussing safety measures and ventilation used during the printing process.  Furthermore, consider a short segment comparing your methods of joining 3D printed parts to that of @KevDoes (referencing the commenter). This fosters a stronger sense of community and shows that the creator is actively listening to and engaging with their audience.",
+            "audience_insights": "Okay, here's an analysis of the audience based on your provided information:\n\n**1. Audience Interests and Concerns:**\n\n*   **Interests:** 3D printing technology (especially speed and specific brands like Bambu Lab and Elegoo), car modification/customization projects, material properties and performance, and practical engineering solutions.\n*   **Concerns:**  Material selection trade-offs (PETG's limitations vs. more durable options), structural strength and durability of 3D printed parts in demanding applications (like car mods), and the overall longevity and reliability of the project.\n\n**2. Engagement Patterns:**\n\n*   **Highly Engaged:** The audience actively offers technical advice and shares their own experiences, indicating a high level of involvement with the subject matter.\n*   **Problem-Solving Focus:** Comments revolve around troubleshooting, optimization, and finding better solutions for the presented project.\n\n**3. Demographic Hints:**\n\n*   **Tech-Savvy:** Familiarity with 3D printing brands, material science concepts, and advanced finishing techniques suggests a technologically literate audience.\n*   **Maker/DIY Enthusiasts:** Passion for car modification and hands-on projects points towards a strong DIY element within the audience.\n\n**4. Content Preferences:**\n\n*   **Technical Depth:**  They appreciate content that delves into the technical aspects of 3D printing, material selection, and fabrication methods.\n*   **Practical Application:** They value content that demonstrates real-world applications of 3D printing, particularly in challenging projects like car customization.\n*   **Detailed Processes:** They benefit from information about printing workflows, and tutorials of techniques that can improve part performance and appearance.\n\n**5. Community Dynamics:**\n\n*   **Collaborative & Supportive:** The sharing of technical advice suggests a positive and collaborative community environment.\n*   **Knowledgeable:** The level of technical discussion implies a relatively knowledgeable audience base.",
+            "content_recommendations": "Here are 5 specific and actionable content recommendations for the creator, based on the user feedback:\n\n1. **Durability Deep Dive & Material Upgrade:** Dedicate a segment in the next video to directly address the durability concerns. Showcase testing of the printed parts (specifically the hood) and compare PETG's performance to alternative materials like ASA, ABS, or Nylon+Carbon Fiber (even small test prints). Explain the reasoning behind the original material choice and discuss the trade-offs of switching. This directly confronts user concerns and incorporates suggested material improvements.\n\n2. **Fiberglassing 2.0: A Tutorial & Demonstration:**  Create a focused tutorial segment on proper fiberglassing techniques. Address concerns about cracking and stress fractures. Demonstrate complete saturation techniques with multiple layers, possibly highlighting different application methods. Consider including a comparative demonstration showing the difference between a properly applied layer and a poorly applied layer. This addresses fiberglassing concerns and incorporates tutorial requests.\n\n3. **Modular Design & Assembly Showcase:**  Document and explain the assembly process in more detail, highlighting any challenges and solutions. In future designs, consider incorporating user suggestions like puzzle-piece attachments or clamping locks for easier and more robust assembly. Showcase these improvements in future videos. This directly addresses assembly concerns and incorporates popular design suggestions.\n\n4. **Scanning & CAD Demystified:**  Create a dedicated video or a segment within a future video that explains the scanning and CAD process in detail. Show the equipment used, the software involved, and the steps taken to convert the scan into a printable model. Explain common challenges and how to overcome them. This directly fulfills a specific video request and adds value to the content.\n\n5. **Fan Choice Fantasy Car Print:**  Engage the audience by holding a poll to determine which fantasy car from a video game should be 3D printed next.  This directly answers a video request, increases engagement by involving the audience in the content creation process, and provides a clear direction for the next major project.  Tease progress updates and snippets of the design phase to build anticipation.",
             "key_findings": [
-                "The audience is highly engaged with the project, following the development process and appreciating the creator's perseverance.",
-                "Cost and practicality are significant concerns for the audience, with comparisons to cheaper alternatives like e-bikes and concerns about the bike's performance relative to its cost.",
-                "There is a strong desire for an electric version of the 3D printed bike."
+                "Strong interest in faster 3D printers, particularly Bambu Lab and Elegoo.",
+                "Concerns regarding material choice (PETG vs. ASA/ABS/Nylon+Carbon Fiber) and structural integrity are prominent.",
+                "Users offer diverse technical advice regarding printing, fiberglassing, and finishing."
             ],
             "user_suggestions": [
-                "Make an electric version of the bike (many suggestions).",
-                "Use carbon fiber tubes with 3D printed connectors.",
-                "Explore alternative printing methods, such as printing negatives and filling them with plastic or resin.",
-                "Use ASA and annealing for better strength and durability.",
-                "Add more bearings to improve performance.",
-                "Focus on single print wheels to reduce points of failure.",
-                "Collaborate with EmilyTheEngineer for similar projects.",
-                "Consider using Pantheon Design if working with a Voron printer.",
-                "Use larger nozzle sizes and fewer infill layers for structural stiffness when printing with a Voron.",
-                "Only print the negatives and then fill with resin."
+                "Use faster 3D printers like Bambu Lab or Elegoo Centuri Carbon.",
+                "Consider using ASA, ABS, or Nylon+Carbon Fiber filament for improved durability and temperature resistance.",
+                "Employ puzzle-piece-like attachments or clapping locks for easier assembly.",
+                "Add support structures to 3D prints for a smoother finish.",
+                "Use carbon fiber fabric for improved aesthetics and strength.",
+                "Ensure complete saturation of fiberglass to prevent cracking and stress fractures.",
+                "Recycle failed prints into parts like the wing.",
+                "Use a mold for carbon fiber parts instead of 3D printing directly.",
+                "Apply multiple layers of fiberglass.",
+                "Consider making it a convertible."
             ],
             "what_users_like": [
-                "The creator's perseverance and willingness to keep trying despite failures.",
-                "The unconventional nature of the project and seeing a unique idea brought to life.",
-                "The creator's personality and the overall atmosphere of the video.",
-                "Seeing the final product work, even if it's not perfect.",
-                "The authenticity of the creator's reactions and relatable moments (e.g., 6:43)."
+                "The ambition and scale of the project.",
+                "The energy and enthusiasm of the creators.",
+                "The willingness of the creators to share their process.",
+                "The unique checkerboard color scheme (for some users)."
             ],
             "what_users_dislike": [
-                "The perceived high cost of the project compared to the bike's performance.",
-                "The bike's performance compared to readily available alternatives (dumpster bikes, e-bikes).",
-                "Some concerns regarding the use of Bambu Lab printers compared to Voron printers.",
-                "Potential health concerns regarding melted plastic fumes.",
-                "Joining 3D printed parts together (per @KevDoes reference)"
+                "Concerns about the floppy hood and its durability.",
+                "Concerns about the quality and application of fiberglass.",
+                "Potential microplastic pollution.",
+                "The choice of Boxster as a base car (some believe it's a waste of a good car).",
+                "Using PETG instead of more durable materials."
             ],
             "video_requests": [
-                "An electric version of the 3D printed bike.",
-                "A 3D printed wheelchair for kids.",
-                "A Velomobile project.",
-                "A video comparing different 3D printing materials and techniques for bike construction.",
-                "A follow-up video addressing the cost and practicality concerns."
+                "A 3D printed retro VW Beetle.",
+                "More details about the scanning and CAD process.",
+                "Printing a fantasy car from a video game.",
+                "Tutorials or explanations of specific techniques (fiberglassing, carbon fiber application)."
             ],
             "engagement_level": "high",
             "topic_analysis": {
@@ -197,11 +195,11 @@
                 "model_used": "fallback"
             },
             "performance_score": {
-                "overall_score": 53.0,
+                "overall_score": 52.4,
                 "sub_scores": {
                     "engagement": 95.0,
                     "satisfaction": 15.0,
-                    "viral_potential": 45
+                    "viral_potential": 42
                 },
                 "controversial_moments": [],
                 "resonating_topics": [
@@ -218,70 +216,70 @@
                     "satisfaction_trend": "moderate"
                 }
             },
-            "analysis_timestamp": "2025-11-22T21:58:38.039413",
+            "analysis_timestamp": "2025-11-22T23:13:07.384623",
             "model_used": "gemini-2.0-flash-exp"
         }
     },
     "comments_sample": [
         {
-            "text": "Hahaha, that feeling then youre finally done after weeks of fails -)))",
-            "author_name": "@TheGumanoidAN",
-            "like_count": "0",
-            "published_at": "2025-11-20T21:57:45.593176"
+            "text": "You can buy the Porsche GT3 STL files HERE! : https://twostepgarage.com/products/porsche-992-gt3-rs-3d-printing-files",
+            "author_name": "@itsmikelake",
+            "like_count": "46",
+            "published_at": "2025-10-22T23:12:19.323909"
         },
         {
-            "text": "The atmosphere was on point.",
-            "author_name": "@josemon-b2l",
+            "text": "Не пойму, это перевод не правильный на русский или реально купили Porsche за 13 USD, а принтер за 549 USD?",
+            "author_name": "@artyomg7275",
             "like_count": "0",
-            "published_at": "2025-11-19T21:57:45.594112"
+            "published_at": "2025-11-22T01:12:19.325115"
         },
         {
-            "text": "Subbed",
-            "author_name": "@universal7564",
+            "text": "You need a Bambu Lab printer, NOW! The X1 is a great choice",
+            "author_name": "@RafesUnderground",
             "like_count": "0",
-            "published_at": "2025-11-17T21:57:45.594757"
+            "published_at": "2025-11-22T00:12:19.326014"
         },
         {
-            "text": "great job with the bike! This might work better as a scooter imo",
-            "author_name": "@iTzZM7TRF",
+            "text": "Microplastics have entered the chat by the quadrillions.",
+            "author_name": "@DBlck2025",
             "like_count": "0",
-            "published_at": "2025-11-13T21:57:45.595385"
+            "published_at": "2025-11-21T23:12:19.326814"
         },
         {
-            "text": "ITS OVER ONE THOUSAND??? Wtf not worth it",
-            "author_name": "@AB-cd5gd",
+            "text": "Please don't name it  Porsch - it's [ˈpɔːrʃə] or for you „POR-she“",
+            "author_name": "@franklauter7466",
             "like_count": "0",
-            "published_at": "2025-11-11T21:57:45.595999"
+            "published_at": "2025-11-21T23:12:19.327593"
         },
         {
-            "text": "all that money and time for something that works worse than a kids bike from the dumpster.",
-            "author_name": "@womplestilskin",
+            "text": "you should have used bambulab printers",
+            "author_name": "@lochanc7881",
             "like_count": "0",
-            "published_at": "2025-11-11T21:57:45.596607"
+            "published_at": "2025-11-20T23:12:19.328367"
         },
         {
-            "text": "Striga sdhdshhsdhds your wife is amazing man",
-            "author_name": "@stsiete2987",
+            "text": "Thats called males puzzle",
+            "author_name": "@debilnívideaczstream",
             "like_count": "0",
-            "published_at": "2025-11-10T21:57:45.597221"
+            "published_at": "2025-11-19T23:12:19.329134"
         },
         {
-            "text": "i like this guy",
-            "author_name": "@mattwyd4",
+            "text": "I actually think the checkerboard color looks sick",
+            "author_name": "@OldNerdyMeathead",
             "like_count": "0",
-            "published_at": "2025-11-10T21:57:45.597826"
+            "published_at": "2025-11-19T23:12:19.329897"
         },
         {
-            "text": "Thanks for putting this together.",
-            "author_name": "@JenneterrMada",
+            "text": "I remember when you could buy an old boxster for 3k an M3 or lotus for 10k",
+            "author_name": "@cronocide",
             "like_count": "0",
-            "published_at": "2025-11-10T21:57:45.598429"
+            "published_at": "2025-11-18T23:12:19.330661"
         },
         {
-            "text": "Bambulab \"can\" print TPU they just don't really care how well.",
-            "author_name": "@MrTree421",
+            "text": "Awesome vid, well done. I feel like having the different part assemble with puzze-piece like attachments would be way easier ; have you tried that?",
+            "author_name": "@griffon",
             "like_count": "0",
-            "published_at": "2025-11-08T21:57:45.598998"
+            "published_at": "2025-11-18T23:12:19.331421"
         }
     ]
 }
