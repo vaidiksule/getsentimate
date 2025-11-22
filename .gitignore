@@ -6,7 +6,7 @@ __pycache__/
 *.pyc
 
 # Virtual Environments
-venv/
+.venv/
 .env
 .env/
 
