@@ -11,10 +11,10 @@ export function PerformanceCard({ performance }: Props) {
   if (!performance) {
     return (
       <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-        <CardHeader>
+        <CardHeader className="pb-3 px-6 pt-6">
           <CardTitle className="text-sm font-semibold text-neutral-900">Performance</CardTitle>
         </CardHeader>
-        <CardContent className="text-xs text-neutral-500">No performance score returned.</CardContent>
+        <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">No performance score returned.</CardContent>
       </Card>
     );
   }
@@ -23,10 +23,10 @@ export function PerformanceCard({ performance }: Props) {
 
   return (
     <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-3 px-6 pt-6">
         <CardTitle className="text-sm font-semibold text-neutral-900">Performance</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-xs text-neutral-700">
+      <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
         <div className="flex items-baseline gap-2">
           <span className="text-3xl font-semibold text-neutral-900">
             {performance.overallScore != null ? performance.overallScore.toFixed(0) : "–"}
@@ -38,13 +38,13 @@ export function PerformanceCard({ performance }: Props) {
             </span>
           )}
         </div>
-        <div className="space-y-1">
+        <div className="space-y-3">
           {entries.map(([key, value]) => (
             <div key={key} className="flex items-center gap-2 text-[11px]">
               <span className="w-24 capitalize text-neutral-500">{key.replace(/_/g, " ")}</span>
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-neutral-100">
                 <div
-                  className="h-full rounded-full bg-[#0A84FF]"
+                  className="h-full rounded-full bg-blue-500"
                   style={{ width: `${Math.min(100, value)}%` }}
                 />
               </div>

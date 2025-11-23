@@ -43,7 +43,7 @@ export function SentimentDonut({ score, positive, neutral, negative }: Sentiment
 
   return (
     <div className="flex w-full items-center justify-between gap-4 rounded-2xl bg-neutral-50 px-4 py-3 text-[11px] text-neutral-600">
-      <div className="h-32 w-32 md:h-40 md:w-40">
+      <div className="h-40 w-40 md:h-48 md:w-48">
         <ResponsiveContainer width="100%" height="100%" minHeight={180}>
           <PieChart>
             <Pie
@@ -52,8 +52,8 @@ export function SentimentDonut({ score, positive, neutral, negative }: Sentiment
               nameKey="name"
               cx="50%"
               cy="50%"
-              innerRadius={24}
-              outerRadius={36}
+              innerRadius={32}
+              outerRadius={52}
               paddingAngle={2}
             >
               {data.map((entry, index) => (

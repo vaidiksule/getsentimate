@@ -81,6 +81,9 @@ export interface ParsedAnalysis {
   personas: ParsedPersona[];
   actionPriorities: ParsedActionPriority[];
   contentRecommendations?: string | null;
+  videoRequests: string[];
+  whatUsersLike: string[];
+  whatUsersDislike: string[];
   comments: ParsedCommentSample[];
   raw: any;
 }
@@ -196,6 +199,23 @@ export function parseAnalysis(json: any): ParsedAnalysis {
       }))
     : [];
 
+  const contentRecommendations: string | null = ai.content_recommendations ?? null;
+
+  const videoRequestsRaw = ai.video_requests;
+  const videoRequests: string[] = Array.isArray(videoRequestsRaw)
+    ? videoRequestsRaw.filter((req: any) => typeof req === "string" && req.trim())
+    : [];
+
+  const whatUsersLikeRaw = ai.what_users_like;
+  const whatUsersLike: string[] = Array.isArray(whatUsersLikeRaw)
+    ? whatUsersLikeRaw.filter((item: any) => typeof item === "string" && item.trim())
+    : [];
+
+  const whatUsersDislikeRaw = ai.what_users_dislike;
+  const whatUsersDislike: string[] = Array.isArray(whatUsersDislikeRaw)
+    ? whatUsersDislikeRaw.filter((item: any) => typeof item === "string" && item.trim())
+    : [];
+
   const commentsRaw = raw.comments_sample;
   const comments: ParsedCommentSample[] = Array.isArray(commentsRaw)
     ? commentsRaw.map((c: any) => ({
@@ -222,7 +242,10 @@ export function parseAnalysis(json: any): ParsedAnalysis {
     performance,
     personas,
     actionPriorities,
-    contentRecommendations: ai.content_recommendations ?? null,
+    contentRecommendations,
+    videoRequests,
+    whatUsersLike,
+    whatUsersDislike,
     comments,
     raw,
   };

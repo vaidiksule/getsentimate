@@ -12,10 +12,10 @@ export function VideoMetaCard({ video }: Props) {
   if (!video) {
     return (
       <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-        <CardHeader>
+        <CardHeader className="pb-3 px-6 pt-6">
           <CardTitle className="text-sm font-semibold text-neutral-900">Video</CardTitle>
         </CardHeader>
-        <CardContent className="text-xs text-neutral-500">
+        <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
           No video metadata returned — see raw response.
         </CardContent>
       </Card>
@@ -23,37 +23,44 @@ export function VideoMetaCard({ video }: Props) {
   }
 
   return (
-    <Card className="flex items-stretch gap-4 rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <div className="relative m-4 aspect-video w-48 overflow-hidden rounded-2xl bg-neutral-100">
-        {video.thumbnailUrl ? (
-          <Image
-            src={video.thumbnailUrl}
-            alt={video.title ?? "Video thumbnail"}
-            fill
-            className="object-cover"
-          />
-        ) : null}
-      </div>
-      <CardContent className="flex flex-1 flex-col justify-center gap-3 px-4 py-4 pr-6 text-xs text-neutral-700">
-        <div>
-          <CardTitle className="mb-1 text-sm font-semibold text-neutral-900 line-clamp-2">
-            {video.title ?? "Untitled video"}
-          </CardTitle>
-          <p className="text-[11px] text-neutral-500">{video.channelTitle}</p>
-        </div>
-        <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-neutral-600">
-          <span>
-            <span className="font-medium">Published:</span> {video.publishedAt ? new Date(video.publishedAt).toLocaleDateString() : "–"}
-          </span>
-          <span>
-            <span className="font-medium">Duration:</span> {video.duration ?? "–"}
-          </span>
-          <span>
-            <span className="font-medium">Views:</span> {video.viewCount?.toLocaleString() ?? "–"}
-          </span>
-          <span>
-            <span className="font-medium">Likes:</span> {video.likeCount?.toLocaleString() ?? "–"}
-          </span>
+    <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
+      <CardHeader className="pb-3 px-6 pt-6">
+        <CardTitle className="text-sm font-semibold text-neutral-900">Video</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
+        <div className="flex gap-4">
+          <div className="relative aspect-video w-48 flex-shrink-0 overflow-hidden rounded-xl bg-neutral-50">
+            {video.thumbnailUrl ? (
+              <Image
+                src={video.thumbnailUrl}
+                alt={video.title ?? "Video thumbnail"}
+                fill
+                className="object-cover"
+                sizes="(max-width: 192px) 100vw, 192px"
+              />
+            ) : null}
+          </div>
+          <div className="flex flex-1 flex-col justify-center gap-3">
+            <div>
+              <CardTitle className="text-sm font-semibold text-neutral-900 mb-1 line-clamp-2">
+                {video.title ?? "Untitled video"}
+              </CardTitle>
+              <p className="text-[10px] text-neutral-600">{video.channelTitle}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              {[
+                ["Published", video.publishedAt ? new Date(video.publishedAt).toLocaleDateString() : "–"],
+                ["Duration", video.duration ?? "–"],
+                ["Views", video.viewCount?.toLocaleString() ?? "–"],
+                ["Likes", video.likeCount?.toLocaleString() ?? "–"]
+              ].map(([label, value]) => (
+                <div key={label} className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-wide text-neutral-400">{label}</span>
+                  <span className="text-xs font-medium text-neutral-900">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

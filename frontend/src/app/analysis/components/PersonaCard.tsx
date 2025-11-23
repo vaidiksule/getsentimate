@@ -11,17 +11,17 @@ interface Props {
 export function PersonaCard({ personas }: Props) {
   return (
     <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-3 px-6 pt-6">
         <CardTitle className="text-sm font-semibold text-neutral-900">Persona</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3 text-xs text-neutral-700">
+      <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
         {personas.length === 0 && <p className="text-neutral-400">No persona analysis returned by backend.</p>}
         {personas.map((p) => (
-          <div key={p.persona} className="space-y-1 rounded-2xl bg-neutral-50 px-3 py-2">
+          <div key={p.persona} className="gap-2 rounded-xl bg-neutral-50/80 px-3 py-2 border border-neutral-100/50">
             <div className="flex items-center justify-between">
               <div className="font-medium text-neutral-900">{p.persona}</div>
               {p.percentage != null && (
-                <Badge className="rounded-full bg-neutral-900 px-2 py-0.5 text-[10px] font-medium text-white">
+                <Badge className="rounded-full bg-blue-500 text-white text-[10px] px-2 py-0.5 font-medium">
                   {p.percentage}%
                 </Badge>
               )}

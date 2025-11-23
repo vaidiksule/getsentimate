@@ -10,8 +10,9 @@ import { PerformanceCard } from "./PerformanceCard";
 import { PersonaCard } from "./PersonaCard";
 import { InsightsCard } from "./InsightsCard";
 import { TopicMatrixCard } from "./TopicMatrixCard";
-import { TimelineCard } from "./TimelineCard";
 import { CommentsSampleCard } from "./CommentsSampleCard";
+import { VideoRequestsCard } from "./VideoRequestsCard";
+import { UserFeedbackCard } from "./UserFeedbackCard";
 
 export interface ParsedSentiment {
   score?: number;
@@ -84,14 +85,29 @@ export function ResultGrid({ parsed, completedAt }: ResultGridProps) {
         <PersonaCard personas={parsed.personas} />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <InsightsCard priorities={parsed.actionPriorities} recommendations={parsed.contentRecommendations} />
+      <div className="grid gap-4 md:grid-cols-1">
         <TopicMatrixCard matrix={parsed.topicMatrix} />
       </div>
 
+      <div className="grid gap-4 md:grid-cols-1">
+        <InsightsCard priorities={parsed.actionPriorities} recommendations={parsed.contentRecommendations} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-1">
+        <UserFeedbackCard whatUsersLike={parsed.whatUsersLike} whatUsersDislike={parsed.whatUsersDislike} />
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <TimelineCard raw={parsed.raw} />
         <CommentsSampleCard comments={parsed.comments} />
+        {parsed.videoRequests && parsed.videoRequests.length > 0 ? (
+          <VideoRequestsCard videoRequests={parsed.videoRequests} />
+        ) : (
+          <div className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md backdrop-blur-sm">
+            <div className="text-center text-sm text-neutral-500">
+              No video requests found in the analysis
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

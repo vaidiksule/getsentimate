@@ -2,20 +2,20 @@
     "success": true,
     "message": "Successfully analyzed video with 100 comments",
     "video": {
-        "id": "2hUA0R-iwiI",
-        "title": "3D Printing an ENTIRE Porsche GT3 RS",
-        "description": "We're 3d printing an entire Porsche 992 GT3 RS using normal every day 3d printers!\n\nThe  Elegoo 3d printers i'm using: https://rb.gy/ub1jyx\n\nBecome an all access member to get access to perks:\nhttps://www.youtube.com/channel/UC6OnbzVF_xLo5uprS8bfjYg/join\n\nRaceworks goodness - https://raceworks.com.au\nSP tools = the BEST tools -  https://www.sptools.com/\n\n➡️ Two Step Garage Store - https://twostepgarage.com/\n➡️ Instagram @itsmikelake",
-        "thumbnail_url": "https://i.ytimg.com/vi/2hUA0R-iwiI/maxresdefault.jpg",
-        "published_at": "2025-09-21T00:00:00",
-        "view_count": 530815,
-        "like_count": 28172,
-        "comment_count": null,
-        "channel_title": "Mike Lake",
-        "duration": "28:17"
+        "id": "VLiZglfPQbo",
+        "title": "ChatGPT vs Gemini 3 vs Grok Make Fortnite From Scratch",
+        "description": "Gemini 3 is insane 🥵. Sorry Epic, please dont sue me.\n\n​@teferi3 did this first, go watch his vid here: https://youtu.be/HsLhp0J7s9k\n\nBusiness Inquiries: minimunchbusiness@gmail.com\n\n00:00 Intro\n00:09 ChatGPT 5.1\n03:25 Gemini 3\n08:10 Grok 4\n12:38 Conclusion",
+        "thumbnail_url": "https://i.ytimg.com/vi/VLiZglfPQbo/hqdefault.jpg",
+        "published_at": "2025-11-20T16:45:02+00:00",
+        "view_count": 110638,
+        "like_count": 3853,
+        "comment_count": 377,
+        "channel_title": "Minimunch",
+        "duration": "13:38"
     },
     "analysis": {
         "total_comments_analyzed": 100,
-        "analysis_timestamp": "2025-11-22T23:12:23.209648",
+        "analysis_timestamp": "2025-11-23T21:01:08.046905",
         "ai_insights": {
             "total_comments": 100,
             "analyzed_comments": 100,
@@ -29,50 +29,39 @@
                 "sentiment_score": 0.6
             },
             "engagement_metrics": {
-                "overall_score": 0.558,
-                "engagement_level": "medium",
-                "average_comment_length": 157.0,
-                "average_likes": 0,
-                "unique_authors": 86,
-                "author_diversity": 0.86
+                "overall_score": 0.997,
+                "engagement_level": "high",
+                "average_comment_length": 100.8,
+                "average_likes": 17.2,
+                "unique_authors": 99,
+                "author_diversity": 0.99
             },
-            "audience_insights": "Okay, here's an analysis of the audience based on your provided information:\n\n**1. Audience Interests and Concerns:**\n\n*   **Interests:** 3D printing technology (especially speed and specific brands like Bambu Lab and Elegoo), car modification/customization projects, material properties and performance, and practical engineering solutions.\n*   **Concerns:**  Material selection trade-offs (PETG's limitations vs. more durable options), structural strength and durability of 3D printed parts in demanding applications (like car mods), and the overall longevity and reliability of the project.\n\n**2. Engagement Patterns:**\n\n*   **Highly Engaged:** The audience actively offers technical advice and shares their own experiences, indicating a high level of involvement with the subject matter.\n*   **Problem-Solving Focus:** Comments revolve around troubleshooting, optimization, and finding better solutions for the presented project.\n\n**3. Demographic Hints:**\n\n*   **Tech-Savvy:** Familiarity with 3D printing brands, material science concepts, and advanced finishing techniques suggests a technologically literate audience.\n*   **Maker/DIY Enthusiasts:** Passion for car modification and hands-on projects points towards a strong DIY element within the audience.\n\n**4. Content Preferences:**\n\n*   **Technical Depth:**  They appreciate content that delves into the technical aspects of 3D printing, material selection, and fabrication methods.\n*   **Practical Application:** They value content that demonstrates real-world applications of 3D printing, particularly in challenging projects like car customization.\n*   **Detailed Processes:** They benefit from information about printing workflows, and tutorials of techniques that can improve part performance and appearance.\n\n**5. Community Dynamics:**\n\n*   **Collaborative & Supportive:** The sharing of technical advice suggests a positive and collaborative community environment.\n*   **Knowledgeable:** The level of technical discussion implies a relatively knowledgeable audience base.",
-            "content_recommendations": "Here are 5 specific and actionable content recommendations for the creator, based on the user feedback:\n\n1. **Durability Deep Dive & Material Upgrade:** Dedicate a segment in the next video to directly address the durability concerns. Showcase testing of the printed parts (specifically the hood) and compare PETG's performance to alternative materials like ASA, ABS, or Nylon+Carbon Fiber (even small test prints). Explain the reasoning behind the original material choice and discuss the trade-offs of switching. This directly confronts user concerns and incorporates suggested material improvements.\n\n2. **Fiberglassing 2.0: A Tutorial & Demonstration:**  Create a focused tutorial segment on proper fiberglassing techniques. Address concerns about cracking and stress fractures. Demonstrate complete saturation techniques with multiple layers, possibly highlighting different application methods. Consider including a comparative demonstration showing the difference between a properly applied layer and a poorly applied layer. This addresses fiberglassing concerns and incorporates tutorial requests.\n\n3. **Modular Design & Assembly Showcase:**  Document and explain the assembly process in more detail, highlighting any challenges and solutions. In future designs, consider incorporating user suggestions like puzzle-piece attachments or clamping locks for easier and more robust assembly. Showcase these improvements in future videos. This directly addresses assembly concerns and incorporates popular design suggestions.\n\n4. **Scanning & CAD Demystified:**  Create a dedicated video or a segment within a future video that explains the scanning and CAD process in detail. Show the equipment used, the software involved, and the steps taken to convert the scan into a printable model. Explain common challenges and how to overcome them. This directly fulfills a specific video request and adds value to the content.\n\n5. **Fan Choice Fantasy Car Print:**  Engage the audience by holding a poll to determine which fantasy car from a video game should be 3D printed next.  This directly answers a video request, increases engagement by involving the audience in the content creation process, and provides a clear direction for the next major project.  Tease progress updates and snippets of the design phase to build anticipation.",
+            "audience_insights": "Okay, here's an analysis of the audience based on the provided findings, focusing on concise and actionable insights:\n\n**1. Audience Interests and Concerns:**\n\n*   **Interest:** Deeply interested in the practical applications of AI in game development, specifically leveraging models like Gemini 3.\n*   **Concerns:** Frustration with limitations hindering AI potential, specifically the timer restriction. They are also likely interested in whether the AI can create fully-fledged games.\n\n**2. Engagement Patterns:**\n\n*   **Active Feedback:** The audience provides specific and actionable feedback (remove/extend timer), suggesting they are actively thinking about how to improve the AI's performance.\n*   **Comparative Analysis:** They actively compare Gemini 3 to other AI models, implying a familiarity with the AI landscape.\n\n**3. Demographic Hints:**\n\n*   **Tech-Savvy:** Their understanding of AI models and game development processes suggests a tech-savvy audience, likely with some programming or game design knowledge.\n*   **Potentially Aspiring Developers:** Strong interest in AI game development suggests many could be aspiring developers or hobbyists looking for tools to simplify the game creation process.\n\n**4. Content Preferences:**\n\n*   **Demonstrations of Capabilities:** They are drawn to videos showcasing the AI's ability to create games.\n*   **Challenging Boundaries:** They prefer content that pushes the limits of AI game development, showcasing complex and complete game creation.\n\n**5. Community Dynamics:**\n\n*   **Constructive Criticism:** The overall positive sentiment combined with specific suggestions indicates a community focused on constructive criticism and improvement.\n*   **Shared Enthusiasm:** They share a common interest in AI's potential in game development, creating a collaborative environment.",
+            "content_recommendations": "Here are 4 specific, actionable recommendations for improving future content based on the comment analysis:\n\n1.  **Eliminate or Extend the Timer, Focusing on Quality (Addressing Concerns & Incorporating Suggestions):** Instead of rigidly adhering to a tight timer, experiment with removing it entirely or significantly extending it (e.g., several hours or even days). Prioritize showing the AI's full potential to create a more complete and playable game, even if it requires manual intervention at the end for polish. The title should reflect the increased timeframe, e.g., \"ChatGPT Creates a Game Over 48 Hours!\"\n\n2.  **Explore Game Engine Integration & Front-End Frameworks (Incorporating Suggestions & Improving Efficiency):**  Produce a video where the AI is used to generate code within a game engine (like Unity or Unreal Engine) or a front-end framework like React. This tackles the perceived limitations of the AI's current output and allows for the creation of more robust and functional game prototypes. Title examples: \"AI Game Dev: ChatGPT & Unity Team Up!\" or \"Creating a Game with React and AI.\"\n\n3.  **Genre Diversification (Creating Requested Content & Improving Engagement):** Create a video where AI attempts to create a game in one of the requested genres like Terraria, FNAF, or a racing game. This directly caters to audience interest and provides fresh, engaging content. Examples titles: \"Can AI Build Terraria?!\", \"AI Creates a Horror Game: FNAF Style!\"\n\n4.  **A/B Test Sound Effects, Gather Feedback Directly (Addressing Concerns & Improving Engagement):** Run a poll on YouTube asking viewers their preference on the current sound effects, offering alternatives, or opting for no sound effects at all.  In future videos, explicitly state in the description that you are experimenting with the sound effects and are open to feedback, encouraging further engagement and a sense of community.",
             "key_findings": [
-                "Strong interest in faster 3D printers, particularly Bambu Lab and Elegoo.",
-                "Concerns regarding material choice (PETG vs. ASA/ABS/Nylon+Carbon Fiber) and structural integrity are prominent.",
-                "Users offer diverse technical advice regarding printing, fiberglassing, and finishing."
+                "The most prominent suggestion is to remove or extend the timer, as users feel it limits the AI's potential.",
+                "Gemini 3 is frequently praised for its performance in game development, particularly compared to other AI models.",
+                "Users are highly interested in seeing more complex and complete games created by AI, pushing the boundaries of what's possible."
             ],
             "user_suggestions": [
-                "Use faster 3D printers like Bambu Lab or Elegoo Centuri Carbon.",
-                "Consider using ASA, ABS, or Nylon+Carbon Fiber filament for improved durability and temperature resistance.",
-                "Employ puzzle-piece-like attachments or clapping locks for easier assembly.",
-                "Add support structures to 3D prints for a smoother finish.",
-                "Use carbon fiber fabric for improved aesthetics and strength.",
-                "Ensure complete saturation of fiberglass to prevent cracking and stress fractures.",
-                "Recycle failed prints into parts like the wing.",
-                "Use a mold for carbon fiber parts instead of 3D printing directly.",
-                "Apply multiple layers of fiberglass.",
-                "Consider making it a convertible."
+                "Remove or significantly extend the timer to allow the AI to create more complete and bug-free games.",
+                "Explore using AI models within game engines or frontend frameworks like React to improve efficiency and code quality.",
+                "Dedicate more time (e.g., a week) to developing a full game using AI, with a final day for manual refinement."
             ],
             "what_users_like": [
-                "The ambition and scale of the project.",
-                "The energy and enthusiasm of the creators.",
-                "The willingness of the creators to share their process.",
-                "The unique checkerboard color scheme (for some users)."
+                "The direct and concise video format, avoiding lengthy introductions and sponsorships.",
+                "The concept of AI creating games and the progress being made in this area.",
+                "The humor derived from the sound effects (although some find them annoying)."
             ],
             "what_users_dislike": [
-                "Concerns about the floppy hood and its durability.",
-                "Concerns about the quality and application of fiberglass.",
-                "Potential microplastic pollution.",
-                "The choice of Boxster as a base car (some believe it's a waste of a good car).",
-                "Using PETG instead of more durable materials."
+                "The timer, as it's perceived as hindering the AI's ability to produce quality results.",
+                "The buggy and incomplete nature of the games created due to time constraints.",
+                "Potentially, the sound effects. While some find them funny, others find them annoying."
             ],
             "video_requests": [
-                "A 3D printed retro VW Beetle.",
-                "More details about the scanning and CAD process.",
-                "Printing a fantasy car from a video game.",
-                "Tutorials or explanations of specific techniques (fiberglassing, carbon fiber application)."
+                "Creating games in other genres like Terraria, FNAF, Clash Royale, Pikmin, or racing games.",
+                "Comparing Gemini 3 Pro directly against Claude.",
+                "Exploring AI music composition using models like Gemini 3.0 or Suno V5."
             ],
             "engagement_level": "high",
             "topic_analysis": {
@@ -195,11 +184,11 @@
                 "model_used": "fallback"
             },
             "performance_score": {
-                "overall_score": 52.4,
+                "overall_score": 51.8,
                 "sub_scores": {
                     "engagement": 95.0,
                     "satisfaction": 15.0,
-                    "viral_potential": 42
+                    "viral_potential": 39
                 },
                 "controversial_moments": [],
                 "resonating_topics": [
@@ -216,70 +205,70 @@
                     "satisfaction_trend": "moderate"
                 }
             },
-            "analysis_timestamp": "2025-11-22T23:13:07.384623",
+            "analysis_timestamp": "2025-11-23T21:01:55.668113",
             "model_used": "gemini-2.0-flash-exp"
         }
     },
     "comments_sample": [
         {
-            "text": "You can buy the Porsche GT3 STL files HERE! : https://twostepgarage.com/products/porsche-992-gt3-rs-3d-printing-files",
-            "author_name": "@itsmikelake",
-            "like_count": "46",
-            "published_at": "2025-10-22T23:12:19.323909"
+            "text": "Remove the timer please",
+            "author_name": "@O-NEILP",
+            "like_count": 667,
+            "published_at": "2025-11-20T17:00:19Z"
         },
         {
-            "text": "Не пойму, это перевод не правильный на русский или реально купили Porsche за 13 USD, а принтер за 549 USD?",
-            "author_name": "@artyomg7275",
-            "like_count": "0",
-            "published_at": "2025-11-22T01:12:19.325115"
+            "text": "Gemini 3 is CRACKED at making these web-based games 😭😭 I made it do GTA 6 and it was actually pretty decent",
+            "author_name": "@ViralEchoes2",
+            "like_count": 310,
+            "published_at": "2025-11-20T17:54:33Z"
         },
         {
-            "text": "You need a Bambu Lab printer, NOW! The X1 is a great choice",
-            "author_name": "@RafesUnderground",
-            "like_count": "0",
-            "published_at": "2025-11-22T00:12:19.326014"
+            "text": "I feel like the results would be wayyyyy better if the timer was removed or if the AI&#39;s were given a lot more time coz I feel like most of the time is wasted fixing bugs<br><br>This is an opinion though",
+            "author_name": "@Certified_z0mbie",
+            "like_count": 90,
+            "published_at": "2025-11-20T17:02:09Z"
         },
         {
-            "text": "Microplastics have entered the chat by the quadrillions.",
-            "author_name": "@DBlck2025",
-            "like_count": "0",
-            "published_at": "2025-11-21T23:12:19.326814"
+            "text": "Minimunch in past:noice<br><br>Minimunch now:*ADDs 1 MİLLİON DİARRHEA SOUNDS*<br>                                      ^<br>                                      |<br>                                   fixed<br>And OMG İ GOT 151 LİKES",
+            "author_name": "@OmerSaka-y9s",
+            "like_count": 153,
+            "published_at": "2025-11-20T18:33:00Z"
         },
         {
-            "text": "Please don't name it  Porsch - it's [ˈpɔːrʃə] or for you „POR-she“",
-            "author_name": "@franklauter7466",
-            "like_count": "0",
-            "published_at": "2025-11-21T23:12:19.327593"
+            "text": "the fart sounds bro",
+            "author_name": "@prodfabrii",
+            "like_count": 59,
+            "published_at": "2025-11-20T17:46:04Z"
         },
         {
-            "text": "you should have used bambulab printers",
-            "author_name": "@lochanc7881",
-            "like_count": "0",
-            "published_at": "2025-11-20T23:12:19.328367"
+            "text": "✨️Remove the timer✨️ uprising soon 😤",
+            "author_name": "@markmuller7962",
+            "like_count": 61,
+            "published_at": "2025-11-20T17:40:05Z"
         },
         {
-            "text": "Thats called males puzzle",
-            "author_name": "@debilnívideaczstream",
-            "like_count": "0",
-            "published_at": "2025-11-19T23:12:19.329134"
+            "text": "I don’t usually comment on videos, but please can you give AI like a long time to make a game? That’d be so sick 👀",
+            "author_name": "@makhe__4338",
+            "like_count": 55,
+            "published_at": "2025-11-20T20:24:46Z"
         },
         {
-            "text": "I actually think the checkerboard color looks sick",
-            "author_name": "@OldNerdyMeathead",
-            "like_count": "0",
-            "published_at": "2025-11-19T23:12:19.329897"
+            "text": "gemini is so good at making games, I make games and play them during school always bc its actually so good",
+            "author_name": "@jomamma6.9",
+            "like_count": 27,
+            "published_at": "2025-11-20T21:10:24Z"
         },
         {
-            "text": "I remember when you could buy an old boxster for 3k an M3 or lotus for 10k",
-            "author_name": "@cronocide",
-            "like_count": "0",
-            "published_at": "2025-11-18T23:12:19.330661"
+            "text": "Gemini&#39;s been cooking  🔥",
+            "author_name": "@m.d.soundscape",
+            "like_count": 17,
+            "published_at": "2025-11-20T21:01:39Z"
         },
         {
-            "text": "Awesome vid, well done. I feel like having the different part assemble with puzze-piece like attachments would be way easier ; have you tried that?",
-            "author_name": "@griffon",
-            "like_count": "0",
-            "published_at": "2025-11-18T23:12:19.331421"
+            "text": "I started watching you yesterday, already gone through like 5 of them and subscribed. so happy you uploaded now lol.",
+            "author_name": "@familyarchives25",
+            "like_count": 11,
+            "published_at": "2025-11-20T16:49:17Z"
         }
     ]
 }
