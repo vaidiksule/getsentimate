@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, Check, X } from "lucide-react";
+import { Zap, Check, X, Menu } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -10,6 +10,7 @@ export function Header() {
   const isAnalysis = pathname === "/analysis";
   const isPricing = pathname === "/pricing";
   const [showToast, setShowToast] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -55,22 +56,23 @@ export function Header() {
   return (
     <>
       <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-lg shadow-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 sm:px-8 lg:px-24 xl:px-32 py-4">
-        <Link href="/" className="flex items-center gap-3 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-105">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-24 py-4">
+        <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
+          <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-105">
             <img 
               src="/logo.svg" 
               alt="GetSentimate Logo" 
-              className="h-12 w-12"
+              className="h-8 w-8 sm:h-12 sm:w-12"
             />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-sm font-semibold text-neutral-900">GetSentimate</span>
-            <span className="text-xs text-neutral-500">YouTube comments intelligence</span>
+            <span className="text-xs sm:text-sm font-semibold text-neutral-900">GetSentimate</span>
+            <span className="text-xs text-neutral-500 hidden sm:block">YouTube comments intelligence</span>
           </div>
         </Link>
         
-        <nav className="flex items-center gap-2">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-2">
           <Link
             href="/analysis"
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
@@ -101,7 +103,57 @@ export function Header() {
             Share
           </button>
         </nav>
+
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+        >
+          <Menu className="w-5 h-5 text-neutral-900" />
+        </button>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-neutral-200/80 bg-white/90 backdrop-blur-lg">
+          <nav className="flex flex-col px-4 py-4 space-y-2">
+            <Link
+              href="/analysis"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                isAnalysis 
+                  ? "bg-neutral-900 text-white shadow-md" 
+                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+              }`}
+            >
+              <Zap className="w-4 h-4" />
+              Analysis
+            </Link>
+            
+            <Link
+              href="/pricing"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                isPricing 
+                  ? "bg-neutral-900 text-white shadow-md" 
+                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+              }`}
+            >
+              Pricing
+            </Link>
+            
+            <button 
+              onClick={() => {
+                handleShare();
+                setIsMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
+            >
+              Share
+            </button>
+          </nav>
+        </div>
+      )}
     </header>
 
     {/* Toast Notification */}
