@@ -51,7 +51,7 @@ export function InsightsCard({ priorities, recommendations }: Props) {
         items.push({
           number: match[1],
           title: match[2],
-          description: description || match[3] || ''
+          description: (description || match[3] || '').replace(/\*\*/g, '').trim()
         });
       } else {
         // Fallback: try to extract any numbered item
@@ -63,7 +63,7 @@ export function InsightsCard({ priorities, recommendations }: Props) {
           items.push({
             number: fallbackMatch[1],
             title: titlePart.replace(/\*\*/g, '').trim(),
-            description: description
+            description: description.replace(/\*\*/g, '').trim()
           });
         }
       }
@@ -75,11 +75,29 @@ export function InsightsCard({ priorities, recommendations }: Props) {
   const parsedItems = parseRecommendations(recommendations || '');
 
   return (
-    <Card className="rounded-3xl border border-neutral-200 bg-white/90 shadow-sm">
-      <CardHeader className="pb-3 px-6 pt-6">
-        <CardTitle className="text-sm font-semibold text-neutral-900">Actionable insights</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 px-6 pb-6 text-[11px] leading-relaxed text-neutral-700">
+    <Card className="rounded-3xl border border-neutral-200/50 bg-white/95 shadow-lg overflow-hidden backdrop-blur-sm">
+      <div className="relative bg-gradient-to-br from-neutral-700 to-neutral-900 px-6 pt-4 pb-3">
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-800/20 to-neutral-900/20"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.05),transparent_50%)]"></div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="relative">
+              <div className="w-3 h-3 rounded-full bg-white/90 animate-pulse"></div>
+              <div className="absolute inset-0 w-3 h-3 rounded-full bg-white/60 animate-ping"></div>
+            </div>
+            <div className="h-px bg-gradient-to-r from-white/60 to-transparent w-12"></div>
+            <span className="text-white/90 text-xs font-medium uppercase tracking-wider">AI Analysis</span>
+          </div>
+          
+          <CardTitle className="text-lg font-bold text-white mb-2 leading-tight max-w-md">
+            Actionable Insights
+          </CardTitle>
+        </div>
+        
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+      </div>
+      <CardContent className="space-y-3 px-6 py-4 pb-6 text-[11px] leading-relaxed text-neutral-700">
         {priorities.length === 0 && !recommendations && (
           <p className="text-neutral-400">No actionable insights returned by backend.</p>
         )}
@@ -122,7 +140,7 @@ export function InsightsCard({ priorities, recommendations }: Props) {
                     key={idx}
                     className={`group rounded-xl border transition-all duration-300 ${
                       isExpanded 
-                        ? 'border-blue-200 bg-gradient-to-r from-blue-50/50 to-purple-50/30 shadow-sm' 
+                        ? ' bg-gradient-to-r from-blue-50/50 to-purple-50/30 shadow-sm' 
                         : 'border-neutral-200/60 bg-white hover:border-neutral-300/80'
                     }`}
                   >
@@ -148,8 +166,8 @@ export function InsightsCard({ priorities, recommendations }: Props) {
                         <div className="flex-1 min-w-0">
                         <h4 className={`font-bold transition-all duration-200 ${
                           isExpanded 
-                            ? 'text-blue-800 text-[12px]' 
-                            : 'text-neutral-900 text-[11px] group-hover:text-blue-700'
+                            ? 'text-neutral-800 text-[12px]' 
+                            : 'text-neutral-900 text-[11px]'
                         } leading-tight`}>
                           {item.title}
                         </h4>
@@ -175,7 +193,7 @@ export function InsightsCard({ priorities, recommendations }: Props) {
                         }`}
                       >
                         <div className="px-4 pb-4 pt-0">
-                          <div className="pl-14 border-t border-blue-100 pt-4">
+                          <div className="border-t border-blue-100 pt-4">
                             <div className="bg-white/80 rounded-xl p-4 border border-blue-100/50">
                               <p className="text-neutral-700 text-[10px] leading-relaxed">
                                 {item.description}

@@ -123,7 +123,7 @@ export default function AnalysisPage() {
 
   return (
     <FormProvider {...form}>
-      <div className="space-y-5">
+      <div className="space-y-5 w-full">
         <AnalysisForm onSubmit={onSubmit} isMutating={isMutating} mockMode={mockMode} setMockMode={setMockMode} />
         {/* <DebugPanel
           showRaw={showRaw}

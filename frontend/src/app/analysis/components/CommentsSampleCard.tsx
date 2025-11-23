@@ -13,7 +13,7 @@ export function CommentsSampleCard({ comments }: Props) {
 
   let shown = comments;
   if (filter === "top") {
-    shown = [...comments].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0)).slice(0, 5);
+    shown = [...comments].sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0)).slice(0, 15);
   }
 
   return (

@@ -23,24 +23,24 @@ export function VideoRequestsCard({ videoRequests }: VideoRequestsCardProps) {
         {videoRequests.map((request, index) => (
           <div
             key={index}
-            className="group flex items-start gap-3 rounded-xl border border-neutral-200/60 bg-gradient-to-r from-purple-50/50 to-pink-50/50 p-3 transition-all duration-300 hover:border-purple-300/60 hover:shadow-sm"
+            className="group flex items-start gap-3 rounded-xl border border-neutral-200/60 bg-neutral-50/50 p-3 transition-all duration-300 hover:border-neutral-300/60 hover:shadow-sm"
           >
-            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-300/50">
-              {index === 0 && <TrendingUp className="h-4 w-4 text-purple-600" />}
-              {index === 1 && <Lightbulb className="h-4 w-4 text-purple-600" />}
-              {index >= 2 && <Video className="h-4 w-4 text-purple-600" />}
+            <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-neutral-100 border border-neutral-200/50">
+              {index === 0 && <TrendingUp className="h-4 w-4 text-neutral-600" />}
+              {index === 1 && <Lightbulb className="h-4 w-4 text-neutral-600" />}
+              {index >= 2 && <Video className="h-4 w-4 text-neutral-600" />}
             </div>
             
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-neutral-700 leading-relaxed group-hover:text-neutral-900 transition-colors">
+              <p className="text-xs text-neutral-700 leading-relaxed">
                 {request}
               </p>
               <div className="flex items-center gap-2 mt-2">
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-purple-100/80 text-purple-700 border border-purple-200/50">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/50">
                   Request #{index + 1}
                 </span>
                 {index === 0 && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-gradient-to-r from-purple-100/80 to-pink-100/80 text-purple-700 border border-purple-200/50">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-neutral-100 text-neutral-700 border border-neutral-200/50">
                     Top Request
                   </span>
                 )}

@@ -27,7 +27,7 @@ const testimonials: Testimonial[] = [
     channelName: "Gaming Central",
     channelImage: "/placeholder-channel-2.jpg",
     content: "The AI insights are game-changing. I discovered content ideas I never would have thought of based on my comments analysis.",
-    rating: 5,
+    rating: 4,
     subscribers: "1.8M",
     category: "Gaming"
   },
@@ -63,7 +63,7 @@ const testimonials: Testimonial[] = [
     channelName: "Music Beats",
     channelImage: "/placeholder-channel-6.jpg",
     content: "The sentiment analysis is incredibly accurate. I can now predict which content will perform best before I even create it.",
-    rating: 5,
+    rating: 4,
     subscribers: "950K",
     category: "Music"
   }
@@ -75,24 +75,14 @@ export function TestimonialSlider() {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const animationRef = useRef<number>();
+  const positionRef = useRef(0);
+  const velocityRef = useRef(0);
+  const lastTimeRef = useRef(Date.now());
 
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      @keyframes slide-left {
-        0% {
-          transform: translateX(0);
-        }
-        100% {
-          transform: translateX(-50%);
-        }
-      }
-      .animate-slide-left {
-        animation: slide-left 20s linear infinite;
-      }
-      .animate-slide-left.paused {
-        animation-play-state: paused;
-      }
       .fade-edge {
         position: relative;
       }
@@ -108,17 +98,31 @@ export function TestimonialSlider() {
       }
       .fade-edge::before {
         left: 0;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0.9), transparent);
+        background: linear-gradient(to right, rgba(255, 255, 255, 0.8), transparent);
       }
       .fade-edge::after {
         right: 0;
-        background: linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent);
+        background: linear-gradient(to left, rgba(248, 250, 252, 0.8), transparent);
       }
       @media (max-width: 640px) {
         .fade-edge::before,
         .fade-edge::after {
           width: 60px;
         }
+      }
+      /* Ensure smooth infinite scroll */
+      .slider-container {
+        display: flex;
+        width: fit-content;
+        will-change: transform;
+      }
+      /* Hide scrollbar */
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
       }
     `;
     document.head.appendChild(style);
@@ -128,58 +132,121 @@ export function TestimonialSlider() {
     };
   }, []);
 
+  // Animation loop for smooth scrolling
+  const animate = () => {
+    if (!sliderRef.current || isDragging) {
+      animationRef.current = requestAnimationFrame(animate);
+      return;
+    }
+
+    const now = Date.now();
+    const deltaTime = (now - lastTimeRef.current) / 1000; // Convert to seconds
+    lastTimeRef.current = now;
+
+    if (!isPaused) {
+      // Auto-scroll speed (pixels per second)
+      const autoScrollSpeed = 50; // Adjust this for faster/slower scrolling
+      positionRef.current -= autoScrollSpeed * deltaTime;
+      
+      // Reset position when we've scrolled through half the content
+      const maxScroll = sliderRef.current.scrollWidth / 2;
+      if (Math.abs(positionRef.current) >= maxScroll) {
+        positionRef.current = 0;
+      }
+    }
+
+    // Apply smooth deceleration when dragging stops
+    if (!isDragging && Math.abs(velocityRef.current) > 0.1) {
+      positionRef.current += velocityRef.current;
+      velocityRef.current *= 0.95; // Friction
+      
+      if (Math.abs(velocityRef.current) < 0.1) {
+        velocityRef.current = 0;
+      }
+    }
+
+    // Apply the transform
+    sliderRef.current.style.transform = `translateX(${positionRef.current}px)`;
+    
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  useEffect(() => {
+    animationRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isDragging, isPaused]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
+    if (!sliderRef.current) return;
     setIsDragging(true);
-    setStartX(e.pageX - (sliderRef.current?.offsetLeft || 0));
-    setScrollLeft(sliderRef.current?.scrollLeft || 0);
+    setStartX(e.pageX);
+    setScrollLeft(positionRef.current);
     setIsPaused(true);
+    velocityRef.current = 0;
+    e.preventDefault();
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
-    setIsPaused(false);
+    // Resume animation after a short delay to allow momentum to finish
+    setTimeout(() => setIsPaused(false), 100);
   };
 
   const handleMouseLeave = () => {
     setIsDragging(false);
-    setIsPaused(false);
+    setTimeout(() => setIsPaused(false), 100);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !sliderRef.current) return;
     e.preventDefault();
-    const x = e.pageX - (sliderRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    sliderRef.current.scrollLeft = scrollLeft - walk;
+    const x = e.pageX;
+    const deltaX = x - startX;
+    const newPosition = scrollLeft + deltaX;
+    
+    // Update position and calculate velocity for momentum
+    positionRef.current = newPosition;
+    velocityRef.current = deltaX * 0.5; // Store velocity for smooth momentum
+    setStartX(x);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (!sliderRef.current) return;
     setIsDragging(true);
-    setStartX(e.touches[0].pageX - (sliderRef.current?.offsetLeft || 0));
-    setScrollLeft(sliderRef.current?.scrollLeft || 0);
+    setStartX(e.touches[0].pageX);
+    setScrollLeft(positionRef.current);
     setIsPaused(true);
+    velocityRef.current = 0;
   };
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    setIsPaused(false);
+    setTimeout(() => setIsPaused(false), 100);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || !sliderRef.current) return;
-    const x = e.touches[0].pageX - (sliderRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    sliderRef.current.scrollLeft = scrollLeft - walk;
+    const x = e.touches[0].pageX;
+    const deltaX = x - startX;
+    const newPosition = scrollLeft + deltaX;
+    
+    positionRef.current = newPosition;
+    velocityRef.current = deltaX * 0.5;
+    setStartX(x);
   };
 
   return (
-    <div className="w-full py-20 bg-gradient-to-br from-neutral-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full py-20">
+      <div className="max-w-7xl mx-auto w-full">
         {/* Testimonials Slider */}
         <div className="fade-edge relative overflow-hidden">
           <div
             ref={sliderRef}
-            className={`flex overflow-x-auto scrollbar-hide ${isPaused ? '' : 'animate-slide-left'} ${isPaused ? 'paused' : ''}`}
+            className="slider-container overflow-x-auto scrollbar-hide"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
@@ -187,15 +254,18 @@ export function TestimonialSlider() {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             onTouchMove={handleTouchMove}
-            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+            style={{ 
+              cursor: isDragging ? 'grabbing' : 'grab',
+              userSelect: isDragging ? 'none' : 'auto'
+            }}
           >
-            {/* Duplicate testimonials for seamless loop */}
-            {[...testimonials, ...testimonials].map((testimonial, index) => (
+            {/* Triple testimonials for extra seamless loop */}
+            {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
               <div
                 key={`${testimonial.id}-${index}`}
                 className="flex-shrink-0 w-64 sm:w-72 md:w-80 mx-2 sm:mx-4"
               >
-                <div className="group relative bg-white rounded-2xl border border-neutral-200 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
+                <div className="group relative bg-white/80 backdrop-blur-sm rounded-2xl border border-neutral-200 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
                   {/* Category Badge */}
                   <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
                     <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

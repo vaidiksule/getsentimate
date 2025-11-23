@@ -40,17 +40,17 @@ export function ResultGrid({ parsed, completedAt }: ResultGridProps) {
       : null;
 
   return (
-    <section aria-live="polite" className="space-y-5">
-      <div className="flex flex-col justify-between gap-3 md:flex-row md:items-end">
+    <section aria-live="polite" className="space-y-8">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div className="space-y-1">
-          <h2 className="text-base font-semibold text-neutral-900">Analysis results</h2>
+          <h2 className="text-lg font-medium text-neutral-900 tracking-tight">Analysis results</h2>
           {completedAt && (
-            <p className="text-xs text-neutral-500">Completed at {completedAt}</p>
+            <p className="text-sm text-neutral-500">Completed at {completedAt}</p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {sentiment && (
-            <Badge className="flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-white">
+            <Badge className="flex items-center gap-2 rounded-full bg-neutral-900 px-4 py-2 text-xs font-medium tracking-wide text-white">
               <span>Sentiment:</span>
               <span className="font-semibold">{sentiment.label ?? "unknown"}</span>
               {typeof sentiment.score === "number" && (
@@ -62,7 +62,7 @@ export function ResultGrid({ parsed, completedAt }: ResultGridProps) {
             <button
               type="button"
               onClick={() => navigator.clipboard.writeText(shareUrl).catch(() => {})}
-              className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] text-neutral-600 hover:bg-neutral-50"
+              className="rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs text-neutral-600 hover:bg-neutral-50 transition-colors"
             >
               Copy permalink
             </button>
@@ -70,44 +70,46 @@ export function ResultGrid({ parsed, completedAt }: ResultGridProps) {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)]">
-        <VideoMetaCard video={parsed.video} />
-        <SentimentCard sentiment={parsed.sentiment} ratios={parsed.sentimentRatios} />
-      </div>
+      <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <VideoMetaCard video={parsed.video} />
+          <SentimentCard sentiment={parsed.sentiment} ratios={parsed.sentimentRatios} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <TopicsCard topics={parsed.topics} />
-        <EngagementCard engagement={parsed.engagement} />
-      </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <TopicsCard topics={parsed.topics} />
+          <EngagementCard engagement={parsed.engagement} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <PerformanceCard performance={parsed.performance} />
-        <PersonaCard personas={parsed.personas} />
-      </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <PerformanceCard performance={parsed.performance} />
+          <PersonaCard personas={parsed.personas} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <TopicMatrixCard matrix={parsed.topicMatrix} />
-      </div>
+        <div className="grid gap-6">
+          <TopicMatrixCard matrix={parsed.topicMatrix} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <InsightsCard priorities={parsed.actionPriorities} recommendations={parsed.contentRecommendations} />
-      </div>
+        <div className="grid gap-6">
+          <InsightsCard priorities={parsed.actionPriorities} recommendations={parsed.contentRecommendations} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-1">
-        <UserFeedbackCard whatUsersLike={parsed.whatUsersLike} whatUsersDislike={parsed.whatUsersDislike} />
-      </div>
+        <div className="grid gap-6">
+          <UserFeedbackCard whatUsersLike={parsed.whatUsersLike} whatUsersDislike={parsed.whatUsersDislike} />
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <CommentsSampleCard comments={parsed.comments} />
-        {parsed.videoRequests && parsed.videoRequests.length > 0 ? (
-          <VideoRequestsCard videoRequests={parsed.videoRequests} />
-        ) : (
-          <div className="rounded-3xl border border-neutral-200 bg-white/80 p-6 shadow-md backdrop-blur-sm">
-            <div className="text-center text-sm text-neutral-500">
-              No video requests found in the analysis
+        <div className="grid gap-6 md:grid-cols-2">
+          <CommentsSampleCard comments={parsed.comments} />
+          {parsed.videoRequests && parsed.videoRequests.length > 0 ? (
+            <VideoRequestsCard videoRequests={parsed.videoRequests} />
+          ) : (
+            <div className="rounded-2xl border border-neutral-100 bg-neutral-50/50 p-8">
+              <div className="text-center text-sm text-neutral-400">
+                No video requests found in the analysis
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </section>
   );

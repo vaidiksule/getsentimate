@@ -2,39 +2,125 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Zap, Check, X } from "lucide-react";
+import { useState } from "react";
 
 export function Header() {
   const pathname = usePathname();
   const isAnalysis = pathname === "/analysis";
+  const isPricing = pathname === "/pricing";
+  const [showToast, setShowToast] = useState(false);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'GetSentimate - YouTube Comments Intelligence',
+          text: 'Analyze YouTube comments with AI-powered sentiment analysis and actionable insights.',
+          url: window.location.origin
+        });
+      } catch (error) {
+        // Fallback to clipboard if user cancels or share fails
+        handleCopyLink();
+      }
+    } else {
+      // Fallback for browsers that don't support Web Share API
+      handleCopyLink();
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.origin);
+      showNotification();
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.origin;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      showNotification();
+    }
+  };
+
+  const showNotification = () => {
+    setShowToast(true);
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
+  };
 
   return (
-    <header className="border-b border-neutral-200 bg-white/80 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 360 290" xmlns="http://www.w3.org/2000/svg">
-              <rect x="0" y="20" width="320" height="250" rx="40" fill="#0B2A4A"/>
-              <rect x="14" y="34" width="292" height="222" rx="30" fill="#FFFFFF"/>
-              <path d="M120 270 L120 330 L180 270 Z" fill="#0B2A4A"/>
-              <polygon points="152,88 152,198 236,143" fill="#F59E0B"/>
-            </svg>
+    <>
+      <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-lg shadow-sm">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 sm:px-8 lg:px-24 xl:px-32 py-4">
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-105">
+            <img 
+              src="/logo.svg" 
+              alt="GetSentimate Logo" 
+              className="h-12 w-12"
+            />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-xs font-medium text-neutral-900">GetSentimate</span>
-            <span className="text-[11px] text-neutral-500">YouTube comments intelligence</span>
+            <span className="text-sm font-semibold text-neutral-900">GetSentimate</span>
+            <span className="text-xs text-neutral-500">YouTube comments intelligence</span>
           </div>
         </Link>
-        <nav className="flex items-center gap-3 text-[12px] font-medium text-neutral-600">
+        
+        <nav className="flex items-center gap-2">
           <Link
             href="/analysis"
-            className={`rounded-full px-3 py-1 transition ${
-              isAnalysis ? "bg-neutral-900 text-white" : "hover:bg-neutral-100"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              isAnalysis 
+                ? "bg-neutral-900 text-white shadow-md" 
+                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
             }`}
           >
+            <Zap className="w-4 h-4" />
             Analysis
           </Link>
+          
+          <Link
+            href="/pricing"
+            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+              isPricing 
+                ? "bg-neutral-900 text-white shadow-md" 
+                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+            }`}
+          >
+            Pricing
+          </Link>
+          
+          <button 
+            onClick={handleShare}
+            className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+          >
+            Share
+          </button>
         </nav>
       </div>
     </header>
+
+    {/* Toast Notification */}
+    {showToast && (
+      <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
+        <div className="flex items-center gap-3 rounded-lg bg-neutral-900 px-4 py-3 shadow-lg">
+          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
+            <Check className="h-3 w-3 text-white" />
+          </div>
+          <span className="text-sm font-medium text-white">Link copied to clipboard!</span>
+          <button
+            onClick={() => setShowToast(false)}
+            className="text-white/60 hover:text-white transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    )}
+  </>
   );
 }
