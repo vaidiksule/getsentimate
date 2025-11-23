@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PlayCircle } from "lucide-react";
+import { TestimonialSlider } from "./analysis/components/TestimonialSlider";
 
 export default function HomePage() {
 	return (
@@ -35,6 +36,7 @@ export default function HomePage() {
 					</Link>
 				</div>
 			</div>
+			<TestimonialSlider />
 		</div>
 	);
 }

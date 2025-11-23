@@ -52,10 +52,10 @@ export function AnalysisForm({ onSubmit, isMutating, mockMode, setMockMode }: An
           {form.formState.errors.url && (
             <p className="text-xs text-red-500">{form.formState.errors.url.message}</p>
           )}
-          <p className="text-[11px] text-neutral-500">
+          {/* <p className="text-[11px] text-neutral-500">
             We send your URL to <code className="rounded-full bg-neutral-100 px-2 py-0.5">POST /api/analysis/url/</code> on
             <code className="ml-1 rounded-full bg-neutral-100 px-2 py-0.5">http://localhost:8000</code> and display whatever comes back.
-          </p>
+          </p> */}
         </div>
 
         <div className="flex flex-col items-stretch gap-3 sm:w-56">

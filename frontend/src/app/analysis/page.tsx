@@ -125,13 +125,13 @@ export default function AnalysisPage() {
     <FormProvider {...form}>
       <div className="space-y-5">
         <AnalysisForm onSubmit={onSubmit} isMutating={isMutating} mockMode={mockMode} setMockMode={setMockMode} />
-        <DebugPanel
+        {/* <DebugPanel
           showRaw={showRaw}
           setShowRaw={setShowRaw}
           forceParseError={forceParseError}
           setForceParseError={setForceParseError}
           body={rawBody}
-        />
+        /> */}
         {/* Error banner */}
         <AnimatePresence>
           {errorInfo && (
