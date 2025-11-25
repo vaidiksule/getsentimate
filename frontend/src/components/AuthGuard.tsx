@@ -36,8 +36,11 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
         }
 
         // Special case: if user is logged in and on home page, redirect to analysis
+        // Add a small delay to ensure session cookie is properly set
         if (!requireAuth && userData && window.location.pathname === '/') {
-          router.push('/analysis');
+          setTimeout(() => {
+            router.push('/analysis');
+          }, 100);
           return;
         }
 
