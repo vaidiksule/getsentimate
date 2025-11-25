@@ -2,6 +2,7 @@ import "./globals.css";
 import type { ReactNode } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "GetSentimate – YouTube Comments Analyzer",
@@ -19,6 +20,7 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
           </main>
           <Footer />
         </div>
+        <Analytics />
       </body>
     </html>
   );
