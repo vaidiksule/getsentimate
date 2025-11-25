@@ -25,16 +25,28 @@ User = get_user_model()
 @permission_classes([IsAuthenticated])
 def credit_balance(request):
     """Get current credit balance"""
+    print(f"Credit balance request - Session key: {request.session.session_key}")
+    print(f"Credit balance request - User authenticated: {request.user.is_authenticated}")
+    print(f"Credit balance request - User ID: {request.user.id if hasattr(request.user, 'id') else 'No user'}")
+    print(f"Credit balance request - Headers: {dict(request.headers)}")
+    
     # Handle cross-domain session ID
     session_id_from_header = request.headers.get('X-Session-ID')
+    print(f"Credit balance - Session ID from header: {session_id_from_header}")
+    
     if session_id_from_header:
         # Try to load session using the provided session ID
         from django.contrib.sessions.backends.db import SessionStore
         try:
             session = SessionStore(session_key=session_id_from_header)
+            print(f"Credit balance - Session exists: {session.exists(session_id_from_header)}")
+            
             if session.exists(session_id_from_header):
                 session_data = session.load()
+                print(f"Credit balance - Session data: {session_data}")
                 user_id = session_data.get('_auth_user_id')
+                print(f"Credit balance - User ID from session: {user_id}")
+                
                 if user_id:
                     from django.contrib.auth import get_user_model
                     User = get_user_model()
@@ -45,8 +57,16 @@ def credit_balance(request):
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
                     
                     print(f"Cross-domain auth successful for credits endpoint: {user.email}")
+                    print(f"After login - User authenticated: {request.user.is_authenticated}")
+                    print(f"After login - User ID: {request.user.id}")
         except Exception as e:
             print(f"Cross-domain session error in credits: {e}")
+    
+    print(f"Final check - User authenticated: {request.user.is_authenticated}")
+    
+    if not request.user.is_authenticated:
+        print("User is not authenticated, returning 403")
+        return JsonResponse({'error': 'Authentication required'}, status=403)
     
     try:
         balance = get_credit_balance(request.user)
