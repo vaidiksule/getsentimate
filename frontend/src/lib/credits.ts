@@ -1,3 +1,5 @@
+import { authApi } from './auth';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
 export interface CreditBalance {
@@ -26,16 +28,13 @@ export interface CreditHistory {
 
 export async function getCreditBalance(): Promise<number> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/credits/`, {
-      method: 'GET',
-      credentials: 'include',
-    });
+    const response = await authApi.get('/api/credits/');
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch credit balance: ${response.status}`);
+    if (!response.data) {
+      throw new Error(`Failed to fetch credit balance`);
     }
 
-    const data: CreditBalance = await response.json();
+    const data: CreditBalance = response.data;
     return data.balance;
   } catch (error) {
     console.error('Error fetching credit balance:', error);
@@ -45,25 +44,17 @@ export async function getCreditBalance(): Promise<number> {
 
 export async function consumeCredits(amount: number = 1): Promise<number> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/credits/consume/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify({ amount }),
-    });
+    const response = await authApi.post('/api/credits/consume/', { amount });
 
     if (response.status === 402) {
-      const error = await response.json();
-      throw new Error(error.error || 'Insufficient credits');
+      throw new Error(response.data.error || 'Insufficient credits');
     }
 
-    if (!response.ok) {
-      throw new Error(`Failed to consume credits: ${response.status}`);
+    if (!response.data) {
+      throw new Error(`Failed to consume credits`);
     }
 
-    const data: CreditBalance = await response.json();
+    const data: CreditBalance = response.data;
     return data.balance;
   } catch (error) {
     console.error('Error consuming credits:', error);
@@ -78,16 +69,13 @@ export async function getCreditHistory(page: number = 1, pageSize: number = 20):
       page_size: pageSize.toString(),
     });
 
-    const response = await fetch(`${API_BASE_URL}/api/credits/history/?${params}`, {
-      method: 'GET',
-      credentials: 'include',
-    });
+    const response = await authApi.get(`/api/credits/history/?${params}`);
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch credit history: ${response.status}`);
+    if (!response.data) {
+      throw new Error(`Failed to fetch credit history`);
     }
 
-    const data: CreditHistory = await response.json();
+    const data: CreditHistory = response.data;
     return data;
   } catch (error) {
     console.error('Error fetching credit history:', error);
@@ -103,20 +91,13 @@ export async function topupCredits(userId?: number, userEmail?: string, amount?:
     if (userEmail) body.user_email = userEmail;
     if (amount) body.amount = amount;
 
-    const response = await fetch(`${API_BASE_URL}/api/credits/topup/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
-      body: JSON.stringify(body),
-    });
+    const response = await authApi.post('/api/credits/topup/', body);
 
-    if (!response.ok) {
-      throw new Error(`Failed to top up credits: ${response.status}`);
+    if (!response.data) {
+      throw new Error(`Failed to top up credits`);
     }
 
-    return await response.json();
+    return response.data;
   } catch (error) {
     console.error('Error topping up credits:', error);
     throw error;

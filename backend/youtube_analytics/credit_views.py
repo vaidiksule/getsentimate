@@ -25,6 +25,29 @@ User = get_user_model()
 @permission_classes([IsAuthenticated])
 def credit_balance(request):
     """Get current credit balance"""
+    # Handle cross-domain session ID
+    session_id_from_header = request.headers.get('X-Session-ID')
+    if session_id_from_header:
+        # Try to load session using the provided session ID
+        from django.contrib.sessions.backends.db import SessionStore
+        try:
+            session = SessionStore(session_key=session_id_from_header)
+            if session.exists(session_id_from_header):
+                session_data = session.load()
+                user_id = session_data.get('_auth_user_id')
+                if user_id:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    user = User.objects.get(id=user_id)
+                    
+                    # Create a new session for this domain
+                    from django.contrib.auth import login
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    print(f"Cross-domain auth successful for credits endpoint: {user.email}")
+        except Exception as e:
+            print(f"Cross-domain session error in credits: {e}")
+    
     try:
         balance = get_credit_balance(request.user)
         return JsonResponse({'balance': balance})
@@ -39,6 +62,29 @@ def credit_balance(request):
 @permission_classes([IsAuthenticated])
 def consume_credits_view(request):
     """Consume credits"""
+    # Handle cross-domain session ID
+    session_id_from_header = request.headers.get('X-Session-ID')
+    if session_id_from_header:
+        # Try to load session using the provided session ID
+        from django.contrib.sessions.backends.db import SessionStore
+        try:
+            session = SessionStore(session_key=session_id_from_header)
+            if session.exists(session_id_from_header):
+                session_data = session.load()
+                user_id = session_data.get('_auth_user_id')
+                if user_id:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    user = User.objects.get(id=user_id)
+                    
+                    # Create a new session for this domain
+                    from django.contrib.auth import login
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    print(f"Cross-domain auth successful for consume credits: {user.email}")
+        except Exception as e:
+            print(f"Cross-domain session error in consume credits: {e}")
+    
     try:
         amount = request.data.get('amount', 1)
         if not isinstance(amount, int) or amount <= 0:
@@ -118,6 +164,29 @@ def topup_credits(request):
 @permission_classes([IsAuthenticated])
 def credit_history(request):
     """Get credit transaction history for the authenticated user"""
+    # Handle cross-domain session ID
+    session_id_from_header = request.headers.get('X-Session-ID')
+    if session_id_from_header:
+        # Try to load session using the provided session ID
+        from django.contrib.sessions.backends.db import SessionStore
+        try:
+            session = SessionStore(session_key=session_id_from_header)
+            if session.exists(session_id_from_header):
+                session_data = session.load()
+                user_id = session_data.get('_auth_user_id')
+                if user_id:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    user = User.objects.get(id=user_id)
+                    
+                    # Create a new session for this domain
+                    from django.contrib.auth import login
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    print(f"Cross-domain auth successful for credit history: {user.email}")
+        except Exception as e:
+            print(f"Cross-domain session error in credit history: {e}")
+    
     try:
         page = int(request.GET.get('page', 1))
         page_size = int(request.GET.get('page_size', 20))
