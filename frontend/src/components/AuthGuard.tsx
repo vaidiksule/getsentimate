@@ -48,11 +48,18 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
 
         // Special case: if user is logged in and on home page, redirect to analysis
         // Add a small delay to ensure session cookie is properly set
-        if (!requireAuth && userData && window.location.pathname === '/') {
+        // Skip if user just logged out (check for logout flag)
+        const justLoggedOut = sessionStorage.getItem('just_logged_out');
+        if (!requireAuth && userData && window.location.pathname === '/' && !justLoggedOut) {
           setTimeout(() => {
             router.push('/analysis');
           }, 100);
           return;
+        }
+        
+        // Clear logout flag after checking
+        if (justLoggedOut) {
+          sessionStorage.removeItem('just_logged_out');
         }
 
         // Only redirect authenticated users away from other pages if they came from login

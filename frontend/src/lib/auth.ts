@@ -63,6 +63,8 @@ export async function logout(): Promise<boolean> {
     await authApi.post('/api/auth/logout/');
     // Clear session ID from localStorage
     localStorage.removeItem('session_id');
+    // Set flag to prevent immediate redirect to analysis
+    sessionStorage.setItem('just_logged_out', 'true');
     return true;
   } catch (error) {
     console.error('Logout failed:', error);
