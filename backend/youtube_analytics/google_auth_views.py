@@ -286,6 +286,38 @@ def auth_logout(request):
         print(f"Logout - Cookies: {request.COOKIES}")
         print(f"Logout - Headers: {dict(request.headers)}")
         
+        # Handle cross-domain session ID
+        session_id_from_header = request.headers.get('X-Session-ID')
+        print(f"Logout - Session ID from header: {session_id_from_header}")
+        
+        if session_id_from_header and not request.user.is_authenticated:
+            # Try to load session using the provided session ID
+            from django.contrib.sessions.backends.db import SessionStore
+            try:
+                session = SessionStore(session_key=session_id_from_header)
+                print(f"Logout - Session exists: {session.exists(session_id_from_header)}")
+                
+                if session.exists(session_id_from_header):
+                    session_data = session.load()
+                    print(f"Logout - Session data: {session_data}")
+                    user_id = session_data.get('_auth_user_id')
+                    print(f"Logout - User ID from session: {user_id}")
+                    
+                    if user_id:
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        user = User.objects.get(id=user_id)
+                        
+                        # Create a new session for this domain
+                        from django.contrib.auth import login
+                        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                        
+                        print(f"Cross-domain auth successful for logout: {user.email}")
+                        print(f"After login - User authenticated: {request.user.is_authenticated}")
+                        print(f"After login - User ID: {request.user.id}")
+            except Exception as e:
+                print(f"Cross-domain session error in logout: {e}")
+        
         if not request.user.is_authenticated:
             print(f"Logout - User not authenticated, returning 401")
             return JsonResponse({'error': 'User not authenticated'}, status=401)
