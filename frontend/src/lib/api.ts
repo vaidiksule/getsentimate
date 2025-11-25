@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { authApi } from './auth';
 
 const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
 
@@ -16,7 +17,7 @@ export interface RawApiResponse {
 }
 
 export async function postUrlAnalysis(url: string): Promise<RawApiResponse> {
-  const response = await api.post<string>(
+  const response = await authApi.post<string>(
     '/api/analysis/url/',
     { url },
     {
