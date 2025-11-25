@@ -61,6 +61,8 @@ export async function checkAuth(retryCount = 0): Promise<User | null> {
 export async function logout(): Promise<boolean> {
   try {
     await authApi.post('/api/auth/logout/');
+    // Clear session ID from localStorage
+    localStorage.removeItem('session_id');
     return true;
   } catch (error) {
     console.error('Logout failed:', error);
