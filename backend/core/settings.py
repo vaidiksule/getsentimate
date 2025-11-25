@@ -183,6 +183,9 @@ SESSION_COOKIE_DOMAIN = None  # Allow all domains
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
+# Ensure session cookies work across subdomains
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+
 # --------------------
 # SOCIAL ACCOUNT PROVIDERS
 # --------------------
