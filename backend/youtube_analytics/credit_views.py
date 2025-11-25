@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import status
 from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
@@ -22,7 +22,7 @@ User = get_user_model()
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def credit_balance(request):
     """Get current credit balance"""
     print(f"Credit balance request - Session key: {request.session.session_key}")
@@ -34,7 +34,7 @@ def credit_balance(request):
     session_id_from_header = request.headers.get('X-Session-ID')
     print(f"Credit balance - Session ID from header: {session_id_from_header}")
     
-    if session_id_from_header:
+    if session_id_from_header and not request.user.is_authenticated:
         # Try to load session using the provided session ID
         from django.contrib.sessions.backends.db import SessionStore
         try:
