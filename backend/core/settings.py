@@ -239,6 +239,7 @@ CORS_ALLOW_HEADERS = [
     "content-type",
     "authorization",
     "x-csrftoken",
+    "x-session-id",  # Add this for cross-domain session handling
 ]
 
 # --------------------
