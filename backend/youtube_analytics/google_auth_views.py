@@ -96,7 +96,17 @@ def google_oauth_callback(request):
         print(f"Session data: {dict(request.session)}")
         print(f"Session saved: {request.session.modified}")
         
-        # Redirect to frontend
+        # For cross-domain scenarios, include session ID in redirect URL
+        frontend_url = settings.FRONTEND_AFTER_LOGIN
+        if 'getsentimate.com' in frontend_url and 'getsentimate.onrender.com' in request.get_host():
+            # Cross-domain scenario - pass session ID as query param
+            session_id = request.session.session_key
+            separator = '&' if '?' in frontend_url else '?'
+            redirect_url = f"{frontend_url}{separator}session_id={session_id}"
+            print(f"Cross-domain redirect with session: {redirect_url}")
+            return redirect(redirect_url)
+        
+        # Same domain scenario - normal redirect
         return redirect(settings.FRONTEND_AFTER_LOGIN)
         
     except Exception as e:
@@ -206,6 +216,38 @@ def create_or_get_user(user_info, refresh_token=None):
 @permission_classes([AllowAny])
 def auth_me(request):
     """Get current authenticated user info"""
+    # Handle cross-domain session ID
+    session_id_from_header = request.headers.get('X-Session-ID')
+    if session_id_from_header:
+        # Try to load session using the provided session ID
+        from django.contrib.sessions.backends.db import SessionStore
+        try:
+            session = SessionStore(session_key=session_id_from_header)
+            if session.exists(session_id_from_header):
+                session_data = session.load()
+                user_id = session_data.get('_auth_user_id')
+                if user_id:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    user = User.objects.get(id=user_id)
+                    
+                    # Create a new session for this domain
+                    from django.contrib.auth import login
+                    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    print(f"Cross-domain auth successful for user: {user.email}")
+                    return Response({
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'name': f"{user.first_name} {user.last_name}".strip() or user.username,
+                        'avatar': user.profile_picture,
+                        'google_sub': user.google_sub,
+                        'is_authenticated': True
+                    })
+        except Exception as e:
+            print(f"Cross-domain session error: {e}")
+    
     # Debug: Check session and authentication status
     print(f"auth_me - Session key: {request.session.session_key}")
     print(f"auth_me - User authenticated: {request.user.is_authenticated}")

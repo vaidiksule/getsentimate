@@ -25,6 +25,17 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
     
     const verifyAuth = async () => {
       try {
+        // Handle cross-domain session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+        
+        if (sessionId) {
+          // Store session ID and clean URL
+          localStorage.setItem('session_id', sessionId);
+          const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]session_id=[^&]*/, '');
+          window.history.replaceState({}, '', cleanUrl);
+        }
+        
         const userData = await checkAuth();
         setUser(userData);
 

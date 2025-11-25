@@ -20,6 +20,15 @@ export const authApi = axios.create({
   withCredentials: true, // Important for cookies
 });
 
+// Add session ID to requests for cross-domain scenarios
+authApi.interceptors.request.use((config) => {
+  const sessionId = localStorage.getItem('session_id');
+  if (sessionId) {
+    config.headers['X-Session-ID'] = sessionId;
+  }
+  return config;
+});
+
 // Check if user is authenticated
 export async function checkAuth(retryCount = 0): Promise<User | null> {
   try {
