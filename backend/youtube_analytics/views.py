@@ -1898,6 +1898,38 @@ class URLAnalysisView(APIView):
     
     def post(self, request):
         """Analyze any YouTube video by URL"""
+        # Handle cross-domain session ID first
+        session_id_from_header = request.headers.get('X-Session-ID')
+        print(f"URLAnalysisView - Session ID from header: {session_id_from_header}")
+        
+        if session_id_from_header:
+            # Try to load session using the provided session ID
+            from django.contrib.sessions.backends.db import SessionStore
+            try:
+                session = SessionStore(session_key=session_id_from_header)
+                print(f"URLAnalysisView - Session exists: {session.exists(session_id_from_header)}")
+                
+                if session.exists(session_id_from_header):
+                    session_data = session.load()
+                    print(f"URLAnalysisView - Session data: {session_data}")
+                    user_id = session_data.get('_auth_user_id')
+                    print(f"URLAnalysisView - User ID from session: {user_id}")
+                    
+                    if user_id:
+                        from django.contrib.auth import get_user_model
+                        User = get_user_model()
+                        user = User.objects.get(id=user_id)
+                        
+                        # Create a new session for this domain
+                        from django.contrib.auth import login
+                        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                        
+                        print(f"Cross-domain auth successful for URL analysis: {user.email}")
+                        print(f"After login - User authenticated: {request.user.is_authenticated}")
+                        print(f"After login - User ID: {request.user.id}")
+            except Exception as e:
+                print(f"Cross-domain session error in URL analysis: {e}")
+        
         # Use Django's built-in user authentication from request
         from django.contrib.auth import get_user
         
@@ -1914,6 +1946,7 @@ class URLAnalysisView(APIView):
                 user = None
         
         if not user or not user.is_authenticated:
+            print("URLAnalysisView - User is not authenticated, returning 401")
             return Response(
                 {'error': 'Authentication required'},
                 status=status.HTTP_401_UNAUTHORIZED
