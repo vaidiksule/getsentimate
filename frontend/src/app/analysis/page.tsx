@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AnimatePresence, motion } from "framer-motion";
 import useSWRMutation from "swr/mutation";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, User as UserIcon } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { postUrlAnalysis } from "@/lib/api";
 import { urlSchema, type UrlFormValues } from "@/lib/validators";
 import { parseAnalysis, type ParsedAnalysis } from "@/lib/parsers";
-import { AnalysisForm } from "./components/AnalysisForm";
+import AnalysisForm from "./components/AnalysisForm";
 import { ResultGrid } from "./components/ResultGrid";
 import { RawPanel } from "./components/RawPanel";
 import { EmptyState } from "./components/EmptyState";
 import { DebugPanel } from "./components/DebugPanel";
-import mockResponse from "../../../../mock-response.json" assert { type: "json" };
+import { AuthGuard } from "@/components/AuthGuard";
+import { checkAuth, type User } from "@/lib/auth";
+import { getCreditBalance } from "@/lib/credits";
 
 interface ErrorInfo {
   type: 'network' | 'http' | 'parse';
@@ -33,10 +36,12 @@ export default function AnalysisPage() {
   const [rawBody, setRawBody] = useState<string>("");
   const [parsed, setParsed] = useState<ParsedAnalysis | null>(null);
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | null>(null);
-  const [mockMode, setMockMode] = useState(false);
   const [showRaw, setShowRaw] = useState(true);
   const [forceParseError, setForceParseError] = useState(false);
   const [completedAt, setCompletedAt] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const form = useForm<UrlFormValues>({
     resolver: zodResolver(urlSchema),
@@ -48,37 +53,82 @@ export default function AnalysisPage() {
 
   const { trigger, isMutating } = useSWRMutation("url-analysis", mutateAnalysis);
 
-  const onSubmit = async (values: UrlFormValues, options?: { mockMode?: boolean }) => {
+  // Prevent hydration issues
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Load user data and credits only after component is mounted
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const loadData = async () => {
+      try {
+        const userData = await checkAuth();
+        setUser(userData);
+        
+        if (userData) {
+          try {
+            const balance = await getCreditBalance();
+            setCredits(balance);
+          } catch (creditError) {
+            console.error('Failed to load credit balance:', creditError);
+            setCredits(0);
+          }
+        } else {
+          setCredits(0);
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
+        setCredits(0);
+      }
+    };
+    
+    loadData();
+  }, [mounted]);
+
+  const onSubmit = async (values: UrlFormValues) => {
     setErrorInfo(null);
     setParsed(null);
     setRawBody("");
     setCompletedAt(null);
 
-    const useMock = options?.mockMode;
-
     let body = "";
     let status = 200;
 
     try {
-      if (useMock) {
-        // Use the full mock-response.json shape for mock mode.
-        body = JSON.stringify(mockResponse);
-      } else {
-        const res = await trigger(values.url);
-        status = res.status;
-        body = res.data;
-      }
-
-      // Developer tool: deliberately corrupt JSON in mock mode to exercise parse-error UI.
-      if (useMock && forceParseError) {
-        body = body.slice(0, Math.max(1, body.length / 2));
+      const res = await trigger(values.url);
+      status = res.status;
+      body = res.data;
+      
+      // Update credits after successful analysis (backend returns new balance)
+      if (status === 200 && body) {
+        try {
+          const parsedBody = JSON.parse(body);
+          if (parsedBody.credits_remaining !== undefined) {
+            setCredits(parsedBody.credits_remaining);
+          }
+        } catch (parseError) {
+          // If parsing fails, we'll handle it in the main parse logic below
+          console.warn('Failed to parse credits from response:', parseError);
+        }
       }
     } catch (err) {
       console.error('Network error:', err);
-      setErrorInfo({
-        type: 'network',
-        message: 'Network error. Please check your connection and try again.',
-      });
+      
+      // Check if it's a credit-related error
+      if (err instanceof Error && err.message.includes('Insufficient credits')) {
+        setErrorInfo({
+          type: 'http',
+          status: 402,
+          message: 'Insufficient credits. You need at least 1 credit to run an analysis.',
+        });
+      } else {
+        setErrorInfo({
+          type: 'network',
+          message: 'Network error. Please check your connection and try again.',
+        });
+      }
       return;
     }
 
@@ -121,17 +171,42 @@ export default function AnalysisPage() {
 
   const hasResults = !!parsed;
 
+  // Don't render until mounted to prevent hydration issues
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <FormProvider {...form}>
+    <AuthGuard requireAuth={true} redirectTo="/">
       <div className="space-y-5 w-full">
-        <AnalysisForm onSubmit={onSubmit} isMutating={isMutating} mockMode={mockMode} setMockMode={setMockMode} />
-        {/* <DebugPanel
-          showRaw={showRaw}
-          setShowRaw={setShowRaw}
-          forceParseError={forceParseError}
-          setForceParseError={setForceParseError}
-          body={rawBody}
-        /> */}
+        {/* Header with user info */}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            {user?.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full" />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-[#0A84FF] flex items-center justify-center">
+                <UserIcon className="w-4 h-4 text-white" />
+              </div>
+            )}
+            <div>
+              <p className="text-sm font-medium text-neutral-900">{user?.name || 'Loading...'}</p>
+              <p className="text-xs text-neutral-600">{user?.email || 'Loading...'}</p>
+            </div>
+            <div className="ml-4 px-3 py-1 bg-[#0A84FF]/10 border border-[#0A84FF]/20 rounded-full">
+              <p className="text-sm font-medium text-[#0A84FF]">{credits ?? '...'} credits</p>
+            </div>
+          </div>
+        </div>
+
+        <FormProvider {...form}>
+          <AnalysisForm 
+            onSubmit={onSubmit} 
+            isMutating={isMutating} 
+            credits={credits}
+          />
+        </FormProvider>
+        
         {/* Error banner */}
         <AnimatePresence>
           {errorInfo && (
@@ -203,7 +278,7 @@ export default function AnalysisPage() {
           {!hasResults && !errorInfo && !isMutating && <EmptyState />}
         </div>
       </div>
-    </FormProvider>
+    </AuthGuard>
   );
 }
 

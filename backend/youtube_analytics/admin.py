@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Channel, Video, Comment, AnalysisResult, UserPreference
+from django.db import transaction
+from .models import User, Channel, Video, Comment, AnalysisResult, UserPreference, CreditAccount, CreditTransaction
+from .credit_utils import add_credits
 
 
 @admin.register(User)
@@ -117,6 +119,101 @@ class UserPreferenceAdmin(admin.ModelAdmin):
         ('Notifications', {'fields': ('email_notifications', 'analysis_complete_notifications')}),
         ('Timestamps', {'fields': ('created_at', 'updated_at')}),
     )
+
+
+@admin.register(CreditAccount)
+class CreditAccountAdmin(admin.ModelAdmin):
+    """Admin for CreditAccount model"""
+    list_display = ('user', 'balance', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'updated_at')
+    search_fields = ('user__username', 'user__email')
+    readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('User', {'fields': ('user',)}),
+        ('Balance', {'fields': ('balance',)}),
+        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+    )
+    
+    actions = ['add_credits_action', 'remove_credits_action']
+    
+    def add_credits_action(self, request, queryset):
+        """Admin action to add credits to selected users"""
+        if 'apply' in request.POST:
+            amount = int(request.POST.get('amount', 0))
+            reason = request.POST.get('reason', 'Admin adjustment')
+            
+            if amount > 0:
+                for account in queryset:
+                    add_credits(account.user, amount, 'ADMIN_ADJUST', reason)
+                
+                self.message_user(request, f'Added {amount} credits to {queryset.count()} users.')
+                return None
+        
+        from django.shortcuts import render
+        return render(request, 'admin/add_credits.html', {
+            'queryset': queryset,
+            'action_name': 'add_credits_action',
+            'action_checkbox_name': admin.ACTION_CHECKBOX_NAME,
+        })
+    
+    add_credits_action.short_description = "Add credits to selected users"
+    
+    def remove_credits_action(self, request, queryset):
+        """Admin action to remove credits from selected users (with confirmation)"""
+        if 'apply' in request.POST:
+            amount = int(request.POST.get('amount', 0))
+            reason = request.POST.get('reason', 'Admin adjustment')
+            
+            if amount > 0:
+                from .credit_utils import consume_credits
+                removed_count = 0
+                for account in queryset:
+                    try:
+                        consume_credits(account.user, amount, 'ADMIN_ADJUST', reason)
+                        removed_count += 1
+                    except Exception as e:
+                        # Skip users with insufficient credits
+                        pass
+                
+                self.message_user(request, f'Removed {amount} credits from {removed_count} users.')
+                return None
+        
+        from django.shortcuts import render
+        return render(request, 'admin/remove_credits.html', {
+            'queryset': queryset,
+            'action_name': 'remove_credits_action',
+            'action_checkbox_name': admin.ACTION_CHECKBOX_NAME,
+        })
+    
+    remove_credits_action.short_description = "Remove credits from selected users"
+
+
+@admin.register(CreditTransaction)
+class CreditTransactionAdmin(admin.ModelAdmin):
+    """Admin for CreditTransaction model"""
+    list_display = ('user', 'amount', 'transaction_type', 'reference', 'created_at')
+    list_filter = ('transaction_type', 'created_at')
+    search_fields = ('user__username', 'user__email', 'reference')
+    readonly_fields = ('id', 'created_at')
+    
+    fieldsets = (
+        ('Transaction', {'fields': ('user', 'amount', 'transaction_type')}),
+        ('Details', {'fields': ('reference',)}),
+        ('Timestamps', {'fields': ('created_at',)}),
+    )
+    
+    def has_add_permission(self, request):
+        """Prevent manual creation of transactions through admin"""
+        return request.user.is_superuser
+    
+    def has_change_permission(self, request, obj=None):
+        """Prevent manual editing of transactions through admin"""
+        return request.user.is_superuser
+    
+    def has_delete_permission(self, request, obj=None):
+        """Prevent manual deletion of transactions through admin"""
+        return request.user.is_superuser
 
 
 # Customize admin site

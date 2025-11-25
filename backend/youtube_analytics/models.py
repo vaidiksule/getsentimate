@@ -1,16 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.db import transaction
 import uuid
 
 
 class User(AbstractUser):
     """Extended user model with YouTube OAuth and preferences"""
     google_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    google_sub = models.CharField(max_length=100, unique=True, null=True, blank=True)  # Google subject identifier
     google_email = models.EmailField(unique=True, null=True, blank=True)
     profile_picture = models.URLField(max_length=500, null=True, blank=True)
     youtube_access_token = models.TextField(null=True, blank=True)
     youtube_refresh_token = models.TextField(null=True, blank=True)
+    google_refresh_token = models.TextField(null=True, blank=True)  # Google OAuth refresh token
     token_expiry = models.DateTimeField(null=True, blank=True)
     is_active_channel = models.CharField(max_length=100, null=True, blank=True)  # Current active channel ID
     created_at = models.DateTimeField(auto_now_add=True)
@@ -21,6 +26,62 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.google_email})"
+
+
+class CreditAccount(models.Model):
+    """Credit account for each user"""
+    user = models.OneToOneField('User', on_delete=models.CASCADE, related_name="credit_account")
+    balance = models.IntegerField(default=0)  # Non-negative balance
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'credit_accounts'
+
+    def __str__(self):
+        return f"{self.user.username}: {self.balance} credits"
+
+
+class CreditTransaction(models.Model):
+    """Transaction history for credit operations"""
+    TRANSACTION_TYPES = [
+        ('INIT', 'Initial Credits'),
+        ('ANALYSIS', 'Analysis Cost'),
+        ('RESERVED', 'Reserved for Analysis'),
+        ('REFUND', 'Refund'),
+        ('TOPUP', 'Top Up'),
+        ('ADMIN_ADJUST', 'Admin Adjustment'),
+    ]
+    
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name="credit_transactions")
+    amount = models.IntegerField()  # Positive for add, negative for spend
+    transaction_type = models.CharField(max_length=20, choices=TRANSACTION_TYPES)
+    reference = models.CharField(max_length=100, blank=True, null=True)  # Optional reference (invoice ID, etc.)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'credit_transactions'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.amount} ({self.transaction_type})"
+
+
+@receiver(post_save, sender=User)
+def create_user_credit_account(sender, instance, created, **kwargs):
+    """Create credit account and initial credits when user is created"""
+    if created:
+        with transaction.atomic():
+            # Create credit account
+            account = CreditAccount.objects.create(user=instance, balance=20)
+            
+            # Create initial transaction
+            CreditTransaction.objects.create(
+                user=instance,
+                amount=20,
+                transaction_type='INIT',
+                reference='signup_bonus'
+            )
 
 
 class Channel(models.Model):

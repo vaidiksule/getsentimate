@@ -13,9 +13,11 @@ from django.views import View
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from .authentication import CSRFExemptSessionAuthentication
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -31,7 +33,7 @@ from django.utils import timezone
 from datetime import datetime
 
 # Import MongoDB service for user creation
-from .services.mongo_service import MongoService
+from .credit_utils import consume_credits, InsufficientCreditsError
 
 
 class AuthView(APIView):
@@ -1877,11 +1879,53 @@ class VideoInsightsView(APIView):
             )
 
 
+class TestAnalysisView(APIView):
+    """Test endpoint for Postman - bypasses CSRF for easier testing"""
+    
+    authentication_classes = [CSRFExemptSessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        """Test analysis endpoint - same logic as URLAnalysisView but without CSRF"""
+        return URLAnalysisView().post(request)
+
+
 class URLAnalysisView(APIView):
-    """URL-based video analysis for any YouTube video (no auth required)"""
+    """URL-based video analysis for any YouTube video (requires authentication and credits)"""
+    
+    authentication_classes = []
+    permission_classes = []
     
     def post(self, request):
         """Analyze any YouTube video by URL"""
+        # Use Django's built-in user authentication from request
+        from django.contrib.auth import get_user
+        
+        # Try to get the user from the session
+        user = None
+        if hasattr(request, 'session') and request.session.session_key:
+            try:
+                user_id = request.session.get('_auth_user_id')
+                if user_id:
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    user = User.objects.get(pk=user_id)
+            except (User.DoesNotExist, TypeError, ValueError):
+                user = None
+        
+        if not user or not user.is_authenticated:
+            return Response(
+                {'error': 'Authentication required'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        # Debug authentication
+        print(f"URLAnalysisView - User authenticated: {user.is_authenticated}")
+        print(f"URLAnalysisView - User ID: {user.id}")
+        print(f"URLAnalysisView - Session key: {request.session.session_key}")
+        print(f"URLAnalysisView - Session data: {dict(request.session)}")
+        print(f"URLAnalysisView - Cookies: {request.COOKIES}")
+        
         try:
             url = request.data.get('url')
             max_comments = request.data.get('max_comments', 100)
@@ -1900,13 +1944,40 @@ class URLAnalysisView(APIView):
             except (ValueError, TypeError):
                 max_comments = 100
             
-            print(f"URL analysis request for URL: {url}")
+            print(f"URL analysis request for URL: {url} by user: {user.username}")
+            
+            # Consume 1 credit for analysis
+            try:
+                new_balance = consume_credits(
+                    user, 
+                    amount=1, 
+                    transaction_type='ANALYSIS',
+                    reference=f"video_analysis_{url[:50]}"
+                )
+                print(f"Credit consumed. New balance: {new_balance}")
+            except InsufficientCreditsError as e:
+                return Response(
+                    {'error': 'Insufficient credits. You need at least 1 credit to run an analysis.'},
+                    status=status.HTTP_402_PAYMENT_REQUIRED
+                )
             
             # Use YouTube Data API based service instead of yt-dlp scraping
             yt_service = YouTubeAPIService()
             success, message, analysis_data = yt_service.analyze_video_by_url(url, max_comments)
 
             if not success or not analysis_data:
+                # Refund credit if analysis failed
+                try:
+                    from .credit_utils import refund_credits
+                    refund_credits(
+                        user, 
+                        amount=1, 
+                        reference=f"refund_failed_analysis_{url[:50]}"
+                    )
+                    print(f"Credit refunded due to analysis failure")
+                except Exception as refund_error:
+                    print(f"Failed to refund credit: {refund_error}")
+                
                 # Map structured error messages to HTTP status codes
                 error_msg = message or "Analysis failed"
                 if error_msg.startswith("QUOTA_EXCEEDED:"):
@@ -1972,6 +2043,7 @@ class URLAnalysisView(APIView):
                         'analysis_timestamp': analysis_data['analysis_timestamp'],
                         'ai_insights': ai_insights
                     },
+                    'credits_remaining': new_balance,
                     'comments_sample': comments_for_analysis[:10]  # Return first 10 comments as sample
                 }
                 

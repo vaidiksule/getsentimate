@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, Check, X, Menu } from "lucide-react";
-import { useState } from "react";
+import { Zap, Check, X, Menu, LogOut, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { checkAuth, logout, type User as UserType } from "@/lib/auth";
 
 export function Header() {
   const pathname = usePathname();
@@ -11,6 +12,29 @@ export function Header() {
   const isPricing = pathname === "/pricing";
   const [showToast, setShowToast] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserType | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const loadUser = async () => {
+      try {
+        const userData = await checkAuth();
+        setUser(userData);
+      } catch (error) {
+        setUser(null);
+      }
+    };
+    loadUser();
+  }, []);
+
+  const handleLogout = async () => {
+    const success = await logout();
+    if (success) {
+      setUser(null);
+      window.location.href = "/";
+    }
+  };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -73,35 +97,46 @@ export function Header() {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-2">
-          <Link
-            href="/analysis"
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
-              isAnalysis 
-                ? "bg-neutral-900 text-white shadow-md" 
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-            }`}
-          >
-            <Zap className="w-4 h-4" />
-            Analysis
-          </Link>
-          
-          <Link
-            href="/pricing"
-            className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
-              isPricing 
-                ? "bg-neutral-900 text-white shadow-md" 
-                : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-            }`}
-          >
-            Pricing
-          </Link>
-          
-          <button 
-            onClick={handleShare}
-            className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-          >
-            Share
-          </button>
+          {user ? (
+            // Logged in user navigation
+            <>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+              
+              <button 
+                onClick={handleShare}
+                className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+              >
+                Share
+              </button>
+            </>
+          ) : (
+            // Logged out user navigation
+            <>
+              <Link
+                href="/pricing"
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  isPricing 
+                    ? "bg-neutral-900 text-white shadow-md" 
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                }`}
+              >
+                Pricing
+              </Link>
+              
+              <button 
+                onClick={handleShare}
+                className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
+              >
+                Share
+              </button>
+            </>
+          )}
         </nav>
 
         {/* Mobile Menu Button */}
@@ -117,40 +152,56 @@ export function Header() {
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-neutral-200/80 bg-white/90 backdrop-blur-lg">
           <nav className="flex flex-col px-4 py-4 space-y-2">
-            <Link
-              href="/analysis"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                isAnalysis 
-                  ? "bg-neutral-900 text-white shadow-md" 
-                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-              }`}
-            >
-              <Zap className="w-4 h-4" />
-              Analysis
-            </Link>
-            
-            <Link
-              href="/pricing"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
-                isPricing 
-                  ? "bg-neutral-900 text-white shadow-md" 
-                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-              }`}
-            >
-              Pricing
-            </Link>
-            
-            <button 
-              onClick={() => {
-                handleShare();
-                setIsMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
-            >
-              Share
-            </button>
+            {user ? (
+              // Logged in user mobile navigation
+              <>
+                <button 
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    handleShare();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Share
+                </button>
+              </>
+            ) : (
+              // Logged out user mobile navigation
+              <>
+                <Link
+                  href="/pricing"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${
+                    isPricing 
+                      ? "bg-neutral-900 text-white shadow-md" 
+                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  }`}
+                >
+                  Pricing
+                </Link>
+                
+                <button 
+                  onClick={() => {
+                    handleShare();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  Share
+                </button>
+              </>
+            )}
           </nav>
         </div>
       )}

@@ -142,6 +142,7 @@ LOGOUT_REDIRECT_URL = "/"
 # --------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -160,6 +161,27 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
 }
+
+# --------------------
+# GOOGLE OAUTH SETTINGS
+# --------------------
+GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
+GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="")
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
+FRONTEND_AFTER_LOGIN = config("FRONTEND_AFTER_LOGIN", default="http://localhost:3000/analysis")
+FRONTEND_AFTER_LOGOUT = config("FRONTEND_AFTER_LOGOUT", default="http://localhost:3000/")
+
+# --------------------
+# SESSION SETTINGS
+# --------------------
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_DOMAIN = None  # Allow all domains
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
 
 # --------------------
 # SOCIAL ACCOUNT PROVIDERS
@@ -208,6 +230,17 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# --------------------
+# CSRF SETTINGS
+# --------------------
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://getsentimate.vercel.app",
+    "https://www.getsentimate.vercel.app",
+    "https://getsentimate.com",
+    "https://www.getsentimate.com",
+]
 
 # --------------------
 # DEFAULT AUTO FIELD
