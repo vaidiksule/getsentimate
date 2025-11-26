@@ -65,6 +65,8 @@ export async function logout(): Promise<boolean> {
     localStorage.removeItem('session_id');
     // Set flag to prevent immediate redirect to analysis
     sessionStorage.setItem('just_logged_out', 'true');
+    // Clear any cached auth data by forcing a brief delay
+    await new Promise(resolve => setTimeout(resolve, 100));
     return true;
   } catch (error) {
     console.error('Logout failed:', error);
