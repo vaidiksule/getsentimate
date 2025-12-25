@@ -76,7 +76,7 @@ export async function logout(): Promise<boolean> {
 
 // Get Google OAuth login URL
 export function getGoogleLoginURL(): string {
-  return `${baseURL}/api/auth/login/`;
+  return `${baseURL}/api/auth/google/login/`;
 }
 
 // Redirect to Google OAuth login

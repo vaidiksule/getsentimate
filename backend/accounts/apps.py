@@ -1,0 +1,10 @@
+from django.apps import AppConfig
+
+
+class AccountsConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'accounts'
+    
+    def ready(self):
+        # Import models to ensure they are registered
+        from . import models

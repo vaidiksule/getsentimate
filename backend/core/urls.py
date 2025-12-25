@@ -19,5 +19,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('youtube_analytics.urls')),
+    # New app-based routing
+    path('api/auth/', include('accounts.urls', namespace='accounts')),
+    path('api/credits/', include('credits.urls', namespace='credits')),
+    path('api/youtube/', include('youtube_service.urls', namespace='youtube_service')),
+    path('api/analysis/', include('ai_service.urls', namespace='ai_service')),
 ]

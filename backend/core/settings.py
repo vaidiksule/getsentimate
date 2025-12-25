@@ -45,7 +45,10 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
 
     # Local apps
-"youtube_analytics",
+    'accounts',
+    'credits',
+    'youtube_service',
+    'ai_service',
 ]
 
 # Site ID for django.contrib.sites
@@ -62,6 +65,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.MongoAuthMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -95,10 +99,11 @@ WSGI_APPLICATION = "core.wsgi.application"
 # --------------------
 # DATABASE
 # --------------------
+# Django ORM is not used for application data; all persistence goes through MongoDB
+# via mongoengine. We configure a dummy backend so Django doesn't try to use SQLite.
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.dummy',
     }
 }
 
@@ -120,11 +125,11 @@ except Exception as e:
 # --------------------
 # AUTHENTICATION
 # --------------------
-AUTH_USER_MODEL = 'youtube_analytics.User'
+# Use custom authentication backend instead of Django's default User model
+# AUTH_USER_MODEL = 'accounts.MongoUser'  # Cannot use MongoEngine document as Django user model
 
 AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
+    "accounts.backends.MongoBackend",
 )
 
 # Allauth settings (updated to remove deprecation warnings)
@@ -140,16 +145,14 @@ LOGOUT_REDIRECT_URL = "/"
 # --------------------
 # REST FRAMEWORK
 # --------------------
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "accounts.drf_auth.MongoSessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",  # Changed from IsAuthenticated to AllowAny
+        "rest_framework.permissions.AllowAny",
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
 }
 
 # --------------------
@@ -174,7 +177,7 @@ FRONTEND_AFTER_LOGOUT = config("FRONTEND_AFTER_LOGOUT", default="http://localhos
 # --------------------
 # SESSION SETTINGS
 # --------------------
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.file'
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
