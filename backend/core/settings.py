@@ -16,8 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 # --------------------
 SECRET_KEY = config("SECRET_KEY", default="changeme-in-production")
-# DEBUG = config("DEBUG", default=True, cast=bool)
-DEBUG = True
+DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*").split(",")
 
 # --------------------
@@ -32,7 +31,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",  # required for allauth
-
     # Third-party
     "corsheaders",
     "rest_framework",
@@ -43,12 +41,13 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth",
     "dj_rest_auth.registration",
-
     # Local apps
-    'accounts',
-    'credits',
-    'youtube_service',
-    'ai_service',
+    "accounts",
+    "credits",
+    "payments",
+    "transactions",
+    "youtube_service",
+    "analysis_service",
 ]
 
 # Site ID for django.contrib.sites
@@ -102,14 +101,14 @@ WSGI_APPLICATION = "core.wsgi.application"
 # Django ORM is not used for application data; all persistence goes through MongoDB
 # via mongoengine. We configure a dummy backend so Django doesn't try to use SQLite.
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.dummy',
+    "default": {
+        "ENGINE": "django.db.backends.dummy",
     }
 }
 
 # MongoDB Configuration
 MONGODB_DATABASE_NAME = "getsentimate"
-MONGODB_URI = os.getenv('DATABASE_URL')
+MONGODB_URI = os.getenv("DATABASE_URL")
 
 # Force MongoDB to use 'getsentimate' database
 MONGODB_DATABASE_NAME = "getsentimate"
@@ -117,6 +116,7 @@ MONGODB_DATABASE_NAME = "getsentimate"
 # Import MongoDB configuration
 try:
     from .mongo_config import connect_to_mongodb
+
     # Connect to MongoDB on startup
     connect_to_mongodb()
 except Exception as e:
@@ -128,9 +128,7 @@ except Exception as e:
 # Use custom authentication backend instead of Django's default User model
 # AUTH_USER_MODEL = 'accounts.MongoUser'  # Cannot use MongoEngine document as Django user model
 
-AUTHENTICATION_BACKENDS = (
-    "accounts.backends.MongoBackend",
-)
+AUTHENTICATION_BACKENDS = ("accounts.backends.MongoBackend",)
 
 # Allauth settings (updated to remove deprecation warnings)
 ACCOUNT_LOGIN_METHOD = "email"
@@ -139,7 +137,7 @@ ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[GetSentimate] "
 ACCOUNT_SESSION_REMEMBER = True
 
-LOGIN_REDIRECT_URL = "/dashboard"
+LOGIN_REDIRECT_URL = "/analysis"
 LOGOUT_REDIRECT_URL = "/"
 
 # --------------------
@@ -171,23 +169,27 @@ SIMPLE_JWT = {
 GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID", default="")
 GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET", default="")
 FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")
-FRONTEND_AFTER_LOGIN = config("FRONTEND_AFTER_LOGIN", default="http://localhost:3000/analysis")
-FRONTEND_AFTER_LOGOUT = config("FRONTEND_AFTER_LOGOUT", default="http://localhost:3000/")
+FRONTEND_AFTER_LOGIN = config(
+    "FRONTEND_AFTER_LOGIN", default="http://localhost:3000/analysis"
+)
+FRONTEND_AFTER_LOGOUT = config(
+    "FRONTEND_AFTER_LOGOUT", default="http://localhost:3000/"
+)
 
 # --------------------
 # SESSION SETTINGS
 # --------------------
-SESSION_ENGINE = 'django.contrib.sessions.backends.file'
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_DOMAIN = None  # Allow all domains
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
 # Ensure session cookies work across subdomains
-SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+SESSION_COOKIE_SAMESITE = "None" if not DEBUG else "Lax"
 
 # --------------------
 # SOCIAL ACCOUNT PROVIDERS
@@ -203,7 +205,9 @@ SOCIALACCOUNT_PROVIDERS = {
 # PASSWORD VALIDATORS
 # --------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -261,3 +265,18 @@ CSRF_TRUSTED_ORIGINS = [
 # --------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# --------------------
+# AI SERVICES
+# --------------------
+QDRANT_URL = config("QDRANT_URL", default=None)
+QDRANT_API_KEY = config("QDRANT_API_KEY", default=None)
+OPENAI_API_KEY = config("OPENAI_API_KEY", default=None)
+GOOGLE_API_KEY = config(
+    "GOOGLE_API_KEY", default=config("GEMINI_API_KEY", default=None)
+)
+
+# --------------------
+# RAZORPAY SETTINGS
+# --------------------
+RAZORPAY_KEY_ID = config("RAZORPAY_KEY_ID", default="")
+RAZORPAY_KEY_SECRET = config("RAZORPAY_KEY_SECRET", default="")

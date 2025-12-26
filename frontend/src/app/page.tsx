@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PlayCircle } from "lucide-react";
-import { TestimonialSlider } from "./analysis/components/TestimonialSlider";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { StatsSection } from "@/components/landing/StatsSection";
@@ -48,8 +47,6 @@ export default function HomePage() {
 					</div>
 				</section>
 
-				{/* Testimonials Section */}
-				<TestimonialSlider />
 
 				{/* Features Section */}
 				<FeaturesSection />

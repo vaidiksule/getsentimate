@@ -70,7 +70,9 @@ class YouTubeAPIService:
             print("YOUTUBE_API_KEY is not configured")
         return self.api_key
 
-    def fetch_youtube_metadata(self, video_id: str, url: str) -> Tuple[bool, str, Optional[Dict]]:
+    def fetch_youtube_metadata(
+        self, video_id: str, url: str
+    ) -> Tuple[bool, str, Optional[Dict]]:
         api_key = self._get_api_key()
         if not api_key:
             return False, "CONFIG_ERROR: YOUTUBE_API_KEY is not configured", None
@@ -80,7 +82,9 @@ class YouTubeAPIService:
             "id": video_id,
             "key": api_key,
         }
-        resp = requests.get("https://www.googleapis.com/youtube/v3/videos", params=params, timeout=10)
+        resp = requests.get(
+            "https://www.googleapis.com/youtube/v3/videos", params=params, timeout=10
+        )
 
         if resp.status_code != 200:
             try:
@@ -88,7 +92,9 @@ class YouTubeAPIService:
             except Exception:
                 data = {}
             error_reason = None
-            error_message = data.get("error", {}).get("message", "Unknown YouTube API error")
+            error_message = data.get("error", {}).get(
+                "message", "Unknown YouTube API error"
+            )
             errors = data.get("error", {}).get("errors", [])
             if errors:
                 error_reason = errors[0].get("reason")
@@ -102,7 +108,9 @@ class YouTubeAPIService:
         items = data.get("items", [])
         if not items:
             # Try oEmbed fallback for basic metadata
-            oembed_success, oembed_message, oembed_meta = self.fetch_oembed_metadata(url)
+            oembed_success, oembed_message, oembed_meta = self.fetch_oembed_metadata(
+                url
+            )
             if oembed_success and oembed_meta:
                 return True, oembed_message, oembed_meta
             return False, "INVALID_VIDEO: Video not found or not accessible", None
@@ -126,7 +134,9 @@ class YouTubeAPIService:
         published_at_raw = snippet.get("publishedAt")
         if published_at_raw:
             try:
-                published_at_dt = datetime.fromisoformat(published_at_raw.replace("Z", "+00:00"))
+                published_at_dt = datetime.fromisoformat(
+                    published_at_raw.replace("Z", "+00:00")
+                )
             except Exception:
                 published_at_dt = None
 
@@ -147,12 +157,20 @@ class YouTubeAPIService:
             "language": snippet.get("defaultLanguage", ""),
             "channel_id": snippet.get("channelId", ""),
             "channel_title": snippet.get("channelTitle", ""),
-            "channel_url": f"https://www.youtube.com/channel/{snippet.get('channelId', '')}" if snippet.get("channelId") else "",
+            "channel_url": f"https://www.youtube.com/channel/{snippet.get('channelId', '')}"
+            if snippet.get("channelId")
+            else "",
         }
 
-        return True, "Successfully fetched video metadata via YouTube Data API", video_details
+        return (
+            True,
+            "Successfully fetched video metadata via YouTube Data API",
+            video_details,
+        )
 
-    def fetch_youtube_comments(self, video_id: str, max_comments: int = 100) -> Tuple[bool, str, List[Dict]]:
+    def fetch_youtube_comments(
+        self, video_id: str, max_comments: int = 100
+    ) -> Tuple[bool, str, List[Dict]]:
         api_key = self._get_api_key()
         if not api_key:
             return False, "CONFIG_ERROR: YOUTUBE_API_KEY is not configured", []
@@ -165,7 +183,11 @@ class YouTubeAPIService:
             "key": api_key,
         }
 
-        resp = requests.get("https://www.googleapis.com/youtube/v3/commentThreads", params=params, timeout=10)
+        resp = requests.get(
+            "https://www.googleapis.com/youtube/v3/commentThreads",
+            params=params,
+            timeout=10,
+        )
 
         if resp.status_code != 200:
             try:
@@ -173,7 +195,9 @@ class YouTubeAPIService:
             except Exception:
                 data = {}
             error_reason = None
-            error_message = data.get("error", {}).get("message", "Unknown YouTube comments API error")
+            error_message = data.get("error", {}).get(
+                "message", "Unknown YouTube comments API error"
+            )
             errors = data.get("error", {}).get("errors", [])
             if errors:
                 error_reason = errors[0].get("reason")
@@ -206,7 +230,11 @@ class YouTubeAPIService:
             }
             comments.append(comment)
 
-        return True, f"Successfully fetched {len(comments)} comments via YouTube Data API", comments
+        return (
+            True,
+            f"Successfully fetched {len(comments)} comments via YouTube Data API",
+            comments,
+        )
 
     def fetch_oembed_metadata(self, url: str) -> Tuple[bool, str, Optional[Dict]]:
         """Fallback: use YouTube oEmbed for basic metadata if Data API fails or returns no items."""
@@ -241,19 +269,25 @@ class YouTubeAPIService:
             print(f"Error fetching oEmbed metadata: {e}")
             return False, f"OEMBED_ERROR: {e}", None
 
-    def analyze_video_by_url(self, url: str, max_comments: int = 100) -> Tuple[bool, str, Optional[Dict]]:
+    def analyze_video_by_url(
+        self, url: str, max_comments: int = 100
+    ) -> Tuple[bool, str, Optional[Dict]]:
         """Analyze a YouTube video by URL using the YouTube Data API (and oEmbed fallback)."""
         try:
             video_id = get_video_id_from_url(url)
             if not video_id:
                 return False, "INVALID_VIDEO: Invalid YouTube URL format", None
 
-            meta_success, meta_message, video_details = self.fetch_youtube_metadata(video_id, url)
+            meta_success, meta_message, video_details = self.fetch_youtube_metadata(
+                video_id, url
+            )
             if not meta_success or not video_details:
                 # Propagate quota errors / invalid video; for other errors, message already descriptive
                 return False, meta_message, None
 
-            comments_success, comments_message, comments = self.fetch_youtube_comments(video_id, max_comments)
+            comments_success, comments_message, comments = self.fetch_youtube_comments(
+                video_id, max_comments
+            )
             if not comments_success and comments_message.startswith("QUOTA_EXCEEDED:"):
                 # If comments quota exceeded, treat as hard failure so caller can return 429
                 return False, comments_message, None
@@ -268,8 +302,16 @@ class YouTubeAPIService:
             }
 
             if total_comments > 0:
-                return True, f"Successfully analyzed video with {total_comments} comments", analysis_data
-            return True, "Successfully analyzed video (no comments available)", analysis_data
+                return (
+                    True,
+                    f"Successfully analyzed video with {total_comments} comments",
+                    analysis_data,
+                )
+            return (
+                True,
+                "Successfully analyzed video (no comments available)",
+                analysis_data,
+            )
 
         except Exception as e:
             print(f"Error analyzing video by URL with YouTube Data API: {e}")

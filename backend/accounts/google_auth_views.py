@@ -16,10 +16,14 @@ from rest_framework import status
 from .models import MongoUser
 from .backends import login as mongo_login
 
+# Import Credits models
+from credits.models import MongoCreditAccount, MongoCreditTransaction
+
 
 # -------------------------------------------------------------------
 # Utils
 # -------------------------------------------------------------------
+
 
 def generate_state():
     return secrets.token_urlsafe(32)
@@ -29,6 +33,7 @@ def verify_id_token(id_token):
     """DEV MODE – no signature verification"""
     try:
         import jwt
+
         decoded = jwt.decode(id_token, options={"verify_signature": False})
         return {
             "sub": decoded.get("sub"),
@@ -59,6 +64,7 @@ def exchange_code_for_tokens(code, request):
 # OAuth Start
 # -------------------------------------------------------------------
 
+
 def google_oauth_login(request):
     state = generate_state()
     request.session["oauth_state"] = state
@@ -74,14 +80,13 @@ def google_oauth_login(request):
         "prompt": "consent",
     }
 
-    return redirect(
-        "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
-    )
+    return redirect("https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params))
 
 
 # -------------------------------------------------------------------
 # OAuth Callback
 # -------------------------------------------------------------------
+
 
 @csrf_exempt
 def google_oauth_callback(request):
@@ -124,6 +129,7 @@ def google_oauth_callback(request):
 # User creation
 # -------------------------------------------------------------------
 
+
 def create_or_get_user(user_info, refresh_token=None):
     google_sub = user_info["sub"]
     email = user_info["email"]
@@ -137,6 +143,14 @@ def create_or_get_user(user_info, refresh_token=None):
         if refresh_token:
             user.google_refresh_token = refresh_token
         user.save()
+
+        # Ensure credit account exists for existing users (migration fallback)
+        if not MongoCreditAccount.objects(user=user).first():
+            account = MongoCreditAccount(
+                user=user, balance=0
+            )  # No bonus for existing users just to be safe, or 10 if you prefer
+            account.save()
+
         return user
 
     user = MongoUser.objects(google_email=email).first()
@@ -146,6 +160,12 @@ def create_or_get_user(user_info, refresh_token=None):
         if refresh_token:
             user.google_refresh_token = refresh_token
         user.save()
+
+        # Ensure credit account exists
+        if not MongoCreditAccount.objects(user=user).first():
+            account = MongoCreditAccount(user=user, balance=0)
+            account.save()
+
         return user
 
     base_username = email.split("@")[0]
@@ -155,7 +175,7 @@ def create_or_get_user(user_info, refresh_token=None):
         username = f"{base_username}{i}"
         i += 1
 
-    return MongoUser.objects.create(
+    new_user = MongoUser.objects.create(
         username=username,
         email=email,
         google_sub=google_sub,
@@ -167,10 +187,27 @@ def create_or_get_user(user_info, refresh_token=None):
         is_active=True,
     )
 
+    # 🎁 BONUS: 10 Free Credits for new users
+    initial_credits = 10
+    credit_account = MongoCreditAccount(user=new_user, balance=initial_credits)
+    credit_account.save()
+
+    MongoCreditTransaction(
+        user=new_user,
+        amount=initial_credits,
+        balance_after=initial_credits,
+        transaction_type="INIT",
+        description="Welcome Bonus",
+        reference="signup_bonus",
+    ).save()
+
+    return new_user
+
 
 # -------------------------------------------------------------------
 # Auth ME
 # -------------------------------------------------------------------
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -183,22 +220,67 @@ def auth_me(request):
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
-    return Response(
-        {
-            "id": str(user.id),
-            "username": user.username,
-            "email": user.email,
-            "name": f"{user.first_name} {user.last_name}".strip(),
-            "avatar": user.profile_picture,
-            "google_sub": user.google_sub,
-            "is_authenticated": True,
-        }
-    )
+    # Fetch credits (with self-healing for missing welcome bonus)
+    credits = 0
+    credit_account = MongoCreditAccount.objects(user=user).first()
+
+    if not credit_account:
+        # HEADS UP: User existed but had no credit account. Fix it.
+        # Retroactive welcome bonus
+        credit_account = MongoCreditAccount(user=user, balance=10)
+        credit_account.save()
+
+        MongoCreditTransaction(
+            user=user,
+            amount=10,
+            balance_after=10,
+            transaction_type="INIT_FIX",
+            description="Welcome Bonus (Delayed)",
+            reference="auth_me_fix",
+        ).save()
+        credits = 10
+        print(f"DEBUG: Created missing credit account for {user.email} with 10 credits")
+    else:
+        # Check if they have 0 credits and NO transactions (meaning they were created before bonuses existed)
+        # This handles the specific case of your account which might have been created before the patch
+        transaction_count = MongoCreditTransaction.objects(user=user).count()
+        if credit_account.balance == 0 and transaction_count == 0:
+            # Retroactively apply welcome bonus
+            credit_account.balance = 10
+            credit_account.save()
+
+            MongoCreditTransaction(
+                user=user,
+                amount=10,
+                balance_after=10,
+                transaction_type="RETRO_BONUS",
+                description="Welcome Bonus (Retroactive)",
+                reference="auth_me_retro",
+            ).save()
+            credits = 10
+            print(f"DEBUG: Retroactively applied bonus for {user.email}")
+        else:
+            credits = credit_account.balance
+            print(f"DEBUG: Found account for {user.email}, balance: {credits}")
+
+    response_data = {
+        "id": str(user.id),
+        "username": user.username,
+        "email": user.email,
+        "name": f"{user.first_name} {user.last_name}".strip(),
+        "avatar": user.profile_picture,
+        "google_sub": user.google_sub,
+        "is_authenticated": True,
+        "credits": credits,
+    }
+    print(f"DEBUG: auth_me returning: {response_data}")
+    return Response(response_data)
 
 
 # -------------------------------------------------------------------
 # Logout
 # -------------------------------------------------------------------
+
 
 @csrf_exempt
 @api_view(["POST"])

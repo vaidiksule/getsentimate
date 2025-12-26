@@ -1,71 +1,100 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { Brain, TrendingUp, Users, BarChart, MessageSquare, Zap } from "lucide-react";
 
 const features = [
   {
     icon: Brain,
     title: "AI-Powered Analysis",
-    description: "Advanced machine learning algorithms analyze thousands of comments in seconds, providing deep insights into your audience's behavior.",
+    description: "Advanced ML algorithms analyze thousands of comments in seconds, providing deep insights into your audience.",
   },
   {
     icon: TrendingUp,
     title: "Sentiment Tracking",
-    description: "Understand the emotional tone of your comments with precise sentiment analysis, helping you gauge audience reaction.",
+    description: "Understand emotional tone with precise sentiment analysis, helping you gauge audience reaction instantly.",
   },
   {
     icon: Users,
     title: "Audience Personas",
-    description: "Discover detailed audience personas based on commenting patterns, helping you create targeted content that resonates.",
+    description: "Discover detailed personas based on commenting patterns to create targeted content that resonates.",
   },
   {
     icon: BarChart,
     title: "Topic Intelligence",
-    description: "Identify trending topics and themes in your comments to stay ahead of content trends and audience interests.",
+    description: "Identify trending topics and themes to stay ahead of content trends and audience interests.",
   },
   {
     icon: MessageSquare,
     title: "Comment Insights",
-    description: "Extract actionable suggestions from your comments to improve content quality and engagement rates.",
+    description: "Extract actionable suggestions to improve content quality and boost engagement rates.",
   },
   {
     icon: Zap,
     title: "Instant Results",
-    description: "Get comprehensive analysis in under 90 seconds. No waiting, no complex setup - just paste and analyze.",
+    description: "Get comprehensive analysis in under 90 seconds. No waiting, no complex setup required.",
   },
 ];
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0 },
+};
+
 export function FeaturesSection() {
   return (
-    <section className="py-20 bg-white">
-      <div className="mx-auto max-w-5xl w-full">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
-            Everything you need to understand your audience
+    <section className="py-16 sm:py-20">
+      <div className="mx-auto max-w-6xl w-full px-6 sm:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12 sm:mb-16"
+        >
+          <h2 className="text-[28px] sm:text-[36px] md:text-[40px] font-semibold tracking-tight text-[#1d1d1f]">
+            Everything you need to understand
+            <br className="hidden sm:block" /> your audience
           </h2>
-          <p className="mt-4 text-lg text-neutral-600">
+          <p className="mt-4 text-[15px] sm:text-[17px] text-[#86868b] max-w-2xl mx-auto">
             Powerful features that give you deep insights into your YouTube audience
           </p>
-        </div>
-        
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        </motion.div>
+
+        <motion.div
+          variants={container}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={index}
-              className="group relative rounded-2xl border border-neutral-200/50 bg-white/50 p-8 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+              variants={item}
+              className="group relative rounded-[20px] border border-black/[0.06] bg-white p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0A84FF]/10 text-[#0A84FF]">
-                <feature.icon className="h-6 w-6" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#0071e3]/10">
+                <feature.icon className="h-5 w-5 text-[#0071e3]" strokeWidth={2} />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-neutral-900 group-hover:text-[#0A84FF] transition-colors">
+              <h3 className="mt-4 text-[17px] font-semibold text-[#1d1d1f]">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-sm text-neutral-600 leading-relaxed">
+              <p className="mt-2 text-[13px] text-[#86868b] leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,10 +1,10 @@
 from accounts.models import MongoUser
-from accounts.backends import MongoBackend
 from .models import MongoCreditAccount, MongoCreditTransaction
 
 
 class InsufficientCreditsError(Exception):
     """Raised when user doesn't have enough credits for an operation"""
+
     pass
 
 
@@ -14,7 +14,7 @@ def get_credit_balance(user):
         # Ensure user is a MongoUser
         if not isinstance(user, MongoUser):
             user = MongoUser.objects(id=user.id).first()
-        
+
         account = MongoCreditAccount.objects(user=user).first()
         if account:
             return account.balance
@@ -25,8 +25,8 @@ def get_credit_balance(user):
                 user=user,
                 amount=20,
                 balance_after=20,
-                transaction_type='INIT',
-                reference='signup_bonus'
+                transaction_type="INIT",
+                reference="signup_bonus",
             )
             return 20
     except Exception as e:
@@ -34,52 +34,56 @@ def get_credit_balance(user):
         return 0
 
 
-def consume_credits(user, amount=1, transaction_type='ANALYSIS', reference=None):
+def consume_credits(user, amount=1, transaction_type="ANALYSIS", reference=None):
     """
     Atomically consume credits from a user's account
-    
-    Args:
-        user: The user to consume credits from
-        amount: Number of credits to consume (default: 1)
-        transaction_type: Type of transaction (default: 'ANALYSIS')
-        reference: Optional reference string
-    
-    Returns:
-        int: New balance after consumption
-    
-    Raises:
-        InsufficientCreditsError: If user doesn't have enough credits
     """
     if amount <= 0:
         raise ValueError("Amount must be positive")
-    
+
     try:
-        # Ensure user is a MongoUser
         if not isinstance(user, MongoUser):
             user = MongoUser.objects(id=user.id).first()
-        
-        # Get or create credit account
+
         account = MongoCreditAccount.objects(user=user).first()
         if not account:
             account = MongoCreditAccount.objects.create(user=user, balance=0)
-        
+
         if account.balance < amount:
-            raise InsufficientCreditsError(f"Insufficient credits: {account.balance} < {amount}")
-        
-        # Deduct credits
+            raise InsufficientCreditsError(
+                f"Insufficient credits: {account.balance} < {amount}"
+            )
+
         new_balance = account.balance - amount
         account.balance = new_balance
         account.save()
-        
-        # Create transaction record
+
+        # 1. Legacy Logging
         MongoCreditTransaction.objects.create(
             user=user,
             amount=-amount,
             balance_after=new_balance,
             transaction_type=transaction_type,
-            reference=reference
+            reference=reference,
         )
-        
+
+        # 2. Modern Logging (UI)
+        from transactions.models import Transaction
+
+        tx_type = "analysis"
+        if transaction_type == "CONSUME":
+            tx_type = "analysis"
+
+        Transaction(
+            user_id=str(user.id),
+            type=tx_type,
+            amount=-amount,
+            description="YouTube video analysis"
+            if tx_type == "analysis"
+            else f"Credits used ({transaction_type})",
+            reference=reference,
+        ).save()
+
         return account.balance
     except InsufficientCreditsError:
         raise
@@ -88,43 +92,57 @@ def consume_credits(user, amount=1, transaction_type='ANALYSIS', reference=None)
         raise
 
 
-def add_credits(user, amount, transaction_type='TOPUP', reference=None):
+def add_credits(
+    user, amount, transaction_type="TOPUP", reference=None, description=None
+):
     """
     Atomically add credits to a user's account
-    
-    Args:
-        user: The user to add credits to
-        amount: Number of credits to add
-        transaction_type: Type of transaction (default: 'TOPUP')
-        reference: Optional reference string
-    
-    Returns:
-        int: New balance after addition
     """
     if amount <= 0:
         raise ValueError("Amount must be positive")
-    
+
     try:
-        # Ensure user is a MongoUser
         if not isinstance(user, MongoUser):
             user = MongoUser.objects(id=user.id).first()
-        
-        # Get or create credit account
+
         account = MongoCreditAccount.objects(user=user).modify(
-            upsert=True,
-            new=True,
-            inc__balance=amount
+            upsert=True, new=True, inc__balance=amount
         )
-        
-        # Create transaction record
+
+        # 1. Legacy Logging
         MongoCreditTransaction.objects.create(
             user=user,
             amount=amount,
             balance_after=account.balance,
             transaction_type=transaction_type,
-            reference=reference
+            reference=reference,
         )
-        
+
+        # 2. Modern Logging (UI)
+        from transactions.models import Transaction
+
+        tx_type = "bonus"
+        if transaction_type in ["TOPUP", "ADD", "PURCHASE"]:
+            tx_type = "purchase"
+        elif transaction_type in ["INIT", "signup_bonus"]:
+            tx_type = "bonus"
+
+        Transaction(
+            user_id=str(user.id),
+            type=tx_type,
+            amount=amount,
+            description=description
+            or (
+                f"Purchased {amount} credits"
+                if tx_type == "purchase"
+                else f"Bonus credits: {amount}"
+            ),
+            reference=reference,
+            razorpay_payment_id=reference
+            if "razorpay" in (reference or "").lower()
+            else None,
+        ).save()
+
         return account.balance
     except Exception as e:
         print(f"Error adding credits: {e}")
@@ -134,28 +152,28 @@ def add_credits(user, amount, transaction_type='TOPUP', reference=None):
 def reserve_credits(user, amount=1, reference=None):
     """
     Reserve credits for an async operation (can be refunded later)
-    
+
     Args:
         user: The user to reserve credits from
         amount: Number of credits to reserve
         reference: Optional reference string
-    
+
     Returns:
         int: New balance after reservation
     """
-    return consume_credits(user, amount, 'RESERVED', reference)
+    return consume_credits(user, amount, "RESERVED", reference)
 
 
 def refund_credits(user, amount, reference=None):
     """
     Refund previously consumed/reserved credits
-    
+
     Args:
         user: The user to refund credits to
         amount: Number of credits to refund
         reference: Optional reference string
-    
+
     Returns:
         int: New balance after refund
     """
-    return add_credits(user, amount, 'REFUND', reference)
+    return add_credits(user, amount, "REFUND", reference)

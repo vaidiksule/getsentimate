@@ -1,7 +1,8 @@
-import os
 import logging
 from mongoengine import connect
 from mongoengine.connection import get_db
+
+from decouple import config
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ def connect_to_mongodb():
     if _CONNECTED:
         return True
 
-    mongodb_uri = os.getenv("DATABASE_URL")
+    mongodb_uri = config("DATABASE_URL", default=None)
     if not mongodb_uri:
         logger.error("DATABASE_URL environment variable not set")
         return False

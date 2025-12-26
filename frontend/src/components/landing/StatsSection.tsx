@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import { MessageSquare, Users, TrendingUp, Clock } from "lucide-react";
 
 const stats = [
@@ -16,7 +17,7 @@ const stats = [
     value: 95,
     suffix: "%",
     label: "Accuracy Rate",
-    description: "Sentiment analysis precision",
+    description: "Sentiment precision",
   },
   {
     icon: TrendingUp,
@@ -30,7 +31,7 @@ const stats = [
     value: 90,
     suffix: "s",
     label: "Processing Time",
-    description: "Average analysis duration",
+    description: "Average duration",
   },
 ];
 
@@ -38,7 +39,7 @@ export function StatsSection() {
   const [counters, setCounters] = useState(stats.map(() => 0));
 
   useEffect(() => {
-    const duration = 2000; // 2 seconds
+    const duration = 2000;
     const steps = 60;
     const stepTime = duration / steps;
 
@@ -57,45 +58,60 @@ export function StatsSection() {
   }, []);
 
   return (
-    <section className="py-20 bg-[#0A84FF] text-white">
-      <div className="mx-auto max-w-5xl w-full">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+    <section className="py-16 sm:py-20 bg-[#0071e3]">
+      <div className="mx-auto max-w-6xl w-full px-6 sm:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-12 sm:mb-16"
+        >
+          <h2 className="text-[28px] sm:text-[36px] md:text-[40px] font-semibold tracking-tight text-white">
             Trusted by creators worldwide
           </h2>
-          <p className="mt-4 text-lg text-blue-100">
+          <p className="mt-4 text-[15px] sm:text-[17px] text-white/80 max-w-2xl mx-auto">
             See the impact GetSentimate has on YouTube channels
           </p>
-        </div>
-        
-        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        </motion.div>
+
+        <div className="grid gap-6 sm:gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, index) => (
-            <div key={index} className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
-                <stat.icon className="h-6 w-6" />
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-[12px] bg-white/20 backdrop-blur-sm mb-4">
+                <stat.icon className="h-6 w-6 text-white" strokeWidth={2} />
               </div>
-              <div className="mt-4">
-                <div className="text-3xl font-bold">
-                  {Math.round(counters[index])}{stat.suffix}
-                </div>
-                <div className="mt-1 text-sm font-medium text-blue-100">
-                  {stat.label}
-                </div>
-                <div className="mt-1 text-xs text-blue-200">
-                  {stat.description}
-                </div>
+              <div className="text-[36px] sm:text-[42px] font-semibold text-white">
+                {Math.round(counters[index])}{stat.suffix}
               </div>
-            </div>
+              <div className="mt-1 text-[15px] font-medium text-white/90">
+                {stat.label}
+              </div>
+              <div className="mt-1 text-[13px] text-white/70">
+                {stat.description}
+              </div>
+            </motion.div>
           ))}
         </div>
-        
-        <div className="mt-16 text-center">
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="mt-12 sm:mt-16 text-center"
+        >
           <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-6 py-3 backdrop-blur-sm">
-            <div className="text-sm text-white">
-              Join <span className="font-semibold">10,000+</span> creators already using GetSentimate
-            </div>
+            <span className="text-[13px] sm:text-[15px] text-white">
+              Join <span className="font-semibold">10,000+</span> creators using GetSentimate
+            </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

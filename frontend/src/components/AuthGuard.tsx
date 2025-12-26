@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { checkAuth, type User } from '@/lib/auth';
+import { useUserStore } from '@/store/userStore';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -22,20 +23,20 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
 
   useEffect(() => {
     if (!mounted) return;
-    
+
     const verifyAuth = async () => {
       try {
         // Handle cross-domain session ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
-        
+
         if (sessionId) {
           // Store session ID and clean URL
           localStorage.setItem('session_id', sessionId);
           const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]session_id=[^&]*/, '');
           window.history.replaceState({}, '', cleanUrl);
         }
-        
+
         // Skip auth check if user just logged out
         const justLoggedOut = sessionStorage.getItem('just_logged_out');
         if (justLoggedOut) {
@@ -44,14 +45,15 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
           setIsLoading(false);
           return;
         }
-        
+
         const userData = await checkAuth();
         setUser(userData);
+        useUserStore.getState().setUser(userData);
 
         // Redirect logic based on authentication status
         if (requireAuth && !userData) {
           // Authentication required but user is not logged in
-          router.push(redirectTo || '/');
+          router.push(redirectTo || '/analysis');
           return;
         }
 
@@ -74,7 +76,7 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
       } catch (error) {
         console.error('Auth verification failed:', error);
         if (requireAuth) {
-          router.push(redirectTo || '/');
+          router.push(redirectTo || '/analysis');
         }
       } finally {
         setIsLoading(false);
@@ -84,9 +86,13 @@ export function AuthGuard({ children, requireAuth = false, redirectTo }: AuthGua
     verifyAuth();
   }, [router, requireAuth, redirectTo, mounted]);
 
-  // Return null during loading/mounting to prevent hydration mismatch
+  // Show loading spinner during verification
   if (!mounted || isLoading) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-[3px] border-[#e5e5e5] border-t-[#0071e3] animate-spin" />
+      </div>
+    );
   }
 
   // If we reach here, the user is in the correct authentication state

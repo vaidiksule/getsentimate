@@ -1,4 +1,3 @@
-from django.contrib.auth.models import AnonymousUser
 from accounts.backends import get_user
 
 
