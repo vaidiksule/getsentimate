@@ -20,7 +20,7 @@ const container = {
     }
 };
 
-const item = {
+const item: any = {
     hidden: { opacity: 0, y: 12 },
     show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } }
 };
@@ -44,7 +44,7 @@ export function ChartsSidebar({ result }: { result: any }) {
             {/* Sentiment Chart */}
             <motion.div variants={item} className="apple-card p-8">
                 <h3 className="label-micro mb-8">Sentiment</h3>
-                <div className="h-64 w-full">
+                <div className="h-64 sm:h-72 w-full min-h-[250px]">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                             <Pie

@@ -42,8 +42,9 @@ class AnalysisService:
         ]
 
         batch_results = []
+        print(f"\n--- Starting Analysis ({len(comments)} comments) ---")
         for i, batch in enumerate(batches):
-            logger.info(f"Processing batch {i + 1}/{len(batches)}")
+            print(f"> Processing batch {i + 1}/{len(batches)}...")
             try:
                 res = self._analyze_batch(batch)
                 batch_results.append(res)
@@ -62,6 +63,16 @@ class AnalysisService:
         input_cost = (self.total_input_tokens / 1_000_000) * 0.10
         output_cost = (self.total_output_tokens / 1_000_000) * 0.40
         total_cost = input_cost + output_cost
+
+        # Debug Logs
+        print("--- Analysis Complete ---")
+        print(f"Model: {self.model_name}")
+        print(f"Total Tokens: {self.total_input_tokens + self.total_output_tokens}")
+        print(f"Input Tokens: {self.total_input_tokens}")
+        print(f"Output Tokens: {self.total_output_tokens}")
+        print(f"API Calls: {self.num_api_calls}")
+        print(f"Est. Cost: ${total_cost:.6f}")
+        print("-------------------------\n")
 
         # Add Debug Info
         final_insight["debug_info"] = {
