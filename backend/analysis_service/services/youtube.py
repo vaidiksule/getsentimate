@@ -1,6 +1,5 @@
 import logging
 from typing import Dict, List, Any
-import yt_dlp
 from itertools import islice
 from youtube_comment_downloader import YoutubeCommentDownloader
 
@@ -23,29 +22,55 @@ class YouTubeFetchService:
         }
 
     def _fetch_metadata(self, url: str) -> Dict[str, Any]:
+        """
+        Fetch video metadata using official API or oEmbed fallback.
+        Avoids yt-dlp bot detection issues.
+        """
+        from youtube_service.youtube_api_service import (
+            YouTubeAPIService,
+            get_video_id_from_url,
+        )
+
         try:
-            ydl_opts = {
-                "quiet": True,
-                "no_warnings": True,
-                "extract_flat": True,
-                "skip_download": True,
-            }
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
+            video_id = get_video_id_from_url(url)
+            api_service = YouTubeAPIService()
+
+            # 1. Try official API (if key exists) or oEmbed
+            success, message, metadata = api_service.fetch_youtube_metadata(
+                video_id, url
+            )
+
+            if success and metadata:
                 return {
-                    "title": info.get("title"),
-                    "channel": info.get("uploader"),
-                    "views": info.get("view_count"),
-                    "upload_date": info.get("upload_date"),
-                    "thumbnail": info.get("thumbnail"),
-                    "duration": info.get("duration"),
-                    "likes": info.get(
-                        "like_count"
-                    ),  # Often None in yt-dlp recently, but we try
+                    "video_id": video_id,
+                    "title": metadata.get("title"),
+                    "channel": metadata.get("channel_title"),
+                    "views": metadata.get("view_count"),
+                    "upload_date": metadata.get("published_at").strftime("%Y-%m-%d")
+                    if metadata.get("published_at")
+                    else None,
+                    "thumbnail": metadata.get("thumbnail_url"),
+                    "duration": metadata.get("duration"),
+                    "likes": metadata.get("like_count"),
                 }
+
+            # 2. Final Fallback: Basic URL extraction if everything fails
+            return {
+                "video_id": video_id,
+                "title": "YouTube Video",
+                "channel": "Unknown",
+                "views": 0,
+                "upload_date": None,
+                "thumbnail": f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+                if video_id
+                else None,
+                "duration": "0:00",
+                "likes": 0,
+            }
+
         except Exception as e:
             logger.error(f"Metadata fetch failed: {e}")
-            raise ValueError("Could not fetch video details. Is the URL correct?")
+            raise ValueError(f"Could not fetch video details: {str(e)}")
 
     def _fetch_comments(self, url: str, max_comments: int) -> List[Dict[str, Any]]:
         try:

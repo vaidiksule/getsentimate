@@ -6,7 +6,9 @@ from typing import Dict, List, Optional, Tuple
 import requests
 
 
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+from django.conf import settings
+
+YOUTUBE_API_KEY = getattr(settings, "GOOGLE_API_KEY", os.getenv("YOUTUBE_API_KEY"))
 
 
 def get_video_id_from_url(url: str) -> Optional[str]:
