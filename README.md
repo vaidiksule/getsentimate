@@ -224,7 +224,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 **Email**: support@getsentimate.com
+- 📧 **Email**: vaidiksule@gmail.com
 - 💬 **Discord**: [Join our community](https://discord.gg/getsentimate)
 - 🐦 **Twitter**: [@GetSentimate](https://twitter.com/getsentimate)
 - 📖 **Documentation**: [docs.getsentimate.com](https://docs.getsentimate.com)
