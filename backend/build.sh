@@ -9,10 +9,8 @@ echo "📦 Installing Python dependencies..."
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-# Run database migrations (optional for Mongo but keep if standard apps use SQL)
-# Using || true to prevent build failure if migrate fails on dummy engine
-echo "🗄️  Running database migrations..."
-python manage.py migrate || echo "⚠️  Migration skipped or failed (common with MongoDB)"
+# No SQL migrations needed for MongoDB project
+# Skipping python manage.py migrate
 
 # Collect static files
 echo "📁 Collecting static files..."

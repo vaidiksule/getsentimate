@@ -30,17 +30,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.sites",  # required for allauth
     # Third-party
     "corsheaders",
     "rest_framework",
     "rest_framework.authtoken",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.google",
-    "dj_rest_auth",
-    "dj_rest_auth.registration",
     # Local apps
     "accounts",
     "credits",
@@ -50,8 +43,6 @@ INSTALLED_APPS = [
     "analysis_service",
 ]
 
-# Site ID for django.contrib.sites
-SITE_ID = 1
 
 # --------------------
 # MIDDLEWARE
@@ -130,13 +121,6 @@ except Exception as e:
 
 AUTHENTICATION_BACKENDS = ("accounts.backends.MongoBackend",)
 
-# Allauth settings (updated to remove deprecation warnings)
-ACCOUNT_LOGIN_METHOD = "email"
-ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
-ACCOUNT_EMAIL_VERIFICATION = "optional"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[GetSentimate] "
-ACCOUNT_SESSION_REMEMBER = True
-
 LOGIN_REDIRECT_URL = "/analysis"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -198,12 +182,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 # --------------------
 # SOCIAL ACCOUNT PROVIDERS
 # --------------------
-SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
-    }
-}
+# (Manual implementation used in google_auth_views.py)
 
 # --------------------
 # PASSWORD VALIDATORS
