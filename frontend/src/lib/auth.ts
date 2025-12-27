@@ -85,27 +85,3 @@ export function redirectToGoogleLogin(): void {
   window.location.href = getGoogleLoginURL();
 }
 
-// Temporary: Login with email/password for Razorpay verification
-export async function tempLogin(email: string, password: string): Promise<boolean> {
-  try {
-    const response = await authApi.post('/api/auth/temp-login/', { email, password });
-
-    if (response.status === 200 && (response.data.access_token || response.data.session_id)) {
-      // Save tokens for API calls
-      if (response.data.access_token) {
-        localStorage.setItem('access_token', response.data.access_token);
-      }
-      if (response.data.refresh_token) {
-        localStorage.setItem('refresh_token', response.data.refresh_token);
-      }
-      if (response.data.session_id) {
-        localStorage.setItem('session_id', response.data.session_id);
-      }
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Temp login failed:', error);
-    return false;
-  }
-}

@@ -77,6 +77,9 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                 name: "GetSentimate",
                 description: `Purchase ${orderData.package_name}`,
                 order_id: orderData.order_id,
+                prefill: {
+                    email: useUserStore.getState().user?.email || "",
+                },
                 handler: async function (response: any) {
                     // Step 3: Verify payment
                     try {
@@ -114,6 +117,11 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                         setLoading(false);
                         setSelectedPackage(null);
                     },
+                },
+                notes: {
+                    user_id: useUserStore.getState().user?.id || "",
+                    website: "https://getsentimate.com",
+                    support_email: "vaidiksule@gmail.com",
                 },
                 theme: {
                     color: "#0071e3",
@@ -201,12 +209,6 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                         </a>
                     </div>
 
-                    {/* Test Mode Notice */}
-                    <div className="mt-6 p-4 bg-yellow-50 rounded-[12px] border border-yellow-200">
-                        <p className="text-[13px] text-yellow-800">
-                            <strong>Test Mode:</strong> Use card <code>4111 1111 1111 1111</code>, any future expiry, CVV: 123
-                        </p>
-                    </div>
                 </motion.div>
             </motion.div>
 
