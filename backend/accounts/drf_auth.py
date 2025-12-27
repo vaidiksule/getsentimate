@@ -28,6 +28,12 @@ class MongoJWTAuthentication(JWTAuthentication):
     SimpleJWT authentication customized for MongoUser.
     """
 
+    def authenticate(self, request):
+        try:
+            return super().authenticate(request)
+        except Exception:
+            return None  # Fall back to session auth
+
     def get_user(self, validated_token):
         try:
             user_id = validated_token["user_id"]

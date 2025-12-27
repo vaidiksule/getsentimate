@@ -8,9 +8,22 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 
     const headers = {
         'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options.headers,
-    } as HeadersInit;
+    } as any;
+
+    // Add session ID if available (fallback for cross-domain)
+    if (typeof window !== 'undefined') {
+        const sessionId = localStorage.getItem('session_id');
+        if (sessionId) {
+            headers['X-Session-ID'] = sessionId;
+        }
+
+        // Only add token if it exists and we're not using session ID
+        const token = localStorage.getItem('access_token');
+        if (token && !sessionId) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+    }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
         ...options,

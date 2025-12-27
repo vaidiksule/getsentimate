@@ -54,6 +54,10 @@ class YouTubeFetchService:
                     "likes": metadata.get("like_count"),
                 }
 
+            logger.warning(
+                f"Metadata fetch fallback triggered for {url}. Message: {message}"
+            )
+
             # 2. Final Fallback: Basic URL extraction if everything fails
             return {
                 "video_id": video_id,

@@ -1,8 +1,6 @@
-
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
-import { PieChart as PieChartIcon, MessageSquare, Lightbulb } from "lucide-react";
 import { motion } from "framer-motion";
 
 const COLORS = {
@@ -41,13 +39,11 @@ export function ChartsSidebar({ result }: { result: any }) {
             variants={container}
             initial="hidden"
             animate="show"
-            className="space-y-6"
+            className="space-y-8"
         >
             {/* Sentiment Chart */}
-            <motion.div variants={item} className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-black/[0.03]">
-                <h3 className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <PieChartIcon className="w-3.5 h-3.5" /> Sentiment
-                </h3>
+            <motion.div variants={item} className="apple-card p-6">
+                <h3 className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest mb-8">Sentiment</h3>
                 <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -55,8 +51,8 @@ export function ChartsSidebar({ result }: { result: any }) {
                                 data={sentimentData}
                                 cx="50%"
                                 cy="50%"
-                                innerRadius={65}
-                                outerRadius={85}
+                                innerRadius={70}
+                                outerRadius={90}
                                 paddingAngle={4}
                                 dataKey="value"
                                 stroke="none"
@@ -68,13 +64,12 @@ export function ChartsSidebar({ result }: { result: any }) {
                             <RechartsTooltip
                                 cursor={false}
                                 contentStyle={{
-                                    borderRadius: '12px',
+                                    borderRadius: '16px',
                                     border: 'none',
-                                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                                    boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
                                     padding: '8px 12px',
                                     fontSize: '13px',
                                     fontWeight: 500,
-                                    color: '#1d1d1f'
                                 }}
                             />
                             <Legend
@@ -82,35 +77,31 @@ export function ChartsSidebar({ result }: { result: any }) {
                                 height={36}
                                 iconType="circle"
                                 iconSize={8}
-                                wrapperStyle={{ fontSize: '12px', color: '#86868b', paddingTop: '10px' }}
+                                wrapperStyle={{ fontSize: '11px', fontWeight: 600, color: '#86868b', paddingTop: '16px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                             />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
             </motion.div>
 
-            {/* Topics List */}
-            <motion.div variants={item} className="bg-white rounded-[20px] p-6 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-black/[0.03]">
-                <h3 className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest mb-6 flex items-center gap-2">
-                    <MessageSquare className="w-3.5 h-3.5" /> Key Topics
-                </h3>
-                <div className="flex flex-wrap gap-2">
+            {/* Topics List - Pill Style */}
+            <motion.div variants={item} className="apple-card p-6">
+                <h3 className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest mb-6">Key Topics</h3>
+                <div className="flex flex-wrap gap-1.5">
                     {result.analysis?.key_topics?.map((topic: string, i: number) => (
-                        <span key={i} className="px-3 py-1.5 bg-[#f5f5f7] text-[#424245] text-[13px] font-medium rounded-lg border border-transparent cursor-default transition-colors hover:bg-[#e5e5e5]">
+                        <span key={i} className="px-3 py-1 bg-[#f5f5f7] text-[#1d1d1f] text-[13px] font-medium rounded-full cursor-default transition-all hover:bg-[#e8e8ed]">
                             {topic}
                         </span>
                     ))}
                 </div>
             </motion.div>
 
-            {/* Video Ideas */}
-            <motion.div variants={item} className="bg-[#F2F7FF] rounded-[20px] p-6 border border-[#0071e3]/10">
-                <h3 className="flex items-center gap-2 text-[11px] font-bold text-[#0071e3] mb-5 uppercase tracking-widest">
-                    <Lightbulb className="w-3.5 h-3.5" strokeWidth={2.5} /> Next Video Ideas
-                </h3>
+            {/* Video Ideas - Minimal */}
+            <motion.div variants={item} className="apple-card p-6 bg-[#0071e3]/5 border-[#0071e3]/10">
+                <h3 className="text-[11px] font-bold text-[#0071e3] mb-6 uppercase tracking-widest">Next Video Ideas</h3>
                 <ul className="space-y-3">
                     {result.analysis?.video_ideas?.map((item: string, i: number) => (
-                        <li key={i} className="bg-white/80 p-3.5 rounded-xl text-[13px] text-[#1d1d1f] font-medium border border-[#0071e3]/5 shadow-sm">
+                        <li key={i} className="bg-white p-4 rounded-xl text-[13px] text-[#1d1d1f] font-medium border border-black/[0.03] shadow-sm">
                             {item}
                         </li>
                     ))}

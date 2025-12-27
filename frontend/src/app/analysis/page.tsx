@@ -15,34 +15,38 @@ export default function AnalysisPage() {
 
     return (
         <AuthGuard requireAuth={true} redirectTo="/">
-            <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 font-sans selection:bg-[#0071e3]/20 text-[#1d1d1f]">
-
-
-                <main className="max-w-[1120px] mx-auto pt-4 sm:pt-8 pb-16 px-4 sm:px-8">
-                    {/* Animate out search input slightly when result appears to transition smoothly */}
-                    <AnimatePresence mode="wait">
-                        {!result && (
-                            <motion.div
-                                key="search"
-                                exit={{ opacity: 0, y: -20, transition: { duration: 0.3 } }}
-                            >
-                                <SearchInput />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
+            <main className="max-w-6xl mx-auto pt-8 pb-24 px-6 md:px-8">
+                <AnimatePresence mode="wait">
+                    {!result && (
+                        <motion.div
+                            key="search"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                        >
+                            <SearchInput />
+                        </motion.div>
+                    )}
 
                     {result && (
-                        <div className="space-y-8">
+                        <motion.div
+                            key="result"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                            className="space-y-12"
+                        >
                             <VideoHeader result={result} />
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
                                 <ExecutiveSummary result={result} />
                                 <ChartsSidebar result={result} />
                             </div>
-                        </div>
+                        </motion.div>
                     )}
-                </main>
-            </div>
+                </AnimatePresence>
+            </main>
         </AuthGuard>
     );
 }

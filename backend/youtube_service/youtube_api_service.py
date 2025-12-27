@@ -77,7 +77,17 @@ class YouTubeAPIService:
     ) -> Tuple[bool, str, Optional[Dict]]:
         api_key = self._get_api_key()
         if not api_key:
-            return False, "CONFIG_ERROR: YOUTUBE_API_KEY is not configured", None
+            # Try oEmbed fallback immediately if no API key
+            oembed_success, oembed_message, oembed_meta = self.fetch_oembed_metadata(
+                url
+            )
+            if oembed_success and oembed_meta:
+                return True, oembed_message, oembed_meta
+            return (
+                False,
+                "CONFIG_ERROR: YOUTUBE_API_KEY is not configured and oEmbed fallback failed",
+                None,
+            )
 
         params = {
             "part": "snippet,statistics,contentDetails",
@@ -241,12 +251,17 @@ class YouTubeAPIService:
     def fetch_oembed_metadata(self, url: str) -> Tuple[bool, str, Optional[Dict]]:
         """Fallback: use YouTube oEmbed for basic metadata if Data API fails or returns no items."""
         try:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
             resp = requests.get(
                 "https://www.youtube.com/oembed",
                 params={"url": url, "format": "json"},
+                headers=headers,
                 timeout=10,
             )
             if resp.status_code != 200:
+                print(f"oEmbed fallback failed with status {resp.status_code}")
                 return False, f"OEMBED_ERROR: HTTP {resp.status_code}", None
             data = resp.json()
             video_details = {
