@@ -3,55 +3,72 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 212 91% 47%; /* Apple Blue */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+  body {
+    @apply bg-white text-black font-sans selection:bg-blue-soft selection:text-blue-text;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
   * {
-    @apply border-border;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    @apply bg-white text-foreground font-sans selection:bg-blue-100 selection:text-blue-900;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply border-gray-200;
   }
 }
 
 @layer components {
   .apple-card {
-    @apply bg-white border border-black/[0.04] shadow-[0_2px_8px_rgba(0,0,0,0.04)] rounded-[20px] transition-all duration-300;
-  }
-  
-  .apple-card:hover {
-    @apply shadow-[0_4px_16px_rgba(0,0,0,0.08)] border-black/[0.08];
+    @apply bg-white border border-gray-200 rounded-apple transition-all duration-apple ease-apple;
   }
 
-  .apple-button-primary {
-    @apply bg-[#0071e3] text-white font-medium rounded-full px-5 py-2 hover:bg-[#0077ed] transition-all active:scale-[0.98];
+  .apple-card-hover {
+    @apply hover:bg-gray-100;
   }
 
-  .apple-button-secondary {
-    @apply bg-[#f5f5f7] text-[#1d1d1f] font-medium rounded-full px-5 py-2 hover:bg-[#e8e8ed] transition-all active:scale-[0.98];
+  .btn-base {
+    @apply inline-flex items-center justify-center rounded-button px-5 py-3 text-body font-medium transition-all duration-apple ease-apple active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn-base bg-black text-white hover:bg-gray-900;
+  }
+
+  .btn-credits {
+    @apply btn-base bg-green-primary text-white hover:bg-green-primary/90;
+  }
+
+  .btn-secondary {
+    @apply btn-base bg-transparent border border-gray-300 text-gray-900 hover:bg-gray-100;
+  }
+
+  .btn-ghost {
+    @apply btn-base bg-transparent text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+  }
+
+  .input-base {
+    @apply w-full rounded-button border border-gray-300 bg-white px-4 py-3 text-body outline-none transition-all duration-apple ease-apple focus:border-black focus:ring-1 focus:ring-black;
+  }
+
+  .label-micro {
+    @apply text-micro font-medium uppercase tracking-widest text-gray-500;
+  }
+
+  .badge-soft {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-micro font-medium;
+  }
+
+  .badge-green {
+    @apply badge-soft bg-green-soft text-green-text;
+  }
+
+  .badge-blue {
+    @apply badge-soft bg-blue-soft text-blue-text;
+  }
+
+  .badge-yellow {
+    @apply badge-soft bg-yellow-soft text-yellow-text;
+  }
+
+  .badge-red {
+    @apply badge-soft bg-red-soft text-red-text;
   }
 }

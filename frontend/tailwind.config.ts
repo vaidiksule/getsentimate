@@ -1,75 +1,86 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-    darkMode: ["class"],
-    content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
-  theme: {
-  	extend: {
-  		fontFamily: {
-				sans: ['-apple-system', 'SF Pro Text', 'Helvetica', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+	darkMode: ["class"],
+	content: [
+		"./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+		"./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+	],
+	theme: {
+		extend: {
+			fontFamily: {
+				sans: [
+					'-apple-system',
+					'BlinkMacSystemFont',
+					'"SF Pro Display"',
+					'"SF Pro Text"',
+					'Inter',
+					'"Helvetica Neue"',
+					'Arial',
+					'sans-serif'
+				],
 				mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace']
-  		},
-  		borderRadius: {
-  			'4xl': '2rem',
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		boxShadow: {
-  			DEFAULT: '0 2px 4px rgba(0, 0, 0, 0.1)',
-  			md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)',
-  			lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)'
-  		},
-  		colors: {
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			background: 'hsl(var(--background))',
-  			text: '#000000',
-  			lightText: '#8E8E93',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		}
-  	}
-  },
-  plugins: [require("tailwindcss-animate")],
+			},
+			fontSize: {
+				'micro': ['12px', '16px'],
+				'secondary': ['14px', '20px'],
+				'body': ['16px', '24px'],
+				'emphasis': ['18px', '26px'],
+				'title-section': ['20px', '28px'],
+				'title-page': ['24px', '32px'],
+				'title-hero': ['32px', '40px'],
+				'headline-dashboard': ['40px', '48px'],
+				'hero-product': ['44px', '52px'],
+			},
+			borderRadius: {
+				'apple': '12px',
+				'button': '8px',
+			},
+			colors: {
+				black: '#0A0A0A',
+				white: '#FFFFFF',
+				gray: {
+					100: '#F5F5F5',
+					200: '#E5E5E5',
+					300: '#D4D4D4',
+					400: '#A3A3A3',
+					500: '#737373',
+					600: '#525252',
+					700: '#404040',
+					800: '#262626',
+					900: '#1A1A1A',
+					950: '#111111',
+				},
+				green: {
+					primary: '#16A34A',
+					soft: '#DCFCE7',
+					text: '#14532D',
+				},
+				blue: {
+					primary: '#2563EB',
+					soft: '#DBEAFE',
+					text: '#1E3A8A',
+				},
+				yellow: {
+					primary: '#CA8A04',
+					soft: '#FEF9C3',
+					text: '#713F12',
+				},
+				red: {
+					primary: '#DC2626',
+					soft: '#FEE2E2',
+					text: '#7F1D1D',
+				}
+			},
+			transitionDuration: {
+				'apple': '150ms',
+			},
+			transitionTimingFunction: {
+				'apple': 'ease-out',
+			}
+		}
+	},
+	plugins: [require("tailwindcss-animate")],
 };
 export default config;

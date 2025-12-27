@@ -41,32 +41,32 @@ const container = {
   show: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.1,
     },
   },
 };
 
 const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } },
 };
 
 export function FeaturesSection() {
   return (
-    <section className="py-16 sm:py-20">
-      <div className="mx-auto max-w-6xl w-full px-6 sm:px-8">
+    <section className="py-24">
+      <div className="mx-auto max-w-7xl w-full">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12 sm:mb-16"
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="text-center mb-20"
         >
-          <h2 className="text-[28px] sm:text-[36px] md:text-[40px] font-semibold tracking-tight text-[#1d1d1f]">
-            Everything you need to understand
-            <br className="hidden sm:block" /> your audience
+          <h2 className="text-title-hero font-bold tracking-tight text-black">
+            The standard for audience intelligence.
           </h2>
-          <p className="mt-4 text-[15px] sm:text-[17px] text-[#86868b] max-w-2xl mx-auto">
-            Powerful features that give you deep insights into your YouTube audience
+          <p className="mt-4 text-emphasis text-gray-500 max-w-2xl mx-auto font-medium">
+            Everything you need to turn thousands of comments into content strategy.
           </p>
         </motion.div>
 
@@ -75,21 +75,21 @@ export function FeaturesSection() {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true }}
-          className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
         >
           {features.map((feature, index) => (
             <motion.div
               key={index}
               variants={item}
-              className="group relative rounded-[20px] border border-black/[0.06] bg-white p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] transition-all hover:shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:-translate-y-1"
+              className="apple-card p-10 bg-white hover:bg-gray-100 transition-all duration-apple ease-apple"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-[12px] bg-[#0071e3]/10">
-                <feature.icon className="h-5 w-5 text-[#0071e3]" strokeWidth={2} />
+              <div className="flex h-12 w-12 items-center justify-center rounded-button bg-black mb-8">
+                <feature.icon className="h-6 w-6 text-white" />
               </div>
-              <h3 className="mt-4 text-[17px] font-semibold text-[#1d1d1f]">
+              <h3 className="text-title-section font-bold text-black mb-4">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-[13px] text-[#86868b] leading-relaxed">
+              <p className="text-secondary text-gray-600 leading-relaxed font-medium">
                 {feature.description}
               </p>
             </motion.div>

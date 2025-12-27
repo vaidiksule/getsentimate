@@ -47,24 +47,18 @@ const testimonials = [
 ];
 
 export function TestimonialsSection() {
-    // Multiply the testimonials to create an infinite scroll effect
     const doubledTestimonials = [...testimonials, ...testimonials];
 
     return (
-        <section className="pb-12 pt-0 overflow-hidden bg-white">
-
-            <div className="relative flex overflow-hidden py-10">
-                {/* Gradient Masks */}
-                <div className="absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />
-                <div className="absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white to-transparent" />
-
+        <section className="py-24 overflow-hidden bg-white">
+            <div className="relative flex overflow-hidden">
                 <motion.div
                     className="flex whitespace-nowrap"
                     animate={{
                         x: ["0%", "-50%"],
                     }}
                     transition={{
-                        duration: 50,
+                        duration: 80,
                         ease: "linear",
                         repeat: Infinity,
                     }}
@@ -72,10 +66,10 @@ export function TestimonialsSection() {
                     {doubledTestimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="inline-block mx-4 w-[280px] sm:w-[350px] bg-white border border-neutral-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] whitespace-normal"
+                            className="inline-block mx-6 w-[350px] apple-card p-10 whitespace-normal bg-white"
                         >
-                            <div className="flex items-center gap-4 mb-4">
-                                <div className="h-12 w-12 rounded-full bg-neutral-100 overflow-hidden flex-shrink-0">
+                            <div className="flex items-center gap-5 mb-8">
+                                <div className="h-12 w-12 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-100">
                                     <img
                                         src={testimonial.image}
                                         alt={testimonial.name}
@@ -84,29 +78,26 @@ export function TestimonialsSection() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
-                                        <h3 className="font-semibold text-neutral-900 truncate">
+                                        <h3 className="text-body font-bold text-black truncate tracking-tight">
                                             {testimonial.name}
                                         </h3>
-                                        {/* <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-700/10">
-                                            {testimonial.category}
-                                        </span> */}
                                     </div>
-                                    <div className="flex items-center gap-1 mt-0.5">
+                                    <div className="flex items-center gap-1.5 mt-1">
                                         <div className="flex">
                                             {[...Array(testimonial.rating)].map((_, i) => (
                                                 <Star
                                                     key={i}
-                                                    className="h-3 w-3 fill-yellow-400 text-yellow-400"
+                                                    className="h-3 w-3 fill-yellow-primary text-yellow-primary"
                                                 />
                                             ))}
                                         </div>
-                                        <span className="text-[11px] text-neutral-400">
+                                        <span className="text-micro text-gray-400 font-medium">
                                             · {testimonial.subscribers}
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-sm leading-relaxed text-neutral-600 italic italic">
+                            <p className="text-secondary leading-relaxed text-gray-600 font-medium italic">
                                 "{testimonial.text}"
                             </p>
                         </div>

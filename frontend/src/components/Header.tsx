@@ -2,21 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, Check, X, Menu, LogOut, User, LayoutDashboard, Share2 } from "lucide-react";
+import { Check, X, Menu, LogOut, LayoutDashboard, Zap } from "lucide-react";
 import { useState, useEffect } from "react";
 import { checkAuth, logout, type User as UserType } from "@/lib/auth";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function Header() {
   const pathname = usePathname();
-  const isAnalysis = pathname === "/dashboard";
-  const isPricing = pathname === "/pricing";
   const [showToast, setShowToast] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const loadUser = async () => {
       try {
         const userData = await checkAuth();
@@ -36,40 +33,6 @@ export function Header() {
     }
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'GetSentimate - YouTube Comments Intelligence',
-          text: 'Analyze YouTube comments with AI-powered sentiment analysis and actionable insights.',
-          url: window.location.origin
-        });
-      } catch (error) {
-        // Fallback to clipboard if user cancels or share fails
-        handleCopyLink();
-      }
-    } else {
-      // Fallback for browsers that don't support Web Share API
-      handleCopyLink();
-    }
-  };
-
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.origin);
-      showNotification();
-    } catch (error) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = window.location.origin;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      showNotification();
-    }
-  };
-
   const showNotification = () => {
     setShowToast(true);
     setTimeout(() => {
@@ -77,79 +40,58 @@ export function Header() {
     }, 3000);
   };
 
+  const navLink = (href: string, label: string) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={`text-secondary transition-all hover:text-black ${isActive ? "font-bold underline underline-offset-8 decoration-2" : "font-normal"
+          }`}
+      >
+        {label}
+      </Link>
+    );
+  };
+
   return (
     <>
-      <header className="border-b border-neutral-200/80 bg-white/90 backdrop-blur-lg shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8 xl:px-12 py-4">
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 group">
-            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-105">
-              <img
-                src="/logo.svg"
-                alt="GetSentimate Logo"
-                className="h-8 w-8 sm:h-12 sm:w-12"
-              />
+      <header className="h-[64px] border-b border-gray-200 bg-white sticky top-0 z-50">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-3 active:scale-95 transition-all">
+            <div className="flex h-8 w-8 items-center justify-center rounded-button bg-black">
+              <img src="/logo.svg" alt="" className="h-5 w-5 invert" />
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-xs sm:text-sm font-semibold text-neutral-900">GetSentimate</span>
-              <span className="text-xs text-neutral-500 hidden sm:block">YouTube comments intelligence</span>
-            </div>
+            <span className="text-emphasis font-bold tracking-tight text-black">GetSentimate</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-2">
+          <nav className="hidden md:flex items-center gap-8">
             {user ? (
-              // Logged in user navigation
               <>
-                <Link
-                  href="/analysis"
-                  className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  Analysis
-                </Link>
-
-                <Link
-                  href="/transactions"
-                  className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
-                >
-                  <Zap className="w-4 h-4" />
-                  Credits
-                </Link>
-
+                {navLink("/analysis", "Analysis")}
+                {navLink("/transactions", "Credits")}
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
+                  className="text-secondary hover:text-red-primary transition-all"
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
                 </button>
-
-                <button
-                  onClick={handleShare}
-                  className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                >
-                  Share
-                </button>
+                <div className="h-4 w-[1px] bg-gray-200 mx-2" />
+                <div className="flex items-center gap-4">
+                  <span className="badge-green">
+                    {user.credits} credits
+                  </span>
+                  <Link href="/transactions" className="btn-credits py-2 text-secondary">
+                    Add Credits
+                  </Link>
+                </div>
               </>
             ) : (
-              // Logged out user navigation
               <>
-                <Link
-                  href="/pricing"
-                  className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${isPricing
-                    ? "bg-neutral-900 text-white shadow-md"
-                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-                    }`}
-                >
-                  Pricing
+                {navLink("/pricing", "Pricing")}
+                <Link href="/login" className="btn-primary py-2 text-secondary">
+                  Login
                 </Link>
-
-                <button
-                  onClick={handleShare}
-                  className="flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105"
-                >
-                  Share
-                </button>
               </>
             )}
           </nav>
@@ -157,105 +99,61 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden flex items-center justify-center p-2 rounded-lg hover:bg-neutral-100 transition-colors"
+            className="md:hidden p-2 text-black"
           >
-            <Menu className="w-5 h-5 text-neutral-900" />
+            {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
 
         {/* Mobile Navigation Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-neutral-200/80 bg-white/90 backdrop-blur-lg">
-            <nav className="flex flex-col px-4 py-4 space-y-2">
-              {user ? (
-                // Logged in user mobile navigation
-                <>
-                  <Link
-                    href="/analysis"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
-                  >
-                    <LayoutDashboard className="w-4 h-4" />
-                    Analysis
-                  </Link>
-
-                  <Link
-                    href="/transactions"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
-                  >
-                    <Zap className="w-4 h-4" />
-                    Credits
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-200"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Logout
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      handleShare();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
-                  >
-                    Share
-                  </button>
-                </>
-              ) : (
-                // Logged out user mobile navigation
-                <>
-                  <Link
-                    href="/pricing"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 ${isPricing
-                      ? "bg-neutral-900 text-white shadow-md"
-                      : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
-                      }`}
-                  >
-                    Pricing
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      handleShare();
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex items-center gap-3 rounded-xl bg-neutral-900 px-4 py-3 text-sm font-medium text-white shadow-md hover:shadow-lg transition-all duration-200"
-                  >
-                    Share
-                  </button>
-                </>
-              )}
-            </nav>
-          </div>
-        )}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              className="md:hidden absolute top-[64px] left-0 right-0 border-b border-gray-200 bg-white px-6 py-6 shadow-sm"
+            >
+              <nav className="flex flex-col gap-6">
+                {user ? (
+                  <>
+                    <Link href="/analysis" onClick={() => setIsMobileMenuOpen(false)} className="text-emphasis font-medium">Analysis</Link>
+                    <Link href="/transactions" onClick={() => setIsMobileMenuOpen(false)} className="text-emphasis font-medium">Credits</Link>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                      <span className="badge-green">{user.credits} credits</span>
+                      <Link href="/transactions" onClick={() => setIsMobileMenuOpen(false)} className="btn-credits py-2 px-8">Add Credits</Link>
+                    </div>
+                    <button onClick={handleLogout} className="text-left text-red-primary font-medium">Logout</button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-emphasis font-medium">Pricing</Link>
+                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="btn-primary w-full">Login</Link>
+                  </>
+                )}
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
-          <div className="flex items-center gap-3 rounded-lg bg-neutral-900 px-4 py-3 shadow-lg">
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500">
-              <Check className="h-3 w-3 text-white" />
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 left-1/2 -translateX-1/2 z-[100]"
+          >
+            <div className="flex items-center gap-3 rounded-button bg-black px-6 py-3 text-white shadow-lg">
+              <Check className="h-4 w-4 text-green-primary" />
+              <span className="text-secondary font-medium">Link copied to clipboard</span>
             </div>
-            <span className="text-sm font-medium text-white">Link copied to clipboard!</span>
-            <button
-              onClick={() => setShowToast(false)}
-              className="text-white/60 hover:text-white transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

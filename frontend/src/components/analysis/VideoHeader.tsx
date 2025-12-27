@@ -10,11 +10,11 @@ export function VideoHeader({ result }: { result: any }) {
 
     return (
         <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="apple-card p-6 flex flex-col md:flex-row gap-8 items-center"
+            className="apple-card p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start md:items-center"
         >
-            <div className="relative w-full md:w-[240px] aspect-video bg-[#f5f5f7] rounded-xl overflow-hidden shrink-0 border border-black/[0.03]">
+            <div className="relative w-full md:w-[240px] aspect-video bg-gray-100 rounded-apple overflow-hidden shrink-0 border border-gray-200">
                 {result.metadata?.thumbnail && (
                     <img
                         src={result.metadata.thumbnail}
@@ -24,30 +24,30 @@ export function VideoHeader({ result }: { result: any }) {
                 )}
             </div>
 
-            <div className="flex-1 min-w-0 text-center md:text-left">
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mb-3">
-                    <span className="px-2 py-0.5 bg-[#0071e3]/5 text-[#0071e3] text-[10px] font-bold tracking-wider rounded uppercase">
-                        Analysis
+            <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                    <span className="badge-blue">
+                        ANALYSIS COMPLETE
                     </span>
-                    <span className="text-[12px] text-[#86868b] font-medium">
-                        {result.analysis?.total_comments_analyzed || 0} comments
+                    <span className="text-micro font-medium text-gray-500">
+                        {result.analysis?.total_comments_analyzed || 0} comments analyzed
                     </span>
                 </div>
 
-                <h2 className="text-[20px] md:text-[22px] font-semibold leading-tight mb-3 text-[#1d1d1f] tracking-tight">
+                <h2 className="text-title-section md:text-title-page font-bold leading-tight mb-4 text-black tracking-tight">
                     {result.metadata?.title}
                 </h2>
 
-                <div className="flex items-center justify-center md:justify-start gap-3 text-[13px] text-[#86868b]">
-                    <span className="text-[#1d1d1f] font-medium">{result.metadata?.channel}</span>
-                    <span className="w-1 h-1 rounded-full bg-[#d2d2d7]"></span>
+                <div className="flex items-center gap-3 text-secondary text-gray-500">
+                    <span className="text-black font-semibold">{result.metadata?.channel}</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
                     <span>{(result.metadata?.views || 0).toLocaleString()} views</span>
                 </div>
             </div>
 
             <button
                 onClick={clearResult}
-                className="apple-button-secondary text-[13px] py-2 px-6 shrink-0"
+                className="btn-secondary py-2.5 px-6 shrink-0 w-full md:w-auto"
             >
                 New Analysis
             </button>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useUserStore } from "@/store/userStore";
 import { authApi } from "@/lib/auth";
 import { Toast } from "@/components/ui/Toast";
+import { X } from "lucide-react";
 
 interface CreditPackage {
     id: string;
@@ -26,19 +27,16 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
     const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
     const { updateCredits } = useUserStore();
 
-    // Toast states
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState("");
     const [toastType, setToastType] = useState<"success" | "error" | "warning" | "info">("success");
 
     useEffect(() => {
-        // Load Razorpay script
         const script = document.createElement("script");
         script.src = "https://checkout.razorpay.com/v1/checkout.js";
         script.async = true;
         document.body.appendChild(script);
 
-        // Fetch packages
         if (isOpen) {
             fetchPackages();
         }
@@ -62,14 +60,12 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
         setSelectedPackage(packageId);
 
         try {
-            // Step 1: Create order
             const orderResponse = await authApi.post("/api/payments/create-order/", {
                 package_id: packageId,
             });
 
             const orderData = orderResponse.data;
 
-            // Step 2: Open Razorpay checkout
             const options = {
                 key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
                 amount: orderData.amount,
@@ -81,7 +77,6 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                     email: useUserStore.getState().user?.email || "",
                 },
                 handler: async function (response: any) {
-                    // Step 3: Verify payment
                     try {
                         const verifyResponse = await authApi.post("/api/payments/verify-payment/", {
                             razorpay_order_id: response.razorpay_order_id,
@@ -89,15 +84,12 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                             razorpay_signature: response.razorpay_signature,
                         });
 
-                        // Update credits in store
                         updateCredits(verifyResponse.data.new_balance);
 
-                        // Show success toast
                         setToastType("success");
                         setToastMessage(`Success! You now have ${verifyResponse.data.new_balance} credits!`);
                         setShowToast(true);
 
-                        // Close modal after showing toast
                         setTimeout(() => {
                             onClose();
                             if (onSuccess) onSuccess();
@@ -124,7 +116,7 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                     support_email: "vaidiksule@gmail.com",
                 },
                 theme: {
-                    color: "#0071e3",
+                    color: "#0A0A0A",
                 },
             };
 
@@ -148,71 +140,67 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                transition={{ duration: 0.15 }}
+                className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] flex items-center justify-center p-6"
                 onClick={onClose}
             >
                 <motion.div
-                    initial={{ scale: 0.95, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0.95, opacity: 0 }}
-                    className="bg-white rounded-[24px] p-6 sm:p-8 max-w-2xl w-full shadow-[0_8px_40px_rgba(0,0,0,0.12)]"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="bg-white rounded-apple p-8 sm:p-10 max-w-2xl w-full shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-[24px] sm:text-[28px] font-semibold text-[#1d1d1f]">Buy Credits</h2>
+                    <div className="flex items-center justify-between mb-10">
+                        <div className="flex flex-col gap-2">
+                            <h2 className="text-title-page font-bold text-black tracking-tight">Purchase Credits</h2>
+                            <p className="text-secondary text-gray-500 font-medium">Select a package to continue your analysis.</p>
+                        </div>
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] transition-colors flex items-center justify-center"
+                            className="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-all flex items-center justify-center text-black"
                         >
-                            ✕
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
 
-                    {/* Packages */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {packages.map((pkg) => (
-                            <motion.button
+                            <button
                                 key={pkg.id}
                                 onClick={() => handleBuyCredits(pkg.id)}
                                 disabled={loading}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className={`p-6 rounded-[16px] border-2 transition-all ${selectedPackage === pkg.id
-                                    ? "border-[#0071e3] bg-blue-50"
-                                    : "border-black/[0.06] hover:border-[#0071e3]/50 bg-white"
+                                className={`p-8 rounded-apple border-2 transition-all flex flex-col items-center ${selectedPackage === pkg.id
+                                    ? "border-green-primary bg-green-soft"
+                                    : "border-gray-200 hover:border-black bg-white"
                                     } ${loading && selectedPackage !== pkg.id ? "opacity-50" : ""}`}
                             >
-                                <div className="text-[17px] font-semibold text-[#1d1d1f] mb-2">
+                                <div className="text-secondary font-bold text-gray-500 mb-2 uppercase tracking-widest text-micro">
                                     {pkg.credits} Credits
                                 </div>
-                                <div className="text-[28px] sm:text-[32px] font-bold text-[#0071e3] mb-1">₹{pkg.price}</div>
-                                <div className="text-[13px] text-[#86868b]">
-                                    ₹{(pkg.price / pkg.credits).toFixed(2)} per credit
+                                <div className="text-title-hero font-bold text-black mb-3">₹{pkg.price}</div>
+                                <div className="text-micro font-bold text-green-text bg-green-primary/10 px-2.5 py-1 rounded-full">
+                                    ₹{(pkg.price / pkg.credits).toFixed(2)} / credit
                                 </div>
-                            </motion.button>
+                            </button>
                         ))}
                     </div>
 
-                    {/* View Full Pricing Link */}
-                    <div className="mt-4 text-center">
+                    <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <p className="text-micro text-gray-400 font-medium">Securely processed via Razorpay</p>
                         <a
                             href="/pricing"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-[13px] font-medium text-[#0071e3] hover:text-[#0077ed] transition-colors"
+                            className="text-secondary font-bold text-blue-primary hover:underline underline-offset-4"
                         >
-                            View full pricing details
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
+                            View enterprise pricing
                         </a>
                     </div>
-
                 </motion.div>
             </motion.div>
 
-            {/* Toast Notification */}
             {showToast && (
                 <Toast
                     message={toastMessage}

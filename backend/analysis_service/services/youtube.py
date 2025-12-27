@@ -77,6 +77,9 @@ class YouTubeFetchService:
             raise ValueError(f"Could not fetch video details: {str(e)}")
 
     def _fetch_comments(self, url: str, max_comments: int) -> List[Dict[str, Any]]:
+        comments = []
+
+        # 1. Try Scraper (YoutubeCommentDownloader) - Better for large volume if not blocked
         try:
             downloader = YoutubeCommentDownloader()
             # method get_comments_from_url returns a generator
@@ -87,24 +90,56 @@ class YouTubeFetchService:
             # Fetch slightly more to account for cleaner filtering
             fetch_limit = int(max_comments * 1.4)  # 40% buffer
 
-            comments = []
             for comment in islice(generator, fetch_limit):
                 comments.append(
                     {
                         "text": comment.get("text"),
                         "author": comment.get("author"),
-                        "likes": comment.get("votes"),  # votes usually maps to likes
-                        "replies": comment.get(
-                            "reply"
-                        ),  # boolean or count? usually not reliable count in basic fetch
+                        "likes": comment.get("votes") or 0,
                         "cid": comment.get("cid"),
                         "time": comment.get("time"),
                     }
                 )
 
-            return comments
+            if comments:
+                logger.info(f"Successfully scraped {len(comments)} comments")
+                return comments
+
         except Exception as e:
-            logger.error(f"Comment fetch failed: {e}")
-            # If comments fail (disabled?) we might still want to proceed with 0 comments?
-            # The prompt relies on comments. Let's return empty list.
-            return []
+            logger.warning(
+                f"Comment scraping failed: {e}. Trying Official API fallback..."
+            )
+
+        # 2. Fallback to Official YouTube API (more reliable in cloud environments like Render)
+        try:
+            from youtube_service.youtube_api_service import (
+                YouTubeAPIService,
+                get_video_id_from_url,
+            )
+
+            video_id = get_video_id_from_url(url)
+            if video_id:
+                api_service = YouTubeAPIService()
+                success, message, api_comments = api_service.fetch_youtube_comments(
+                    video_id, max_comments
+                )
+
+                if success and api_comments:
+                    for c in api_comments:
+                        comments.append(
+                            {
+                                "text": c.get("text"),
+                                "author": c.get("author_name"),
+                                "likes": c.get("like_count") or 0,
+                                "cid": c.get("id"),
+                                "time": c.get("published_at"),
+                            }
+                        )
+                    logger.info(
+                        f"Successfully fetched {len(comments)} comments via official API"
+                    )
+                    return comments
+        except Exception as e:
+            logger.error(f"Official API comment fetch fallback failed: {e}")
+
+        return comments
