@@ -1,5 +1,6 @@
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_URL = `${API_BASE_URL}/api`;
 
 async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
     // Auth might still be needed if user is logged in
