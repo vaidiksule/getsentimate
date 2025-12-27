@@ -91,8 +91,11 @@ export async function tempLogin(email: string, password: string): Promise<boolea
     const response = await authApi.post('/api/auth/temp-login/', { email, password });
 
     if (response.status === 200 && response.data.access_token) {
-      // Logic same as what happens after Google redirect usually handles tokens
-      // If we are using session cookies, they should be set by the POST response
+      // Save tokens for API calls
+      localStorage.setItem('access_token', response.data.access_token);
+      if (response.data.refresh_token) {
+        localStorage.setItem('refresh_token', response.data.refresh_token);
+      }
       return true;
     }
     return false;

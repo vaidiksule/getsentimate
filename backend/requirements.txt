@@ -17,8 +17,8 @@ google-auth-oauthlib==1.2.2
 google-generativeai==0.8.5
 youtube-transcript-api==0.6.2
 requests==2.32.4
-yt-dlp==2023.12.30
-youtube-comment-downloader==0.1.78
+yt-dlp>=2024.12.23
+youtube-comment-downloader>=0.1.78
 numpy
 bcrypt==4.1.2
 setuptools

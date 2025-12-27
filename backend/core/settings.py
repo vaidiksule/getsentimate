@@ -146,6 +146,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "accounts.drf_auth.MongoJWTAuthentication",
         "accounts.drf_auth.MongoSessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
@@ -179,17 +180,20 @@ FRONTEND_AFTER_LOGOUT = config(
 # --------------------
 # SESSION SETTINGS
 # --------------------
-SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "None" if not DEBUG else "Lax"
 SESSION_COOKIE_DOMAIN = None  # Allow all domains
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = True
 
-# Ensure session cookies work across subdomains
-SESSION_COOKIE_SAMESITE = "None" if not DEBUG else "Lax"
+# --------------------
+# DEPLOYMENT SETTINGS
+# --------------------
+# Trust the X-Forwarded-Proto header from the proxy (Render)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # --------------------
 # SOCIAL ACCOUNT PROVIDERS

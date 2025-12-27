@@ -46,14 +46,18 @@ def verify_id_token(id_token):
         return None
 
 
-def exchange_code_for_tokens(code, request):
-    callback_url = f"{request.scheme}://{request.get_host()}/api/auth/google/callback/"
+def exchange_code_for_tokens(code, request, redirect_uri=None):
+    if not redirect_uri:
+        redirect_uri = (
+            f"{request.scheme}://{request.get_host()}/api/auth/google/callback/"
+        )
+
     data = {
         "client_id": settings.GOOGLE_CLIENT_ID,
         "client_secret": settings.GOOGLE_CLIENT_SECRET,
         "code": code,
         "grant_type": "authorization_code",
-        "redirect_uri": callback_url,
+        "redirect_uri": redirect_uri,
     }
     res = requests.post("https://oauth2.googleapis.com/token", data=data)
     res.raise_for_status()
@@ -118,7 +122,15 @@ def google_oauth_callback(request):
         mongo_login(request, user)
         request.session.save()
 
-        return redirect(settings.FRONTEND_AFTER_LOGIN)
+        session_id = request.session.session_key
+        redirect_url = settings.FRONTEND_AFTER_LOGIN
+
+        # Append session_id for cross-domain support if frontend is on different domain
+        if session_id:
+            separator = "&" if "?" in redirect_url else "?"
+            redirect_url = f"{redirect_url}{separator}session_id={session_id}"
+
+        return redirect(redirect_url)
 
     except Exception as e:
         print("OAuth callback error:", e)

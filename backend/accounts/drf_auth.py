@@ -1,5 +1,8 @@
 from rest_framework.authentication import BaseAuthentication
 from django.contrib.auth.models import AnonymousUser
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFailed
+from accounts.models import MongoUser
 
 
 class MongoSessionAuthentication(BaseAuthentication):
@@ -18,3 +21,19 @@ class MongoSessionAuthentication(BaseAuthentication):
             return (user, None)
 
         return None
+
+
+class MongoJWTAuthentication(JWTAuthentication):
+    """
+    SimpleJWT authentication customized for MongoUser.
+    """
+
+    def get_user(self, validated_token):
+        try:
+            user_id = validated_token["user_id"]
+            user = MongoUser.objects(id=user_id).first()
+            if user is None:
+                raise AuthenticationFailed("User not found", code="user_not_found")
+            return user
+        except Exception as e:
+            raise InvalidToken(str(e))

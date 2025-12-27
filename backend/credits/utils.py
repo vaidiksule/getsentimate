@@ -45,18 +45,24 @@ def consume_credits(user, amount=1, transaction_type="ANALYSIS", reference=None)
         if not isinstance(user, MongoUser):
             user = MongoUser.objects(id=user.id).first()
 
-        account = MongoCreditAccount.objects(user=user).first()
+        # Atomically find and decrement balance if enough credits exist
+        account = MongoCreditAccount.objects(user=user, balance__gte=amount).modify(
+            inc__balance=-amount, new=True
+        )
+
         if not account:
-            account = MongoCreditAccount.objects.create(user=user, balance=0)
+            # Check if it was missing account or just insufficient balance
+            total_account = MongoCreditAccount.objects(user=user).first()
+            if not total_account:
+                # Should technically exist for all users, but heal if missing
+                MongoCreditAccount.objects.create(user=user, balance=0)
+                raise InsufficientCreditsError(f"Insufficient credits: 0 < {amount}")
+            else:
+                raise InsufficientCreditsError(
+                    f"Insufficient credits: {total_account.balance} < {amount}"
+                )
 
-        if account.balance < amount:
-            raise InsufficientCreditsError(
-                f"Insufficient credits: {account.balance} < {amount}"
-            )
-
-        new_balance = account.balance - amount
-        account.balance = new_balance
-        account.save()
+        new_balance = account.balance
 
         # 1. Legacy Logging
         MongoCreditTransaction.objects.create(
