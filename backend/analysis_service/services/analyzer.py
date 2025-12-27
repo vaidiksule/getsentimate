@@ -14,9 +14,13 @@ class AnalysisService:
         if not api_key:
             raise ValueError("GOOGLE_API_KEY not configured")
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel(
-            "gemini-2.0-flash"
-        )  # Using fast efficient model
+        self.model_name = "gemini-2.0-flash"
+        self.model = genai.GenerativeModel(self.model_name)
+
+        # Tracking for debug info
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
+        self.num_api_calls = 0
 
     def analyze(
         self, video_data: Dict[str, Any], comments: List[Dict[str, Any]]
@@ -28,12 +32,14 @@ class AnalysisService:
         3. Aggregate (Reduce)
         4. Final Insight (Summary)
         """
+        self.total_input_tokens = 0
+        self.total_output_tokens = 0
+        self.num_api_calls = 0
+
         BATCH_SIZE = 50
         batches = [
             comments[i : i + BATCH_SIZE] for i in range(0, len(comments), BATCH_SIZE)
         ]
-
-        # No longer limiting to 5 batches to support up to 500 comments (10 batches of 50)
 
         batch_results = []
         for i, batch in enumerate(batches):
@@ -51,6 +57,22 @@ class AnalysisService:
         final_insight = self._generate_executive_summary(
             aggregated, video_data, comments[:10]
         )
+
+        # Calculate Cost (Gemini 2.0 Flash: $0.10 / 1M input, $0.40 / 1M output)
+        input_cost = (self.total_input_tokens / 1_000_000) * 0.10
+        output_cost = (self.total_output_tokens / 1_000_000) * 0.40
+        total_cost = input_cost + output_cost
+
+        # Add Debug Info
+        final_insight["debug_info"] = {
+            "num_comments": len(comments),
+            "total_tokens": self.total_input_tokens + self.total_output_tokens,
+            "input_tokens": self.total_input_tokens,
+            "output_tokens": self.total_output_tokens,
+            "estimated_cost_usd": round(total_cost, 6),
+            "model_used": self.model_name,
+            "api_calls": self.num_api_calls,
+        }
 
         return final_insight
 
@@ -75,7 +97,16 @@ class AnalysisService:
         """
 
         try:
+            self.num_api_calls += 1
             response = self.model.generate_content(prompt)
+
+            # Track tokens
+            if response.usage_metadata:
+                self.total_input_tokens += response.usage_metadata.prompt_token_count
+                self.total_output_tokens += (
+                    response.usage_metadata.candidates_token_count
+                )
+
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
             return json.loads(clean_text)
         except Exception as e:
@@ -158,7 +189,16 @@ class AnalysisService:
         """
 
         try:
+            self.num_api_calls += 1
             response = self.model.generate_content(prompt)
+
+            # Track tokens
+            if response.usage_metadata:
+                self.total_input_tokens += response.usage_metadata.prompt_token_count
+                self.total_output_tokens += (
+                    response.usage_metadata.candidates_token_count
+                )
+
             clean_text = response.text.replace("```json", "").replace("```", "").strip()
             result = json.loads(clean_text)
 
