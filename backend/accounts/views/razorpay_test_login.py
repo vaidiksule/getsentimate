@@ -1,5 +1,5 @@
 import json
-from django.contrib.auth import login
+
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -74,7 +74,11 @@ class RazorpayTestLoginView(APIView):
                 )
 
             # Log in user (Session)
-            login(request, user, backend="accounts.backends.MongoBackend")
+            from ..backends import login as mongo_login
+
+            mongo_login(request, user)
+            request.session.save()
+            session_id = request.session.session_key
 
             # Create JWT tokens (identical to Google login)
             refresh = RefreshToken.for_user(user)
@@ -84,6 +88,7 @@ class RazorpayTestLoginView(APIView):
                     "message": "Login successful",
                     "access_token": str(refresh.access_token),
                     "refresh_token": str(refresh),
+                    "session_id": session_id,
                     "user": {
                         "id": str(user.id),
                         "username": user.username,

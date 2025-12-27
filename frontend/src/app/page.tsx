@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, PlayCircle } from "lucide-react";
 import { FeaturesSection } from "@/components/landing/FeaturesSection";
+import { TestimonialsSection } from "@/components/landing/TestimonialsSection";
 import { HowItWorksSection } from "@/components/landing/HowItWorksSection";
 import { StatsSection } from "@/components/landing/StatsSection";
 import { BenefitsSection } from "@/components/landing/BenefitsSection";
@@ -37,7 +38,7 @@ export default function HomePage() {
 		<AuthGuard requireAuth={false}>
 			<div className="flex flex-col max-w-5xl mx-auto w-full">
 				{/* Hero Section */}
-				<section className="flex flex-col items-center justify-center py-20 xl:px-32">
+				<section className="flex flex-col items-center justify-center pt-20 pb-4 xl:px-32">
 					<div className="mx-auto max-w-5xl text-center w-full">
 						<span className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-600 shadow-sm">
 							GetSentimate · YouTube comments intelligence
@@ -118,6 +119,8 @@ export default function HomePage() {
 					</div>
 				</section>
 
+				{/* Testimonials Section */}
+				<TestimonialsSection />
 
 				{/* Features Section */}
 				<FeaturesSection />
