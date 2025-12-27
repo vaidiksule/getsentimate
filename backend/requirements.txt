@@ -21,3 +21,5 @@ yt-dlp==2023.12.30
 youtube-comment-downloader==0.1.78
 numpy
 bcrypt==4.1.2
+setuptools
+
