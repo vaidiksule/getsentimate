@@ -1,5 +1,4 @@
 import json
-import bcrypt
 from django.contrib.auth import login
 from rest_framework import status
 from rest_framework.views import APIView
@@ -33,6 +32,7 @@ class RazorpayTestLoginView(APIView):
             user = MongoUser.objects(email=email).first()
 
             if not user:
+                print(f"Test login failed: User {email} not found")
                 return Response(
                     {"error": "User not found"},
                     status=status.HTTP_401_UNAUTHORIZED,
@@ -47,16 +47,27 @@ class RazorpayTestLoginView(APIView):
                     status=status.HTTP_403_FORBIDDEN,
                 )
 
-            if user.auth_provider != "local":
-                return Response(
-                    {"error": "Invalid auth provider"},
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            # Verify password (handles both Django hashes and raw bcrypt hashes)
+            import bcrypt
 
-            # Verify password using bcrypt
-            # Note: We expect the password in DB to be hashed with bcrypt
-            stored_hash = user.password.encode("utf-8")
-            if not bcrypt.checkpw(password.encode("utf-8"), stored_hash):
+            stored_hash = user.password
+            is_valid = False
+
+            try:
+                if stored_hash.startswith(("$2a$", "$2b$")):
+                    # Check as raw bcrypt
+                    is_valid = bcrypt.checkpw(
+                        password.encode("utf-8"), stored_hash.encode("utf-8")
+                    )
+                else:
+                    # Check via standard Django hasher
+                    is_valid = user.check_password(password)
+            except Exception as e:
+                print(f"Password check error: {e}")
+                is_valid = False
+
+            if not is_valid:
+                print(f"Test login failed: Invalid password for {email}")
                 return Response(
                     {"error": "Invalid credentials"},
                     status=status.HTTP_401_UNAUTHORIZED,

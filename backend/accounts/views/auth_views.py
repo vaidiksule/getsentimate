@@ -40,7 +40,9 @@ class RegisterView(APIView):
                 )
 
             # Create user
-            user = MongoUser(username=username, email=email, is_active=True)
+            user = MongoUser(
+                username=username, email=email, is_active=True, auth_provider="local"
+            )
             user.set_password(password)
             user.save()
 
