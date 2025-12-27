@@ -108,9 +108,9 @@ def verify_payment(request):
             )
 
         # Check for duplicate processing (idempotency)
-        from transactions.models import MongoTransaction
+        from transactions.models import Transaction
 
-        existing_tx = MongoTransaction.objects(
+        existing_tx = Transaction.objects(
             reference=f"razorpay_{razorpay_payment_id}"
         ).first()
         if existing_tx:
@@ -195,13 +195,13 @@ def razorpay_webhook(request):
 
             if user_id:
                 from accounts.models import MongoUser
-                from transactions.models import MongoTransaction
+                from transactions.models import Transaction
 
                 user = MongoUser.objects(id=user_id).first()
                 if user:
                     # Idempotency check
                     tx_ref = f"razorpay_{payment_id}"
-                    if not MongoTransaction.objects(reference=tx_ref).first():
+                    if not Transaction.objects(reference=tx_ref).first():
                         add_credits(
                             user,
                             credits_to_add,
