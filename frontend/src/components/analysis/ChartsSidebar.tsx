@@ -108,6 +108,34 @@ export function ChartsSidebar({ result }: { result: any }) {
                     ))}
                 </ul>
             </motion.div>
+            {/* Usage Analysis - Debug Info */}
+            {result.analysis?.debug_info && (
+                <motion.div variants={item} className="apple-card p-8 bg-gray-50 border-gray-200">
+                    <h3 className="label-micro mb-6 text-gray-500">Usage Analysis</h3>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center text-micro">
+                            <span className="text-gray-500 font-medium">Comments Analyzed</span>
+                            <span className="text-black font-bold">{result.analysis.debug_info.num_comments}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-micro">
+                            <span className="text-gray-500 font-medium">Model</span>
+                            <span className="text-black font-bold uppercase tracking-tight">{result.analysis.debug_info.model_used}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-micro">
+                            <span className="text-gray-500 font-medium">API Calls</span>
+                            <span className="text-black font-bold">{result.analysis.debug_info.api_calls}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-micro">
+                            <span className="text-gray-500 font-medium">Tokens Used</span>
+                            <span className="text-black font-bold">{result.analysis.debug_info.total_tokens.toLocaleString()}</span>
+                        </div>
+                        <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
+                            <span className="text-micro text-gray-400 font-bold uppercase tracking-widest">Est. Cost</span>
+                            <span className="text-secondary font-bold text-black">${result.analysis.debug_info.estimated_cost_usd} <span className="text-[10px] text-gray-400 font-normal">USD</span></span>
+                        </div>
+                    </div>
+                </motion.div>
+            )}
         </motion.div>
     );
 }
