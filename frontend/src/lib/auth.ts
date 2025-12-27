@@ -84,3 +84,20 @@ export function getGoogleLoginURL(): string {
 export function redirectToGoogleLogin(): void {
   window.location.href = getGoogleLoginURL();
 }
+
+// Temporary: Login with email/password for Razorpay verification
+export async function tempLogin(email: string, password: string): Promise<boolean> {
+  try {
+    const response = await authApi.post('/api/auth/temp-login/', { email, password });
+
+    if (response.status === 200 && response.data.access_token) {
+      // Logic same as what happens after Google redirect usually handles tokens
+      // If we are using session cookies, they should be set by the POST response
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error('Temp login failed:', error);
+    return false;
+  }
+}

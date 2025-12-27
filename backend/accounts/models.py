@@ -44,6 +44,9 @@ class MongoUser(Document):
     google_refresh_token = StringField()
     google_token_expires_at = DateTimeField()
 
+    # Auth Provider (for temporary test login)
+    auth_provider = StringField(default="google", choices=["google", "local"])
+
     meta = {
         "collection": "users",
         "indexes": [

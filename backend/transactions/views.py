@@ -65,25 +65,36 @@ def transaction_summary(request):
 
         # Add legacy transactions (only if not duplicates)
         for lt in legacy_transactions:
-            # Skip duplicates (legacy transactions with razorpay reference)
-            is_duplicate = False
-            if lt.reference:
-                for pid in razorpay_ids:
-                    if pid and pid in lt.reference:
-                        is_duplicate = True
-                        break
+            # Skip duplicates
+            if lt.reference and lt.reference != "unknown":
+                if any(pid in lt.reference for pid in razorpay_ids if pid):
+                    continue  # Razorpay duplicate
+                if any(
+                    t.reference == lt.reference
+                    for t in new_transactions
+                    if t.reference != "unknown"
+                ):
+                    continue  # Analysis duplicate
 
-            if is_duplicate:
+            # Check for very close timestamps
+            is_close_duplicate = False
+            for nt in new_transactions:
+                diff = abs((lt.created_at - nt.created_at).total_seconds())
+                if diff < 1.0 and lt.amount == nt.amount:
+                    is_close_duplicate = True
+                    break
+
+            if is_close_duplicate:
                 continue
 
-            # Only count ADD/TOPUP with razorpay reference as purchases
-            if lt.transaction_type in ["ADD", "TOPUP"]:
-                # Only if it has a razorpay reference
+            # Only count ADD/TOPUP/PURCHASE with razorpay reference as purchases
+            if lt.transaction_type in ["ADD", "TOPUP", "PURCHASE"]:
                 if lt.reference and "razorpay_" in lt.reference:
                     total_purchased += lt.amount
             elif lt.transaction_type in ["ANALYSIS", "CONSUME"]:
-                # Count each analysis/consumption (not sum amount)
                 total_used += 1
+            elif lt.transaction_type in ["INIT", "signup_bonus"]:
+                total_bonus += lt.amount
 
         return Response(
             {
@@ -151,14 +162,35 @@ def transaction_list(request):
         # Add legacy transactions (skip duplicates)
         for lt in legacy_transactions:
             # Skip if this transaction has a reference that matches a new transaction
-            if lt.reference and any(pid in lt.reference for pid in razorpay_ids if pid):
-                continue  # Skip duplicate
+            # (especially for purchases or identified analyses)
+            if lt.reference and lt.reference != "unknown":
+                if any(pid in lt.reference for pid in razorpay_ids if pid):
+                    continue  # Razorpay duplicate
+                if any(
+                    t.reference == lt.reference
+                    for t in new_transactions
+                    if t.reference != "unknown"
+                ):
+                    continue  # Analysis duplicate with same ID
+
+            # Additional heuristic: check for very close timestamps for 'unknown' reference
+            is_close_duplicate = False
+            for nt in new_transactions:
+                diff = abs((lt.created_at - nt.created_at).total_seconds())
+                if (
+                    diff < 1.0 and lt.amount == nt.amount
+                ):  # within 1 second and same amount
+                    is_close_duplicate = True
+                    break
+
+            if is_close_duplicate:
+                continue
 
             # Map legacy types to new types
             if lt.transaction_type == "INIT":
                 trans_type = "bonus"
                 description = "Welcome bonus"
-            elif lt.transaction_type in ["ADD", "TOPUP"]:
+            elif lt.transaction_type in ["ADD", "TOPUP", "PURCHASE"]:
                 trans_type = "purchase"
                 description = lt.description or "Credit purchase"
             elif lt.transaction_type in ["ANALYSIS", "CONSUME"]:
