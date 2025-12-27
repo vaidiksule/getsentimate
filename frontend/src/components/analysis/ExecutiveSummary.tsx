@@ -30,14 +30,14 @@ export function ExecutiveSummary({ result }: { result: any }) {
             className="lg:col-span-2 space-y-6"
         >
             {/* Executive Insight Card */}
-            <motion.div variants={item} className="bg-white rounded-[20px] p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-black/[0.03]">
+            <motion.div variants={item} className="bg-white rounded-[20px] p-6 sm:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-black/[0.03]">
                 <div className="flex items-center gap-2 mb-4">
                     <div className="p-1.5 bg-[#FFD60A]/10 rounded-lg">
                         <Lightbulb className="w-4 h-4 text-[#FFD60A]" strokeWidth={2.5} />
                     </div>
                     <h3 className="text-[11px] font-bold text-[#86868b] uppercase tracking-widest">Executive Insight</h3>
                 </div>
-                <p className="text-[17px] leading-relaxed font-medium text-[#1d1d1f] tracking-tight">
+                <p className="text-[16px] sm:text-[17px] leading-relaxed font-medium text-[#1d1d1f] tracking-tight">
                     {result.analysis?.overall_summary}
                 </p>
             </motion.div>

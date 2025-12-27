@@ -72,7 +72,7 @@ export function TestimonialsSection() {
                     {doubledTestimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="inline-block mx-4 w-[350px] bg-white border border-neutral-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] whitespace-normal"
+                            className="inline-block mx-4 w-[280px] sm:w-[350px] bg-white border border-neutral-100 rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] whitespace-normal"
                         >
                             <div className="flex items-center gap-4 mb-4">
                                 <div className="h-12 w-12 rounded-full bg-neutral-100 overflow-hidden flex-shrink-0">

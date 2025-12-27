@@ -17,12 +17,12 @@ export default function HomePage() {
 		<AuthGuard requireAuth={false}>
 			<div className="flex flex-col max-w-5xl mx-auto w-full">
 				{/* Hero Section */}
-				<section className="flex flex-col items-center justify-center pt-20 pb-4 xl:px-32">
+				<section className="flex flex-col items-center justify-center pt-12 sm:pt-20 pb-4 px-4 sm:px-8 lg:px-12">
 					<div className="mx-auto max-w-5xl text-center w-full">
 						<span className="inline-flex items-center rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-600 shadow-sm">
 							GetSentimate · YouTube comments intelligence
 						</span>
-						<h1 className="mt-6 text-balance text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl md:text-6xl">
+						<h1 className="mt-6 text-balance text-3xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-neutral-900">
 							Understand your audience in <span className="text-[#0A84FF]">one paste</span>.
 						</h1>
 						<p className="mt-4 text-balance text-sm text-neutral-600 sm:text-base">

@@ -18,7 +18,7 @@ export default function AnalysisPage() {
             <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 font-sans selection:bg-[#0071e3]/20 text-[#1d1d1f]">
 
 
-                <main className="max-w-[1120px] mx-auto pt-8 pb-16 px-6 sm:px-8">
+                <main className="max-w-[1120px] mx-auto pt-4 sm:pt-8 pb-16 px-4 sm:px-8">
                     {/* Animate out search input slightly when result appears to transition smoothly */}
                     <AnimatePresence mode="wait">
                         {!result && (

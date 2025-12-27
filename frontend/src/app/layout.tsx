@@ -15,7 +15,7 @@ export default function HomeLayout({ children }: { children: ReactNode }) {
       <body className="min-h-screen bg-background text-foreground antialiased">
         <div className="flex min-h-screen flex-col bg-white text-neutral-900">
           <Header />
-          <main className="flex-1 bg-gradient-to-b from-white to-neutral-50/80 px-6 sm:px-8 lg:px-24 xl:px-32 ">
+          <main className="flex-1 bg-gradient-to-b from-white to-neutral-50/80">
             {children}
           </main>
           <Footer />

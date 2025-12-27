@@ -68,10 +68,10 @@ export function SearchInput() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="w-full flex items-center justify-between mb-8 px-1"
+                    className="w-full flex flex-col md:flex-row items-center justify-between mb-8 px-1 gap-6 md:gap-0"
                 >
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full overflow-hidden border border-black/5 shadow-sm">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <div className="w-14 h-14 rounded-full overflow-hidden border border-black/5 shadow-sm shrink-0">
                             {user.avatar ? (
                                 <img
                                     src={user.avatar}
@@ -79,25 +79,25 @@ export function SearchInput() {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl">
+                                <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl">
                                     {user.name?.charAt(0) || 'U'}
                                 </div>
                             )}
                         </div>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h2 className="text-[17px] font-semibold text-[#1d1d1f] tracking-tight">{user.name}</h2>
-                                <span className="px-3 py-0.5 rounded-full bg-blue-50 text-[#0071e3] text-[13px] font-medium border border-blue-100 shadow-sm">
+                        <div className="min-w-0 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+                                <h2 className="text-[18px] font-bold text-[#1d1d1f] tracking-tight truncate">{user.name}</h2>
+                                <span className="inline-flex w-fit px-3 py-0.5 rounded-full bg-blue-50 text-[#0071e3] text-[12px] font-bold border border-blue-100 shadow-sm whitespace-nowrap">
                                     {typeof user.credits === 'number' ? user.credits : 0} credits
                                 </span>
                             </div>
-                            <p className="text-[14px] text-[#86868b] font-normal">{user.email}</p>
+                            <p className="text-[14px] text-[#86868b] font-normal truncate">{user.email}</p>
                         </div>
                     </div>
 
                     <button
                         onClick={() => setShowBuyCredits(true)}
-                        className="flex items-center justify-center gap-2 rounded-xl bg-[#0071e3] px-6 py-2.5 text-[15px] font-medium text-white shadow-sm hover:bg-[#0077ed] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+                        className="flex items-center justify-center gap-2 rounded-xl bg-[#0071e3] px-8 py-3 text-[15px] font-semibold text-white shadow-md hover:bg-[#0077ed] transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto"
                     >
                         <Plus className="w-4 h-4" />
                         Buy Credits
@@ -111,13 +111,13 @@ export function SearchInput() {
                 animate={loading ? { scale: 0.98, opacity: 0.8 } : { scale: 1, opacity: 1 }}
                 transition={{ duration: 0.4, ease: "circOut" }}
             >
-                <div className="bg-white rounded-[24px] p-2 shadow-[0_8px_32px_rgba(0,0,0,0.08)] border border-black/[0.03]">
-                    <form onSubmit={handleAnalyze} className="relative flex items-center gap-2">
+                <div className="bg-white rounded-[32px] p-3 sm:p-4 shadow-[0_12px_40px_rgba(0,0,0,0.08)] border border-black/[0.03]">
+                    <form onSubmit={handleAnalyze} className="relative flex flex-col md:flex-row items-stretch gap-3">
                         <div className="relative flex-1">
                             <input
                                 type="text"
-                                placeholder="https://www.youtube.com/watch?v=..."
-                                className="w-full pl-6 pr-4 py-4 bg-transparent outline-none text-[16px] text-[#1d1d1f] placeholder:text-[#86868b]/70 font-normal font-sans border border-black/[0.06] rounded-xl focus:border-[#0071e3]/30 transition-all duration-200"
+                                placeholder="Paste YouTube URL here..."
+                                className="w-full pl-6 pr-4 py-4.5 bg-[#f5f5f7] outline-none text-[17px] text-[#1d1d1f] placeholder:text-[#86868b]/70 font-medium border border-transparent focus:border-[#0071e3]/20 focus:bg-white rounded-[20px] transition-all duration-300 shadow-inner"
                                 value={url}
                                 onChange={(e) => setUrl(e.target.value)}
                                 disabled={loading}
@@ -126,13 +126,13 @@ export function SearchInput() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="shrink-0 px-8 py-4 bg-[#0071e3] hover:bg-[#0077ED] disabled:bg-[#f5f5f7] disabled:text-[#86868b] text-white text-[15px] font-semibold rounded-xl transition-all duration-200 shadow-[0_4px_12px_rgba(0,113,227,0.15)] hover:shadow-[0_6px_16px_rgba(0,113,227,0.25)] flex items-center gap-2.5"
+                            className="shrink-0 px-10 py-4.5 bg-[#0071e3] hover:bg-[#0077ED] disabled:bg-[#f5f5f7] disabled:text-[#86868b] text-white text-[16px] font-bold rounded-[20px] transition-all duration-300 shadow-[0_6px_20px_rgba(0,113,227,0.2)] hover:shadow-[0_8px_24px_rgba(0,113,227,0.3)] flex items-center justify-center gap-3 active:scale-[0.98]"
                         >
                             {loading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                                 <>
-                                    <Search className="w-4 h-4 text-white/90" strokeWidth={2.5} />
+                                    <Search className="w-5 h-5 text-white/90" strokeWidth={3} />
                                     Analyze URL
                                 </>
                             )}

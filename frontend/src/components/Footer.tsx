@@ -5,10 +5,10 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-neutral-200 bg-white/80 text-[11px] text-neutral-500">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 sm:px-8 lg:px-24 xl:px-32 py-3">
-        <div className="flex gap-4">
-          <span>GetSentimate · Youtube Comment Analysis Tool</span>
-          <div className="flex flex-wrap gap-4 border-l border-neutral-200 pl-4">
+      <div className="mx-auto flex flex-col md:flex-row max-w-5xl items-center justify-between px-6 sm:px-8 lg:px-24 xl:px-32 py-6 md:py-3 gap-4 md:gap-0">
+        <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+          <span className="font-medium">GetSentimate · Youtube Comment Analysis Tool</span>
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-2 md:border-l md:border-neutral-200 md:pl-4">
             <Link href="/privacy-policy" className="hover:text-neutral-900 transition-colors">
               Privacy Policy
             </Link>
@@ -26,7 +26,7 @@ export function Footer() {
             </Link>
           </div>
         </div>
-        <span>Built for YouTube creators</span>
+        <span className="text-center">Built for YouTube creators</span>
       </div>
     </footer>
   );

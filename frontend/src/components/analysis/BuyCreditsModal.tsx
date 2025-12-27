@@ -155,12 +155,12 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                     initial={{ scale: 0.95, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     exit={{ scale: 0.95, opacity: 0 }}
-                    className="bg-white rounded-[24px] p-8 max-w-2xl w-full shadow-[0_8px_40px_rgba(0,0,0,0.12)]"
+                    className="bg-white rounded-[24px] p-6 sm:p-8 max-w-2xl w-full shadow-[0_8px_40px_rgba(0,0,0,0.12)]"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-[28px] font-semibold text-[#1d1d1f]">Buy Credits</h2>
+                        <h2 className="text-[24px] sm:text-[28px] font-semibold text-[#1d1d1f]">Buy Credits</h2>
                         <button
                             onClick={onClose}
                             className="w-8 h-8 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] transition-colors flex items-center justify-center"
@@ -186,7 +186,7 @@ export function BuyCreditsModal({ isOpen, onClose, onSuccess }: { isOpen: boolea
                                 <div className="text-[17px] font-semibold text-[#1d1d1f] mb-2">
                                     {pkg.credits} Credits
                                 </div>
-                                <div className="text-[32px] font-bold text-[#0071e3] mb-1">₹{pkg.price}</div>
+                                <div className="text-[28px] sm:text-[32px] font-bold text-[#0071e3] mb-1">₹{pkg.price}</div>
                                 <div className="text-[13px] text-[#86868b]">
                                     ₹{(pkg.price / pkg.credits).toFixed(2)} per credit
                                 </div>

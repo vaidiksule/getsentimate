@@ -81,7 +81,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 py-12 px-6 sm:px-8 lg:px-24 xl:px-32 sm:py-16 md:py-20">
+    <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 py-8 px-4 sm:px-8 lg:px-12 sm:py-16 md:py-20">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
@@ -121,8 +121,8 @@ export default function PricingPage() {
 
               <div
                 className={`flex-1 flex flex-col rounded-[20px] p-6 sm:p-8 bg-white border transition-all ${pkg.popular
-                    ? "border-[#0071e3] shadow-[0_4px_24px_rgba(0,113,227,0.12)]"
-                    : "border-black/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
+                  ? "border-[#0071e3] shadow-[0_4px_24px_rgba(0,113,227,0.12)]"
+                  : "border-black/[0.06] shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
                   }`}
               >
                 {/* Package Name */}
@@ -161,8 +161,8 @@ export default function PricingPage() {
                 <button
                   onClick={handleBuyClick}
                   className={`w-full py-3 px-6 rounded-full text-[15px] font-medium transition-all ${pkg.popular
-                      ? "bg-[#0071e3] text-white hover:bg-[#0077ed] shadow-sm hover:shadow-md"
-                      : "bg-[#1d1d1f] text-white hover:bg-[#2d2d2f]"
+                    ? "bg-[#0071e3] text-white hover:bg-[#0077ed] shadow-sm hover:shadow-md"
+                    : "bg-[#1d1d1f] text-white hover:bg-[#2d2d2f]"
                     }`}
                 >
                   Buy {pkg.credits} Credits

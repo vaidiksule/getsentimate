@@ -79,7 +79,7 @@ export default function TransactionsPage() {
 
     return (
         <AuthGuard requireAuth={true}>
-            <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 py-12 px-6 sm:px-8 lg:px-24 xl:px-32">
+            <div className="min-h-screen bg-gradient-to-b from-white to-neutral-50/80 py-8 sm:py-12 px-4 sm:px-8 lg:px-12">
                 <div className="max-w-4xl mx-auto">
                     {/* Header */}
                     <motion.div
@@ -88,7 +88,7 @@ export default function TransactionsPage() {
                         className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4"
                     >
                         <div>
-                            <h1 className="text-[32px] sm:text-[40px] font-semibold text-[#1d1d1f] tracking-tight">
+                            <h1 className="text-[28px] sm:text-[40px] font-semibold text-[#1d1d1f] tracking-tight">
                                 Credits & Purchases
                             </h1>
                             <p className="text-[15px] text-[#86868b] mt-2">
@@ -156,22 +156,22 @@ export default function TransactionsPage() {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         transition={{ delay: 0.3 + index * 0.05 }}
-                                        className="px-6 sm:px-8 py-5 flex items-center justify-between hover:bg-[#f5f5f7]/50 transition-colors"
+                                        className="px-4 sm:px-8 py-5 flex items-center justify-between hover:bg-[#f5f5f7]/50 transition-colors gap-4"
                                     >
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f7]">
+                                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f5f5f7] shrink-0">
                                                 {getIcon(transaction.type)}
                                             </div>
-                                            <div>
-                                                <div className="text-[15px] font-medium text-[#1d1d1f]">
+                                            <div className="min-w-0">
+                                                <div className="text-[14px] sm:text-[15px] font-medium text-[#1d1d1f] truncate">
                                                     {transaction.description}
                                                 </div>
-                                                <div className="text-[13px] text-[#86868b] mt-0.5">
+                                                <div className="text-[12px] sm:text-[13px] text-[#86868b] mt-0.5">
                                                     {transaction.created_at}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className={`text-[17px] font-semibold ${getAmountColor(transaction.amount)}`}>
+                                        <div className={`text-[15px] sm:text-[17px] font-semibold shrink-0 ${getAmountColor(transaction.amount)}`}>
                                             {transaction.amount > 0 ? "+" : ""}{transaction.amount}
                                         </div>
                                     </motion.div>
